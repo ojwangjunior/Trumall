@@ -142,7 +142,36 @@ fn main() {
                 }
             }
             "sell" => {
-                println!("Sell functionality not yet implemented.");
+                let item_name = get_user_input("Enter the item name:");
+                let item_price: u64 = get_user_input("Enter the item price:").parse().expect("Please enter a valid number");
+                let item_description = get_user_input("Enter the item description:");
+
+                let new_item = Item {
+                    id: (posted_items.len() + 1).to_string(),
+                    name: item_name,
+                    price: item_price,
+                    description: item_description,
+                };
+
+                posted_items.push(new_item.clone());
+
+                let mut transaction = services::new_sell_transaction(
+                    Uuid::new_v4(), // user_id
+                    Uuid::new_v4(), // item_id
+                    item_price,
+                    1, // quantity
+                    "USD".to_string(),
+                    0, // transaction_fees
+                    "USD".to_string(),
+                    HashMap::new(),
+                );
+
+                match services::execute_sell_transaction(&mut transaction, &mut account) {
+                    Ok(_) => println!("Sell transaction successful!"),
+                    Err(e) => println!("Sell transaction failed: {}", e),
+                }
+
+                println!("Item added for sale!");
             }
             "quit" => {
                 break;

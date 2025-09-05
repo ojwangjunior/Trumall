@@ -38,7 +38,6 @@ pub fn execute_buy_transaction(transaction: &mut Transaction, account: &mut Acco
         println!("Transaction completed successfully");
         //Display new balance
         println!("Your new balance is {}", account.account_balance);
-        println!("Thanks for shopping at Trumall!");
         record_transaction(transaction, account);
         Ok(())
     } else {
@@ -72,6 +71,17 @@ pub fn new_sell_transaction(
         transaction_fee: transaction_fees,
         transaction_fee_currency: transaction_fees_currency,
     }
+}
+
+pub fn execute_sell_transaction(transaction: &mut Transaction, account: &mut Account) -> Result<(), String> {
+    let total_amount = transaction.price * transaction.quantity - transaction.transaction_fee;
+    account.account_balance = account.account_balance.saturating_add(total_amount);
+    transaction.status = TransactionStatus::Completed;
+    println!("Transaction completed successfully");
+    //Display new balance
+    println!("Your new balance is {}", account.account_balance);
+    record_transaction(transaction, account);
+    Ok(())
 }
 
 pub fn record_transaction(transaction: &Transaction, account: &mut Account) {
