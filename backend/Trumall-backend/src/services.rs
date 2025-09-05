@@ -39,7 +39,7 @@ pub fn execute_buy_transaction(transaction: &mut Transaction, account: &mut Acco
         //Display new balance
         println!("Your new balance is {}", account.account_balance);
         println!("Thanks for shopping at Trumall!");
-        record_transaction(transaction);
+        record_transaction(transaction, account);
         Ok(())
     } else {
         println!("Insufficient funds");
@@ -74,6 +74,7 @@ pub fn new_sell_transaction(
     }
 }
 
-pub fn record_transaction(transaction: &Transaction) {
+pub fn record_transaction(transaction: &Transaction, account: &mut Account) {
+    account.transaction_history.push(format!("{:?}", transaction));
     println!("Transaction recorded: {:?}", transaction);
 }
