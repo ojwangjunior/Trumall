@@ -23,3 +23,14 @@ type Order struct {
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
+type Payment struct {
+	ID           uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	OrderID      uuid.UUID `gorm:"type:uuid;index" json:"order_id"`
+	Provider     string    `json:"provider"`
+	ProviderTxID *string   `json:"provider_tx_id,omitempty"`
+	AmountCents  int64     `json:"amount_cents"`
+	Currency     string    `gorm:"default:USD" json:"currency"`
+	Status       string    `gorm:"default:initiated" json:"status"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
