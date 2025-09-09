@@ -82,4 +82,11 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(400).JSON(fiber.Map{"error": "cart is empty"})
 		}
 
+		// Create order
+		order := models.Order{
+			BuyerID: user.ID,
+			Status:  "pending",
+		}
+		db.Create(&order)
+
 		
