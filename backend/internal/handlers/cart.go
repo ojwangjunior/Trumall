@@ -95,4 +95,11 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 				return c.Status(400).JSON(fiber.Map{"error": "not enough stock for " + item.Product.Title})
 			}
 
+			orderItem := models.OrderItem{
+				OrderID:   order.ID,
+				ProductID: item.ProductID,
+				Quantity:  item.Quantity,
+				UnitPriceCents:         item.Product.PriceCents,
+			}
 			
+}
