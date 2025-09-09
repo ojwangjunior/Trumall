@@ -60,6 +60,7 @@ func RequireAuth() fiber.Handler {
 
 		// attach to context
 		c.Locals("user_id", uid)
+		c.Locals("user_role", role)
 		
 	}
 }
