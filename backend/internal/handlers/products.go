@@ -72,3 +72,8 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 	}
 }
 
+func ListProductsHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		
+	}
+}
