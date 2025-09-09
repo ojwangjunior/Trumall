@@ -23,4 +23,16 @@ func RequireAuth() fiber.Handler {
 			return c.Status(401).JSON(fiber.Map{"error": "invalid auth header"})
 		}
 
+		secret := os.Getenv("JWT_SECRET")
+		if secret == "" {
+			return c.Status(500).JSON(fiber.Map{"error": "server misconfigured (no jwt secret)"})
+		}
 
+		tok, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+			// ensure signing method
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fiber.ErrUnauthorized
+			}
+			return []byte(secret), nil
+		})
+		
