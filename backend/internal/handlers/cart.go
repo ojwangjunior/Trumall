@@ -76,4 +76,6 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		user := c.Locals("user").(models.User)
 
+		var cart []models.CartItem
+		db.Preload("Product").Where("user_id = ?", user.ID).Find(&cart)
 		
