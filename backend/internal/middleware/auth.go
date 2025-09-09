@@ -68,4 +68,6 @@ func RequireAuth() fiber.Handler {
 // RequireRole ensures the user has the given role (e.g. "seller")
 func RequireRole(role string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-	
+		r := c.Locals("user_role")
+		
+}
