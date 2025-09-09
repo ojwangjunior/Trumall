@@ -52,4 +52,9 @@ func CreateOrderHandler(db *gorm.DB) fiber.Handler {
 			}
 		}()
 
+		if err := tx.Create(&order).Error; err != nil {
+			tx.Rollback()
+			return c.Status(500).JSON(fiber.Map{"error": "failed to create order"})
+		}
+
 		
