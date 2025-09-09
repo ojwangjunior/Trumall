@@ -93,4 +93,10 @@ func CreateOrderHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to update order total"})
 		}
 
+		payment := models.Payment{ID: uuid.New(), OrderID: order.ID, Provider: "onchain", AmountCents: order.TotalCents, Currency: "USD", Status: "initiated"}
+		if err := tx.Create(&payment).Error; err != nil {
+			tx.Rollback()
+			return c.Status(500).JSON(fiber.Map{"error": "failed to create payment"})
+		}
+
 		
