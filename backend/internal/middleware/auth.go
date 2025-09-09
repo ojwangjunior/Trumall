@@ -44,5 +44,10 @@ func RequireAuth() fiber.Handler {
 			return c.Status(401).JSON(fiber.Map{"error": "invalid token claims"})
 		}
 
+		sub, ok := claims["sub"].(string)
+		if !ok || sub == "" {
+			return c.Status(401).JSON(fiber.Map{"error": "invalid token subject"})
+		}
 		
+}
 
