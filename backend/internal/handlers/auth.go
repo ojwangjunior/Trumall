@@ -78,7 +78,13 @@ func LoginHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "db error"})
 		}
 		if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password)); err != nil {
-		
+			return c.Status(401).JSON(fiber.Map{"error": "invalid credentials"})
+		}
+		token, err := generateToken(user.ID.String(), user.Role)
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "token"})
+		}
+		return c.JSON(fiber.Map{"token": token})
 	}
 }
 
