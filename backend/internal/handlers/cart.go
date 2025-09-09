@@ -19,8 +19,13 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(400).JSON(fiber.Map{"error": "invalid request"})
 		}
 
-		
+		// Get user from middleware (set by RequireAuth)
+		user := c.Locals("user").(models.User)
+
+		// Check product exists
+		var product models.Product
+		if err := db.First(&product, "id = ?", body.ProductID).Error; err != nil {
+			return c.Status(404).JSON(fiber.Map{"error": "product not found"})
+		}
 
 		
-	}
-}
