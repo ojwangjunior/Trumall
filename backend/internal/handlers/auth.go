@@ -67,7 +67,11 @@ func LoginHandler(db *gorm.DB) fiber.Handler {
 			Email    string `json:"email"`
 			Password string `json:"password"`
 		}
+		if err := c.BodyParser(&body); err != nil {
+			return fiber.ErrBadRequest
+		}
 		
+	}
 }
 
 func generateToken(sub, role string) (string, error) {
