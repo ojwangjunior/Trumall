@@ -59,3 +59,9 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 	}
 }
 
+// Get a list of all stores
+func ListStoresHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var stores []models.Store
+
+		
