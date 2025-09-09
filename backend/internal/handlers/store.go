@@ -14,4 +14,11 @@ import (
 // Create a new store
 func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		// Get logged-in user ID from middleware (set during authentication)
+		//ensures only authenticated users can create stores
+		userID := c.Locals("userID")
+		if userID == nil {
+			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
+		}
+
 		
