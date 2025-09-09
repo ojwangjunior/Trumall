@@ -91,5 +91,7 @@ func GetStoreHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch store"})
 		}
 
-		
+		// Return store with its products
+		return c.JSON(fiber.Map{"data": store})
+	}
 }
