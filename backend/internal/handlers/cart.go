@@ -89,4 +89,10 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 		}
 		db.Create(&order)
 
-		
+		// Create order items + deduct stock
+		for _, item := range cart {
+			if item.Quantity > item.Product.Stock {
+				return c.Status(400).JSON(fiber.Map{"error": "not enough stock for " + item.Product.Title})
+			}
+
+			
