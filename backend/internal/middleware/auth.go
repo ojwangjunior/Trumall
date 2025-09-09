@@ -53,6 +53,11 @@ func RequireAuth() fiber.Handler {
 			return c.Status(401).JSON(fiber.Map{"error": "invalid user id in token"})
 		}
 
-		
+		role := "buyer"
+		if r, ok := claims["role"].(string); ok && r != "" {
+			role = r
+		}
+
+	
 }
 
