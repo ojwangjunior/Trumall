@@ -18,11 +18,11 @@ func main() {
 		log.Println("no .env file loaded, using environment")
 	}
 
-	// // Connect DB
-	// dbConn, err := db.Connect()
-	// if err != nil {
-	// 	log.Fatalf("failed to connect to db: %v", err)
-	// }
+	// Connect DB
+	dbConn, err := db.Connect()
+	if err != nil {
+		log.Fatalf("failed to connect to db: %v", err)
+	}
 
 	// // Fiber app
 	// app := fiber.New()
