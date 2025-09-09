@@ -76,6 +76,9 @@ func ListProductsHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// pagination (optional)
 		var products []models.Product
-		
+		if err := db.Limit(100).Find(&products).Error; err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "db error"})
+		}
+		return c.JSON(products)
 	}
 }
