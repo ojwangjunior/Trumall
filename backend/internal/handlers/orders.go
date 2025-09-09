@@ -42,5 +42,14 @@ func CreateOrderHandler(db *gorm.DB) fiber.Handler {
 		order := models.Order{ID: uuid.New(), BuyerID: buyerID, StoreID: storeID, Status: "pending"}
 		var total int64 = 0
 
+		tx := db.Begin()
+		if tx.Error != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "failed to begin tx"})
+		}
+		defer func() {
+			if r := recover(); r != nil {
+				tx.Rollback()
+			}
+		}()
+
 		
-}
