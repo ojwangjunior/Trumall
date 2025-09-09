@@ -70,4 +70,8 @@ func ListStoresHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch stores"})
 		}
 
-		
+		// Return the list of stores
+		return c.JSON(fiber.Map{"data": stores})
+	}
+}
+
