@@ -46,4 +46,8 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		if err := db.First(&store, "id = ?", sid).Error; err != nil {
 			return c.Status(404).JSON(fiber.Map{"error": "store not found"})
 		}
+		if store.OwnerID != uid {
+			return c.Status(403).JSON(fiber.Map{"error": "only store owner can add products"})
+		}
+
 		
