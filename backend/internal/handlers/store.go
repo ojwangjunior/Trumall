@@ -27,4 +27,9 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid user id"})
 		}
 
+		// Parse the request body (store name + description)
+		var body struct {
+			Name        string `json:"name"`
+			Description string `json:"description"`
+		}
 		
