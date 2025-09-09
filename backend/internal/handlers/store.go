@@ -21,4 +21,10 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
 		}
 
+		// Convert userID (string) -> UUID format
+		uid, err := uuid.Parse(userID.(string))
+		if err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid user id"})
+		}
+
 		
