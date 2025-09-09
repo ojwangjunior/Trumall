@@ -39,6 +39,13 @@ func main() {
 	app.Post("/api/auth/register", handlers.RegisterHandler(dbConn))
 	app.Post("/api/auth/login", handlers.LoginHandler(dbConn))
 
+	// STORES
+	app.Post("/api/stores", middleware.RequireAuth(), handlers.CreateStoreHandler(dbConn))
+	// list all stores
+	app.Get("/api/stores", handlers.ListStoresHandler(dbConn))
+	// get one store
+	app.Get("/api/stores/:id", handlers.GetStoreHandler(dbConn))
+	
 	// Products
 	app.Post("/api/products", middleware.RequireAuth(), handlers.CreateProductHandler(dbConn))
 	app.Get("/api/products", handlers.ListProductsHandler(dbConn))
@@ -49,6 +56,12 @@ func main() {
 
 	// Payments / Webhooks
 	app.Post("/api/webhooks/payment", handlers.PaymentWebhookHandler(dbConn))
+
+	//cart
+	app.Post("/api/cart/add", middleware.RequireAuth(), handlers.AddToCartHandler(dbConn))
+	app.Get("/api/cart", middleware.RequireAuth(), handlers.GetCartHandler(dbConn))
+	app.Delete("/api/cart/:id", middleware.RequireAuth(), handlers.RemoveFromCartHandler(dbConn))
+	app.Post("/api/cart/checkout", middleware.RequireAuth(), handlers.CheckoutHandler(dbConn))
 
 	// Start server
 	port := os.Getenv("PORT")
