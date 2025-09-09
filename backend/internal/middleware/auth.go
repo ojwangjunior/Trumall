@@ -69,5 +69,8 @@ func RequireAuth() fiber.Handler {
 func RequireRole(role string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		r := c.Locals("user_role")
+		if r == nil {
+			return c.Status(403).JSON(fiber.Map{"error": "forbidden"})
+		}
 		
 }
