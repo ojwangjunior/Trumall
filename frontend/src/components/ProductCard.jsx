@@ -4,13 +4,15 @@ import Rating from "./Rating";
 
 const ProductCard = ({ product }) => {
   return (
-    <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col justify-between">
+    <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col justify-between group">
       <Link to={`/product/${product.id}`}>
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-48 object-cover"
-        />
+        <div className="overflow-hidden aspect-square">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        </div>
         <div className="p-4">
           <h2 className="text-lg font-bold truncate">{product.name}</h2>
           <div className="flex items-center my-2">
@@ -27,7 +29,7 @@ const ProductCard = ({ product }) => {
         </div>
       </Link>
       <div className="p-4 pt-0">
-        <button className="w-full bg-orange text-white py-2 rounded-md hover:bg-orange-dark">
+        <button className="w-full bg-orange text-white py-2 rounded-md hover:bg-orange-dark transition-colors duration-200">
           Add to Cart
         </button>
       </div>
