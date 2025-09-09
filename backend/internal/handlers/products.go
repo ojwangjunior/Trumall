@@ -41,4 +41,9 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "invalid user id in context"})
 		}
 
+		// load store and check ownership
+		var store models.Store
+		if err := db.First(&store, "id = ?", sid).Error; err != nil {
+			return c.Status(404).JSON(fiber.Map{"error": "store not found"})
+		}
 		
