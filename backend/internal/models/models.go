@@ -34,3 +34,16 @@ type Payment struct {
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
+type Product struct {
+	ID               uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	StoreID          uuid.UUID `gorm:"type:uuid;index" json:"store_id"`
+	Title            string    `gorm:"not null" json:"title"`
+	Description      *string   `json:"description,omitempty"`
+	PriceCents       int64     `gorm:"not null" json:"price_cents"`
+	Currency         string    `gorm:"default:USD" json:"currency"`
+	SKU              *string   `json:"sku,omitempty"`
+	Stock            int       `gorm:"default:0" json:"stock"`
+	AuthenticityHash *string   `json:"authenticity_hash,omitempty"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+}
