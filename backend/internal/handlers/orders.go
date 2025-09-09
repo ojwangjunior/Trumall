@@ -79,4 +79,12 @@ func CreateOrderHandler(db *gorm.DB) fiber.Handler {
 				tx.Rollback()
 				return c.Status(500).JSON(fiber.Map{"error": "failed to create order item"})
 			}
-			
+			prod.Stock -= it.Quantity
+			if err := tx.Save(&prod).Error; err != nil {
+				tx.Rollback()
+				return c.Status(500).JSON(fiber.Map{"error": "failed to update product stock"})
+			}
+			total += prod.PriceCents * int64(it.Quantity)
+		}
+
+		
