@@ -33,4 +33,16 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(400).JSON(fiber.Map{"error": "not enough stock"})
 		}
 
-		
+		// Create or update cart item
+		var cartItem models.CartItem
+		if err := db.Where("user_id = ? AND product_id = ?", user.ID, body.ProductID).First(&cartItem).Error; err == nil {
+			cartItem.Quantity += body.Quantity
+			db.Save(&cartItem)
+		} else {
+			cartItem = models.CartItem{
+				UserID:    user.ID,
+				ProductID: product.ID,
+				Quantity:  body.Quantity,
+			}
+			db.Create(&cartItem)
+		}
