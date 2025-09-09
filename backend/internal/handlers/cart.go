@@ -28,4 +28,9 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(404).JSON(fiber.Map{"error": "product not found"})
 		}
 
+		// Check stock
+		if body.Quantity > product.Stock {
+			return c.Status(400).JSON(fiber.Map{"error": "not enough stock"})
+		}
+
 		
