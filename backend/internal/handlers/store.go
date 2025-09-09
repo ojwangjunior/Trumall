@@ -75,3 +75,11 @@ func ListStoresHandler(db *gorm.DB) fiber.Handler {
 	}
 }
 
+// Get a single store + its products
+func GetStoreHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// Get store ID from URL param
+		id := c.Params("id")
+
+		
+}
