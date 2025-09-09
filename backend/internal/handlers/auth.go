@@ -40,4 +40,16 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to hash password"})
 		}
 
+		// create user
+		user := models.User{
+			ID:           uuid.New(),
+			Email:        body.Email,
+			PasswordHash: string(pwHash),
+			Name:         body.Name,
+			Role:         role,
+		}
+		if err := db.Create(&user).Error; err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "failed to create user"})
+		}
+
 		
