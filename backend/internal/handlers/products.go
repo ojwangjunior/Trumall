@@ -50,4 +50,13 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(403).JSON(fiber.Map{"error": "only store owner can add products"})
 		}
 
+		p := models.Product{
+			ID:         uuid.New(),
+			StoreID:    sid,
+			Title:      body.Title,
+			Description: nil,
+			PriceCents: body.PriceCents,
+			Currency:   body.Currency,
+			Stock:      body.Stock,
+		}
 		
