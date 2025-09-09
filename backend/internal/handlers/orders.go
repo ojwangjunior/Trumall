@@ -103,5 +103,13 @@ func CreateOrderHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to commit transaction"})
 		}
 
-		
+		// load items for response
+		var items []models.OrderItem
+		if err := db.Where("order_id = ?", order.ID).Find(&items).Error; err != nil {
+			// not fatal; return order and payment anyway
+			return c.Status(201).JSON(fiber.Map{"order": order, "payment": payment})
+		}
+
+		return c.Status(201).JSON(fiber.Map{"order": order, "items": items, "payment": payment})
+	}
 }
