@@ -70,6 +70,14 @@ func LoginHandler(db *gorm.DB) fiber.Handler {
 		if err := c.BodyParser(&body); err != nil {
 			return fiber.ErrBadRequest
 		}
+		var user models.User
+		if err := db.Where("email = ?", body.Email).First(&user).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return c.Status(401).JSON(fiber.Map{"error": "invalid credentials"})
+			}
+			return c.Status(500).JSON(fiber.Map{"error": "db error"})
+		}
+		if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password)); err != nil {
 		
 	}
 }
