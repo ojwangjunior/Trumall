@@ -64,4 +64,10 @@ func ListStoresHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var stores []models.Store
 
+		// Fetch all stores from DB
+		if err := db.Find(&stores).Error; err != nil {
+			log.Printf("list stores error: %v", err)
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch stores"})
+		}
+
 		
