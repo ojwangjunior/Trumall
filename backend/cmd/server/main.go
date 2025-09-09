@@ -44,7 +44,8 @@ func main() {
 	app.Get("/api/products", handlers.ListProductsHandler(dbConn))
 	app.Post("/api/stores/:id/products", middleware.RequireAuth(), middleware.RequireRole("seller"), handlers.CreateProductHandler(dbConn))
 
-
+	// Orders
+	app.Post("/api/orders", middleware.RequireAuth(), handlers.CreateOrderHandler(dbConn))
 
 	
 	// Start server
