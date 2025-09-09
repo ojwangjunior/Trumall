@@ -101,5 +101,12 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 				Quantity:  item.Quantity,
 				UnitPriceCents:         item.Product.PriceCents,
 			}
-			
+			db.Create(&orderItem)
+
+			// Deduct stock
+			db.Model(&models.Product{}).
+				Where("id = ?", item.ProductID).
+				Update("stock", gorm.Expr("stock - ?", item.Quantity))
+		}
+
 }
