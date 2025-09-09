@@ -35,4 +35,8 @@ func RequireAuth() fiber.Handler {
 			}
 			return []byte(secret), nil
 		})
+		if err != nil || !tok.Valid {
+			return c.Status(401).JSON(fiber.Map{"error": "invalid token"})
+		}
+
 		
