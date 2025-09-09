@@ -18,5 +18,16 @@ func CreateOrderHandler(db *gorm.DB) fiber.Handler {
 				Quantity  int    `json:"quantity"`
 			} `json:"items"`
 		}
+		if err := c.BodyParser(&body); err != nil {
+			return fiber.ErrBadRequest
+		}
+		if len(body.Items) == 0 {
+			return c.Status(400).JSON(fiber.Map{"error": "items required"})
+		}
+		storeID, err := uuid.Parse(body.StoreID)
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{"error": "invalid store id"})
+		}
+
 		
 }
