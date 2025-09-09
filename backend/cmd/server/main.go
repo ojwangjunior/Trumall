@@ -24,16 +24,16 @@ func main() {
 		log.Fatalf("failed to connect to db: %v", err)
 	}
 
-	// // Fiber app
-	// app := fiber.New()
+	// Fiber app
+	app := fiber.New()
 
-	// // ✅ Root health-check
-	// app.Get("/", func(c *fiber.Ctx) error {
-	// 	return c.JSON(fiber.Map{
-	// 		"status":  "ok",
-	// 		"message": "TrustMall API is running 🚀",
-	// 	})
-	// })
+	// ✅ Root health-check
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"status":  "ok",
+			"message": "TrustMall API is running 🚀",
+		})
+	})
 
 	
 
