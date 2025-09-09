@@ -17,6 +17,10 @@ func RequireAuth() fiber.Handler {
 			return c.Status(401).JSON(fiber.Map{"error": "missing auth"})
 		}
 		// Expect: "Bearer <token>"
-		
-}
+		var tokenStr string
+		_, err := fmt.Sscanf(auth, "Bearer %s", &tokenStr)
+		if err != nil || tokenStr == "" {
+			return c.Status(401).JSON(fiber.Map{"error": "invalid auth header"})
+		}
+
 
