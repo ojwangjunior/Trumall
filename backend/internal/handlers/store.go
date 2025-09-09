@@ -36,4 +36,9 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
 		}
 
+		// Validation: make sure store name is not empty
+		if body.Name == "" {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "store name is required"})
+		}
+
 		
