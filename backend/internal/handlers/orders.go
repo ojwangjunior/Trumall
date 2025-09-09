@@ -63,4 +63,11 @@ func CreateOrderHandler(db *gorm.DB) fiber.Handler {
 				tx.Rollback()
 				return c.Status(400).JSON(fiber.Map{"error": "invalid product id"})
 			}
+			var prod models.Product
+			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+				First(&prod, "id = ?", pid).Error; err != nil {
+				tx.Rollback()
+				return c.Status(400).JSON(fiber.Map{"error": "product not found"})
+			}
+
 			
