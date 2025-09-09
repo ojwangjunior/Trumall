@@ -46,3 +46,7 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 			}
 			db.Create(&cartItem)
 		}
+
+		return c.JSON(cartItem)
+	}
+}
