@@ -81,5 +81,7 @@ func GetStoreHandler(db *gorm.DB) fiber.Handler {
 		// Get store ID from URL param
 		id := c.Params("id")
 
+		// automatically fetch and loads all products linked to the store
+		var store models.Store
 		
 }
