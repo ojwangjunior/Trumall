@@ -48,6 +48,11 @@ func RequireAuth() fiber.Handler {
 		if !ok || sub == "" {
 			return c.Status(401).JSON(fiber.Map{"error": "invalid token subject"})
 		}
+		uid, err := uuid.Parse(sub)
+		if err != nil {
+			return c.Status(401).JSON(fiber.Map{"error": "invalid user id in token"})
+		}
+
 		
 }
 
