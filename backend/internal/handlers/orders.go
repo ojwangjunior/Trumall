@@ -57,4 +57,10 @@ func CreateOrderHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create order"})
 		}
 
-		
+		for _, it := range body.Items {
+			pid, err := uuid.Parse(it.ProductID)
+			if err != nil {
+				tx.Rollback()
+				return c.Status(400).JSON(fiber.Map{"error": "invalid product id"})
+			}
+			
