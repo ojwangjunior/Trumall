@@ -22,4 +22,13 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		if err := c.BodyParser(&body); err != nil {
 			return fiber.ErrBadRequest
 		}
+		// basic validation
+		if body.Title == "" || body.PriceCents <= 0 {
+			return c.Status(400).JSON(fiber.Map{"error": "title and positive price_cents required"})
+		}
+		sid, err := uuid.Parse(body.StoreID)
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{"error": "invalid store id"})
+		}
+
 		
