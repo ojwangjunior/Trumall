@@ -73,4 +73,7 @@ func RemoveFromCartHandler(db *gorm.DB) fiber.Handler {
 
 // Checkout: create order & deduct stock
 func CheckoutHandler(db *gorm.DB) fiber.Handler {
-	
+	return func(c *fiber.Ctx) error {
+		user := c.Locals("user").(models.User)
+
+		
