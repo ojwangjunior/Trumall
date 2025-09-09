@@ -47,7 +47,9 @@ func main() {
 	// Orders
 	app.Post("/api/orders", middleware.RequireAuth(), handlers.CreateOrderHandler(dbConn))
 
-	
+	// Payments / Webhooks
+	app.Post("/api/webhooks/payment", handlers.PaymentWebhookHandler(dbConn))
+
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
