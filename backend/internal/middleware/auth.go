@@ -39,4 +39,10 @@ func RequireAuth() fiber.Handler {
 			return c.Status(401).JSON(fiber.Map{"error": "invalid token"})
 		}
 
+		claims, ok := tok.Claims.(jwt.MapClaims)
+		if !ok {
+			return c.Status(401).JSON(fiber.Map{"error": "invalid token claims"})
+		}
+
 		
+
