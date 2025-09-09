@@ -109,4 +109,9 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 				Update("stock", gorm.Expr("stock - ?", item.Quantity))
 		}
 
+		// Clear cart
+		db.Where("user_id = ?", user.ID).Delete(&models.CartItem{})
+
+		return c.JSON(order)
+	}
 }
