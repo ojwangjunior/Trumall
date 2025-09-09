@@ -65,4 +65,10 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		if p.Currency == "" {
 			p.Currency = "USD"
 		}
-		
+		if err := db.Create(&p).Error; err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "failed to create product"})
+		}
+		return c.Status(201).JSON(p)
+	}
+}
+
