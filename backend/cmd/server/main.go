@@ -35,8 +35,14 @@ func main() {
 		})
 	})
 
-	
+	// Auth
+	app.Post("/api/auth/register", handlers.RegisterHandler(dbConn))
+	app.Post("/api/auth/login", handlers.LoginHandler(dbConn))
 
+
+
+
+	
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
