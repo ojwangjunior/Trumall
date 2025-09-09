@@ -83,5 +83,13 @@ func GetStoreHandler(db *gorm.DB) fiber.Handler {
 
 		// automatically fetch and loads all products linked to the store
 		var store models.Store
+		if err := db.Preload("Products").First(&store, "id = ?", id).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "store not found"})
+			}
+			log.Printf("get store error: %v", err)
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch store"})
+		}
+
 		
 }
