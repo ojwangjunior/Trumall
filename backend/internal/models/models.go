@@ -47,3 +47,11 @@ type Product struct {
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
 }
+type Review struct {
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	ProductID uuid.UUID `gorm:"type:uuid;index" json:"product_id"`
+	UserID    uuid.UUID `gorm:"type:uuid;index" json:"user_id"`
+	Rating    int       `json:"rating"`
+	Comment   *string   `json:"comment,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+}
