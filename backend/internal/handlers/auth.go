@@ -61,3 +61,25 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 	}
 }
 
+func LoginHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		var body struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}
+		
+}
+
+func generateToken(sub, role string) (string, error) {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		secret = "devsecret"
+	}
+	claims := jwt.MapClaims{
+		"sub":  sub,
+		"role": role,
+		"exp":  time.Now().Add(72 * time.Hour).Unix(),
+	}
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return t.SignedString([]byte(secret))
+}
