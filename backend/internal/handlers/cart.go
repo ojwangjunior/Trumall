@@ -50,3 +50,27 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 		return c.JSON(cartItem)
 	}
 }
+
+// Get user cart
+func GetCartHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		user := c.Locals("user").(models.User)
+		var items []models.CartItem
+		db.Preload("Product").Where("user_id = ?", user.ID).Find(&items)
+		return c.JSON(items)
+	}
+}
+
+// Remove from cart
+func RemoveFromCartHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		user := c.Locals("user").(models.User)
+		id := c.Params("id")
+		db.Where("id = ? AND user_id = ?", id, user.ID).Delete(&models.CartItem{})
+		return c.JSON(fiber.Map{"message": "removed"})
+	}
+}
+
+// Checkout: create order & deduct stock
+func CheckoutHandler(db *gorm.DB) fiber.Handler {
+	
