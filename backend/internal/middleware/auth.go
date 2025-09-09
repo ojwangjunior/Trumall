@@ -72,5 +72,9 @@ func RequireRole(role string) fiber.Handler {
 		if r == nil {
 			return c.Status(403).JSON(fiber.Map{"error": "forbidden"})
 		}
-		
+		if rr, ok := r.(string); ok && rr == role {
+			return c.Next()
+		}
+		return c.Status(403).JSON(fiber.Map{"error": "forbidden: insufficient role"})
+	}
 }
