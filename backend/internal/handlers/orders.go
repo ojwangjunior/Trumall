@@ -39,4 +39,8 @@ func CreateOrderHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "invalid user id in context"})
 		}
 
+		order := models.Order{ID: uuid.New(), BuyerID: buyerID, StoreID: storeID, Status: "pending"}
+		var total int64 = 0
+
 		
+}
