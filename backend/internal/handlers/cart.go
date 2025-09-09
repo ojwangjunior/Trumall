@@ -78,4 +78,8 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 
 		var cart []models.CartItem
 		db.Preload("Product").Where("user_id = ?", user.ID).Find(&cart)
+		if len(cart) == 0 {
+			return c.Status(400).JSON(fiber.Map{"error": "cart is empty"})
+		}
+
 		
