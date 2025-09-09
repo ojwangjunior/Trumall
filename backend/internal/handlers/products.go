@@ -62,4 +62,7 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		if body.Description != nil {
 			p.Description = body.Description
 		}
+		if p.Currency == "" {
+			p.Currency = "USD"
+		}
 		
