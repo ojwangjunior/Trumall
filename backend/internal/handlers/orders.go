@@ -70,4 +70,13 @@ func CreateOrderHandler(db *gorm.DB) fiber.Handler {
 				return c.Status(400).JSON(fiber.Map{"error": "product not found"})
 			}
 
+			if prod.Stock < it.Quantity {
+				tx.Rollback()
+				return c.Status(400).JSON(fiber.Map{"error": "insufficient stock"})
+			}
+			item := models.OrderItem{ID: uuid.New(), OrderID: order.ID, ProductID: prod.ID, UnitPriceCents: prod.PriceCents, Quantity: it.Quantity}
+			if err := tx.Create(&item).Error; err != nil {
+				tx.Rollback()
+				return c.Status(500).JSON(fiber.Map{"error": "failed to create order item"})
+			}
 			
