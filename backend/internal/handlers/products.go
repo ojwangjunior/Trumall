@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -25,6 +27,15 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		// basic validation
 		if body.Title == "" || body.PriceCents <= 0 {
 			return c.Status(400).JSON(fiber.Map{"error": "title and positive price_cents required"})
+		}
+		if len(body.Title) > 255 {
+			return c.Status(400).JSON(fiber.Map{"error": "title too long (max 255 characters)"})
+		}
+		if body.PriceCents <= 0 {
+			return c.Status(400).JSON(fiber.Map{"error": "price_cents must be greater than 0"})
+		}
+		if body.Stock < 0 {
+			return c.Status(400).JSON(fiber.Map{"error": "stock cannot be negative"})
 		}
 		sid, err := uuid.Parse(body.StoreID)
 		if err != nil {
@@ -51,13 +62,13 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		}
 
 		p := models.Product{
-			ID:         uuid.New(),
-			StoreID:    sid,
-			Title:      body.Title,
+			ID:          uuid.New(),
+			StoreID:     sid,
+			Title:       body.Title,
 			Description: nil,
-			PriceCents: body.PriceCents,
-			Currency:   body.Currency,
-			Stock:      body.Stock,
+			PriceCents:  body.PriceCents,
+			Currency:    body.Currency,
+			Stock:       body.Stock,
 		}
 		if body.Description != nil {
 			p.Description = body.Description
@@ -68,17 +79,21 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		if err := db.Create(&p).Error; err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create product"})
 		}
+		db.Preload("Store").First(&p, "id = ?", p.ID)
 		return c.Status(201).JSON(p)
 	}
 }
 
+// ListProductsHandler - list all products with store info
 func ListProductsHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// pagination (optional)
 		var products []models.Product
-		if err := db.Limit(100).Find(&products).Error; err != nil {
-			return c.Status(500).JSON(fiber.Map{"error": "db error"})
+
+		// 👇 Preload Store so each product comes with its store
+		if err := db.Preload("Store").Find(&products).Error; err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch products"})
 		}
+
 		return c.JSON(products)
 	}
 }
