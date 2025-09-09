@@ -99,4 +99,9 @@ func CreateOrderHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create payment"})
 		}
 
+		if err := tx.Commit().Error; err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "failed to commit transaction"})
+		}
+
 		
+}
