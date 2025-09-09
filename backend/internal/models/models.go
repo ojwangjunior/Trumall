@@ -13,3 +13,13 @@ type OrderItem struct {
 	UnitPriceCents int64     `json:"unit_price_cents"`
 	Quantity       int       `json:"quantity"`
 }
+type Order struct {
+	ID         uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	BuyerID    uuid.UUID `gorm:"type:uuid;index" json:"buyer_id"`
+	StoreID    uuid.UUID `gorm:"type:uuid;index" json:"store_id"`
+	TotalCents int64     `json:"total_cents"`
+	Currency   string    `gorm:"default:USD" json:"currency"`
+	Status     string    `gorm:"default:pending" json:"status"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
