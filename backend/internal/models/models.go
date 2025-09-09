@@ -55,3 +55,10 @@ type Review struct {
 	Comment   *string   `json:"comment,omitempty"`
 	CreatedAt time.Time `json:"created_at"`
 }
+type Store struct {
+	ID          uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	OwnerID     uuid.UUID `gorm:"type:uuid;index" json:"owner_id"`
+	Name        string    `gorm:"not null" json:"name"`
+	Description *string   `json:"description,omitempty"`
+	CreatedAt   time.Time `json:"created_at"`
+}
