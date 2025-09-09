@@ -19,4 +19,7 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 			Currency    string  `json:"currency"`
 			Stock       int     `json:"stock"`
 		}
+		if err := c.BodyParser(&body); err != nil {
+			return fiber.ErrBadRequest
+		}
 		
