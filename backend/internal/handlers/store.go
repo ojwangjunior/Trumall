@@ -41,4 +41,11 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "store name is required"})
 		}
 
+		// Create a new store record
+		store := models.Store{
+			OwnerID:     uid,
+			Name:        body.Name,
+			Description: &body.Description,
+		}
+
 		
