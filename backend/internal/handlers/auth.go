@@ -52,4 +52,12 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create user"})
 		}
 
-		
+		// generate JWT with role claim
+		token, err := generateToken(user.ID.String(), user.Role)
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "failed to create token"})
+		}
+		return c.JSON(fiber.Map{"token": token})
+	}
+}
+
