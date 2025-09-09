@@ -48,4 +48,8 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 			Description: &body.Description,
 		}
 
-		
+		// Save store to database
+		if err := db.Create(&store).Error; err != nil {
+			log.Printf("create store error: %v", err) // log error internally
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to create store"})
+		}
