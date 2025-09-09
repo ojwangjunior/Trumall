@@ -32,4 +32,8 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 			Name        string `json:"name"`
 			Description string `json:"description"`
 		}
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid request body"})
+		}
+
 		
