@@ -36,4 +36,9 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		if uidv == nil {
 			return c.Status(401).JSON(fiber.Map{"error": "unauthenticated"})
 		}
+		uid, ok := uidv.(uuid.UUID)
+		if !ok {
+			return c.Status(500).JSON(fiber.Map{"error": "invalid user id in context"})
+		}
+
 		
