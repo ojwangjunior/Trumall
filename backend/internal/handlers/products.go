@@ -31,4 +31,9 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(400).JSON(fiber.Map{"error": "invalid store id"})
 		}
 
+		// get user id from context (set by RequireAuth middleware)
+		uidv := c.Locals("user_id")
+		if uidv == nil {
+			return c.Status(401).JSON(fiber.Map{"error": "unauthenticated"})
+		}
 		
