@@ -46,6 +46,9 @@ type Product struct {
 	AuthenticityHash *string   `json:"authenticity_hash,omitempty"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
+		// Back-reference: Many products belong to one store
+	Store Store `gorm:"foreignKey:StoreID" json:"store"`
+
 }
 type Review struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
@@ -61,6 +64,7 @@ type Store struct {
 	Name        string    `gorm:"not null" json:"name"`
 	Description *string   `json:"description,omitempty"`
 	CreatedAt   time.Time `json:"created_at"`
+	Products    []Product  `gorm:"foreignKey:StoreID" json:"products"`
 }
 type User struct {
 	ID           uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
@@ -70,4 +74,14 @@ type User struct {
 	Role         string    `gorm:"default:buyer" json:"role"` // <-- add this
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
+}
+type CartItem struct {
+	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	UserID    uuid.UUID `gorm:"type:uuid;not null"`
+	ProductID uuid.UUID `gorm:"type:uuid;not null"`
+	Quantity  int       `json:"quantity"`
+	Price     int64     `json:"price"`
+	Product   Product   `gorm:"foreignKey:ProductID"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
