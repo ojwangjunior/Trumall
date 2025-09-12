@@ -3,13 +3,17 @@ use std::collections::HashMap;
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
-#[derive(Debug, Clone)]
-pub struct Account {
-    pub account_name: String,
-    pub account_number: u32,
-    pub account_balance: u64,
-    pub transaction_history: Vec<String>,
-    pub account_pin: u32,
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct User {
+    pub id: Uuid,
+    pub username: String,
+    pub password_hash: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Claims {
+    pub sub: String,
+    pub exp: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -56,4 +60,16 @@ pub struct Transaction {
     pub timestamp: DateTime<Utc>,
     pub transaction_fee: u64,
     pub transaction_fee_currency: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SignupData {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LoginData {
+    pub username: String,
+    pub password: String,
 }

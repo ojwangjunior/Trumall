@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
   const accountDropdownRef = useRef(null);
+  const { token, logout } = useAuth();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -204,16 +206,22 @@ const Header = () => {
               {isAccountDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                   <div className="py-2">
-                    {/* Sign In Button */}
-                    <div className="px-4 pb-2">
+                    {token ? (
+                      <button
+                        onClick={logout}
+                        className="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center py-2 px-4 rounded-md transition-colors duration-200 font-medium"
+                      >
+                        Logout
+                      </button>
+                    ) : (
                       <Link
-                        to="/signin"
+                        to="/login"
                         className="block w-full bg-orange-500 hover:bg-orange-600 text-white text-center py-2 px-4 rounded-md transition-colors duration-200 font-medium"
                         onClick={() => setIsAccountDropdownOpen(false)}
                       >
                         Sign In
                       </Link>
-                    </div>
+                    )}
 
                     <div className="border-t border-gray-100"></div>
 

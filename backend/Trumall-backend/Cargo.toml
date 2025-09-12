@@ -11,3 +11,7 @@ serde_json = "1.0"
 uuid = { version = "1.0", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 rand = "0.8"
+actix-web = "4"
+tokio = { version = "1", features = ["full"] }
+bcrypt = "0.15"
+jsonwebtoken = "9"

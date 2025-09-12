@@ -1,16 +1,14 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 
-const LoginPage = () => {
+const SignupPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    const response = await fetch('/api/login', {
+    const response = await fetch('/api/signup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,20 +17,18 @@ const LoginPage = () => {
     });
 
     if (response.ok) {
-      const { token } = await response.json();
-      login(token);
-      navigate('/');
+      navigate('/login');
     } else {
       // Handle error
-      console.error('Login failed');
+      console.error('Signup failed');
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-3xl font-bold text-center text-gray-900">Log in to your account</h2>
-        <form className="space-y-6" onSubmit={handleLogin}>
+        <h2 className="text-3xl font-bold text-center text-gray-900">Create an account</h2>
+        <form className="space-y-6" onSubmit={handleSignup}>
           <div>
             <label
               htmlFor="username"
@@ -72,14 +68,14 @@ const LoginPage = () => {
               type="submit"
               className="w-full px-4 py-2 text-lg font-medium text-white bg-orange-600 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
             >
-              Log in
+              Sign up
             </button>
           </div>
         </form>
         <p className="text-sm text-center text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/signup" className="font-medium text-orange-600 hover:text-orange-500">
-            Sign up
+          Already have an account?{' '}
+          <Link to="/login" className="font-medium text-orange-600 hover:text-orange-500">
+            Log in
           </Link>
         </p>
       </div>
@@ -87,4 +83,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;

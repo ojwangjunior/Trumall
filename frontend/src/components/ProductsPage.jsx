@@ -1,35 +1,16 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
 
-const products = [
-  {
-    id: 1,
-    name: 'Product 1',
-    price: '$10',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: 2,
-    name: 'Product 2',
-    price: '$20',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: 3,
-    name: 'Product 3',
-    price: '$30',
-    image: 'https://via.placeholder.com/150',
-  },
-  {
-    id: 4,
-    name: 'Product 4',
-    price: '$40',
-    image: 'https://via.placeholder.com/150',
-  },
-];
-
 const ProductsPage = () => {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => setProducts(data));
+  }, []);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Products</h1>

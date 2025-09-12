@@ -1,24 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { CartContext } from '../context/cart';
 
 const BuyPage = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [products, setProducts] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
-  const [cart, setCart] = useState([]);
+  const { addToCart, cartItems } = useContext(CartContext);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        setProducts(data);
+        setSearchResults(data);
+      });
+  }, []);
 
   const handleSearch = () => {
-    // Handle search logic here
-    console.log('Searching for:', searchKeyword);
-    // Mock search results (ideally from backend)
-    setSearchResults([
-      { id: 1, name: 'Laptop', price: 1200, description: 'A powerful laptop', image: 'https://via.placeholder.com/150' },
-      { id: 2, name: 'Keyboard', price: 75, description: 'A mechanical keyboard', image: 'https://via.placeholder.com/150' },
-      { id: 3, name: 'Mouse', price: 25, description: 'Wireless mouse', image: 'https://via.placeholder.com/150' },
-      { id: 4, name: 'Monitor', price: 300, description: '27-inch 4K monitor', image: 'https://via.placeholder.com/150' },
-    ]);
-  };
-
-  const addToCart = (item) => {
-    setCart([...cart, item]);
+    const results = products.filter((product) =>
+      product.name.toLowerCase().includes(searchKeyword.toLowerCase())
+    );
+    setSearchResults(results);
   };
 
   return (
@@ -78,11 +80,11 @@ const BuyPage = () => {
       {/* Cart Display */}
       <div className="mt-12 bg-white p-6 rounded-lg shadow-lg">
         <h3 className="text-2xl font-bold mb-4">Your Cart</h3>
-        {cart.length === 0 ? (
+        {cartItems.length === 0 ? (
           <p className="text-gray-600">Your cart is empty.</p>
         ) : (
           <ul>
-            {cart.map((item, index) => (
+            {cartItems.map((item, index) => (
               <li key={index} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
                 <span className="text-gray-800">{item.name}</span>
                 <span className="font-semibold text-blue-600">${item.price}</span>
@@ -90,7 +92,7 @@ const BuyPage = () => {
             ))}
             <li className="flex justify-between items-center py-2 mt-4 font-bold text-lg">
               <span>Total:</span>
-              <span>${cart.reduce((sum, item) => sum + item.price, 0).toFixed(2)}</span>
+              <span>${cartItems.reduce((sum, item) => sum + item.price, 0).toFixed(2)}</span>
             </li>
           </ul>
         )}
