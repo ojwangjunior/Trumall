@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { useParams } from "react-router-dom";
 import Rating from "./Rating";
-import { CartContext } from "../context/CartContext";
+import { CartContext } from "../context/cart";
 
 // Mock data - in a real app, you would fetch this based on the id
 const products = [
