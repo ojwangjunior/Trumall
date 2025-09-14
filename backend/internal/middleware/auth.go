@@ -7,10 +7,13 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
+
+	"trumall/internal/models"
 )
 
 // RequireAuth validates the Authorization header Bearer token and attaches user info to context
-func RequireAuth() fiber.Handler {
+func RequireAuth(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		auth := c.Get("Authorization")
 		if auth == "" {
@@ -53,14 +56,13 @@ func RequireAuth() fiber.Handler {
 			return c.Status(401).JSON(fiber.Map{"error": "invalid user id in token"})
 		}
 
-		role := "buyer"
-		if r, ok := claims["role"].(string); ok && r != "" {
-			role = r
+		var user models.User
+		if err := db.First(&user, "id = ?", uid).Error; err != nil {
+			return c.Status(401).JSON(fiber.Map{"error": "user not found"})
 		}
 
 		// attach to context
-		c.Locals("user_id", uid)
-		c.Locals("user_role", role)
+		c.Locals("user", user)
 		return c.Next()
 	}
 }
@@ -68,11 +70,11 @@ func RequireAuth() fiber.Handler {
 // RequireRole ensures the user has the given role (e.g. "seller")
 func RequireRole(role string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		r := c.Locals("user_role")
-		if r == nil {
+		user, ok := c.Locals("user").(models.User)
+		if !ok {
 			return c.Status(403).JSON(fiber.Map{"error": "forbidden"})
 		}
-		if rr, ok := r.(string); ok && rr == role {
+		if user.Role == role {
 			return c.Next()
 		}
 		return c.Status(403).JSON(fiber.Map{"error": "forbidden: insufficient role"})
