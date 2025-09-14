@@ -5,10 +5,11 @@ import (
 	"log"
 	"os"
 
+	"github.com/golang-migrate/migrate/v4"
+	migratedb "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	"trumall/internal/models"
 )
 
 func Connect() (*gorm.DB, error) {
@@ -29,19 +30,27 @@ func Connect() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	// Run migrations
-	err = db.AutoMigrate(
-		&models.User{},
-		&models.Store{},
-		&models.Product{},
-		&models.Order{},
-		&models.OrderItem{},
-		&models.Payment{},
-		&models.Review{},
-		&models.CartItem{},
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatalf("failed to get sql.DB: %v", err)
+	}
+
+	driver, err := migratedb.WithInstance(sqlDB, &migratedb.Config{})
+	if err != nil {
+		log.Fatalf("failed to create driver: %v", err)
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file:///home/ombimahillary/ojwang/Trumall/backend/migrations",
+		"postgres",
+		driver,
 	)
 	if err != nil {
-		log.Fatalf("failed to migrate: %v", err)
+		log.Fatalf("failed to create migrate instance: %v", err)
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatalf("failed to run migrations: %v", err)
 	}
 
 	return db, nil
