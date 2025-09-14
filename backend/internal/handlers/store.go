@@ -16,16 +16,20 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Get logged-in user ID from middleware (set during authentication)
 		//ensures only authenticated users can create stores
-		userID := c.Locals("userID")
+		userID := c.Locals("user_id")
 		if userID == nil {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
 		}
 
 		// Convert userID (string) -> UUID format
-		uid, err := uuid.Parse(userID.(string))
-		if err != nil {
-			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid user id"})
+		// uid, err := uuid.Parse(userID.(string))
+		uid, ok := userID.(uuid.UUID)
+		if !ok {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "invalid user id type"})
 		}
+		// if err != nil {
+		// 	return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid user id"})
+		// }
 
 		// Parse the request body (store name + description)
 		var body struct {

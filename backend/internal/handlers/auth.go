@@ -23,15 +23,26 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 			Name     string `json:"name"`
 			Role     string `json:"role"` // optional: "buyer" or "seller"
 		}
+		// parse request body
 		if err := c.BodyParser(&body); err != nil {
 			return fiber.ErrBadRequest
 		}
 		if body.Email == "" || body.Password == "" {
 			return c.Status(400).JSON(fiber.Map{"error": "email and password required"})
 		}
+		// set default role
 		role := "buyer"
 		if body.Role == "seller" {
 			role = "seller"
+		}
+
+		// check if user already exists
+		var existing models.User
+		if err := db.First(&existing, "email = ?", body.Email).Error; err == nil {
+			// found a user with same email
+			return c.Status(400).JSON(fiber.Map{
+				"error": "user with this email already exists",
+			})
 		}
 
 		// hash password
@@ -57,7 +68,10 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create token"})
 		}
-		return c.JSON(fiber.Map{"token": token})
+		return c.JSON(fiber.Map{
+			"message": "Account created successfully",
+			"token":   token,
+		})
 	}
 }
 
@@ -84,7 +98,10 @@ func LoginHandler(db *gorm.DB) fiber.Handler {
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "token"})
 		}
-		return c.JSON(fiber.Map{"token": token})
+		return c.JSON(fiber.Map{
+			"message": "Login successful",
+			"token":   token,
+		})
 	}
 }
 
