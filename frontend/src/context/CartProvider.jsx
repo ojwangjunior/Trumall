@@ -1,38 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { CartContext } from "./cart";
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
-  const addToCart = (product) => {
-    console.log("Received product in CartContext.addToCart:", product);
-    setCartItems((prevItems) => {
-      const itemInCart = prevItems.find((item) => item.id === product.id);
-      let newItems;
-      if (itemInCart) {
-        newItems = prevItems.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + product.quantity }
-            : item
-        );
-      } else {
-        newItems = [
-          ...prevItems,
-          { ...product, quantity: product.quantity || 1 },
-        ];
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/api/cart", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setCartItems(response.data);
+      } catch (error) {
+        console.error("Error fetching cart:", error);
       }
-      console.log("Cart items after update:", newItems);
-      return newItems;
-    });
+    };
+
+    fetchCart();
+  }, []);
+
+  const addToCart = async (product) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/cart/add",
+        {
+          productID: product.ID,
+          quantity: product.quantity || 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setCartItems(response.data);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
   };
 
-  const removeFromCart = (productId) => {
-    console.log("Removing product from cart:", productId);
-    setCartItems((prevItems) => {
-      const updatedItems = prevItems.filter((item) => item.id !== productId);
-      console.log("Cart items after removal:", updatedItems);
-      return updatedItems;
-    });
+  const removeFromCart = async (productId) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:8080/api/cart/${productId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setCartItems(response.data);
+    } catch (error) {
+      console.error("Error removing from cart:", error);
+    }
   };
 
   return (
