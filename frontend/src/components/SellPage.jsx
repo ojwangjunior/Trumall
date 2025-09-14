@@ -1,21 +1,39 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const SellPage = () => {
   const [itemName, setItemName] = useState('');
   const [itemPrice, setItemPrice] = useState('');
   const [itemDescription, setItemDescription] = useState('');
   const [itemImage, setItemImage] = useState(null); // For image file
+  const [stock, setStock] = useState(1);
+  const [storeId, setStoreId] = useState('YOUR_STORE_ID'); // Hardcoded to be changed
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSell = (e) => {
+  const handleSell = async (e) => {
     e.preventDefault(); // Prevent default form submission
     setIsSubmitting(true);
     setSubmissionSuccess(false);
+    setError(null);
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Selling item:', { itemName, itemPrice, itemDescription, itemImage });
+    try {
+      const priceCents = Math.round(parseFloat(itemPrice) * 100);
+
+      const response = await axios.post('http://localhost:8080/api/products', {
+        store_id: storeId,
+        title: itemName,
+        description: itemDescription,
+        price_cents: priceCents,
+        stock: stock,
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      console.log('Selling item:', response.data);
       setIsSubmitting(false);
       setSubmissionSuccess(true);
       // Clear form after successful submission
@@ -23,7 +41,12 @@ const SellPage = () => {
       setItemPrice('');
       setItemDescription('');
       setItemImage(null);
-    }, 1500);
+      setStock(1);
+    } catch (error) {
+      console.error('Error selling item:', error);
+      setError('Error selling item. Please try again.');
+      setIsSubmitting(false);
+    }
   };
 
   const handleImageChange = (e) => {
@@ -41,6 +64,13 @@ const SellPage = () => {
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
             <strong className="font-bold">Success!</strong>
             <span className="block sm:inline"> Your item has been listed for sale.</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <strong className="font-bold">Error!</strong>
+            <span className="block sm:inline"> {error}</span>
           </div>
         )}
 
@@ -74,6 +104,21 @@ const SellPage = () => {
               required
               min="0"
               step="0.01"
+            />
+          </div>
+
+          <div className="mb-5">
+            <label htmlFor="stock" className="block text-gray-700 text-sm font-bold mb-2">
+              Stock
+            </label>
+            <input
+              type="number"
+              id="stock"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g., 10"
+              value={stock}
+              onChange={(e) => setStock(e.target.value === '' ? 0 : parseInt(e.target.value))}
+              min="0"
             />
           </div>
 
