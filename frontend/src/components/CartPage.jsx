@@ -8,8 +8,7 @@ const CartPage = () => {
   const calculateTotal = () => {
     return cartItems
       .reduce((total, item) => {
-        const price = parseFloat(item.price.replace("$", ""));
-        return total + price * item.quantity;
+        return total + item.Price * item.quantity;
       }, 0)
       .toFixed(2);
   };
@@ -69,38 +68,41 @@ const CartPage = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {cartItems.map((item) => (
-                  <tr key={item.id}>
+                  <tr key={item.ID}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-16 w-16">
                           <img
                             className="h-16 w-16 rounded-md object-cover"
-                            src={item.image}
-                            alt={item.name}
+                            src={`https://via.placeholder.com/150?text=${item.Product.Title}`}
+                            alt={item.Product.Title}
                           />
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {item.name}
+                            {item.Product.Title}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item.price}
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: item.Product.Currency,
+                      }).format(item.Price / 100)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {item.quantity}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      $
-                      {(
-                        parseFloat(item.price.replace("$", "")) * item.quantity
-                      ).toFixed(2)}
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: item.Product.Currency,
+                      }).format((item.Price * item.quantity) / 100)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item.ID)}
                         className="text-red-600 hover:text-red-900"
                       >
                         Remove
@@ -114,7 +116,12 @@ const CartPage = () => {
 
           <div className="mt-8 flex justify-end items-center">
             <div className="text-lg font-bold mr-4">
-              Total: ${calculateTotal()}
+              Total: {
+                new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: cartItems[0]?.Product.Currency || "USD",
+                }).format(calculateTotal() / 100)
+              }
             </div>
             <button className="px-6 py-3 font-semibold text-white bg-green-500 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
               Proceed to Checkout
