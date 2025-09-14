@@ -6,34 +6,39 @@ import { CartContext } from "../context/cart";
 const ProductCard = ({ product }) => {
   const { addToCart } = useContext(CartContext);
 
+  const formatPrice = (priceCents, currency) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency,
+    }).format(priceCents / 100);
+  };
+
   const handleAddToCart = () => {
     console.log("Adding to cart from ProductCard:", product);
     addToCart(product);
   };
 
+  const imageUrl = `https://via.placeholder.com/300x300?text=${product.Title}`;
+
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col justify-between group">
-      <Link to={`/product/${product.id}`}>
+      <Link to={`/product/${product.ID}`}>
         <div className="overflow-hidden aspect-square">
           <img
-            src={product.image}
-            alt={product.name}
+            src={imageUrl}
+            alt={product.Title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
         <div className="p-4">
-          <h2 className="text-lg font-bold truncate">{product.name}</h2>
+          <h2 className="text-lg font-bold truncate">{product.Title}</h2>
           <div className="flex items-center my-2">
             <span className="text-xl font-bold text-orange">
-              {product.price}
+              {formatPrice(product.PriceCents, product.Currency)}
             </span>
-            {product.originalPrice && (
-              <span className="text-sm text-gray-500 line-through ml-2">
-                {product.originalPrice}
-              </span>
-            )}
           </div>
-          <Rating rating={product.rating} />
+          {/* Add rating if available in the product data */}
+          {/* <Rating rating={product.rating} /> */}
         </div>
       </Link>
       <div className="p-4 pt-0">
