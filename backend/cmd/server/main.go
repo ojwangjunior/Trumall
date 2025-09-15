@@ -52,6 +52,8 @@ func main() {
 	app.Get("/api/stores", handlers.ListStoresHandler(dbConn))
 	// get one store
 	app.Get("/api/stores/:id", handlers.GetStoreHandler(dbConn))
+	// get stores for the logged in user
+	app.Get("/api/me/stores", middleware.RequireAuth(dbConn), handlers.GetUserStoresHandler(dbConn))
 	
 	// Products
 	app.Post("/api/products", middleware.RequireAuth(dbConn), handlers.CreateProductHandler(dbConn))
