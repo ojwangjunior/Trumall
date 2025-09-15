@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"trumall/internal/models"
@@ -19,28 +22,43 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(400).JSON(fiber.Map{"error": "invalid request"})
 		}
 
-		// Get user from middleware (set by RequireAuth)
-		user := c.Locals("user").(models.User)
+		// Get user ID from JWT
+		userIDLocal := c.Locals("user_id")
+		if userIDLocal == nil {
+			return c.Status(401).JSON(fiber.Map{"error": "unauthorized"})
+		}
+		userID, ok := userIDLocal.(uuid.UUID)
+		if !ok {
+			return c.Status(500).JSON(fiber.Map{"error": "invalid user id"})
+		}
 
-		// Check product exists
+		// Check if product exists
 		var product models.Product
 		if err := db.First(&product, "id = ?", body.ProductID).Error; err != nil {
 			return c.Status(404).JSON(fiber.Map{"error": "product not found"})
 		}
 
-		// Check stock
-		if body.Quantity > product.Stock {
-			return c.Status(400).JSON(fiber.Map{"error": "not enough stock"})
-		}
-
-		// Create or update cart item
+		// Check if cart item already exists
 		var cartItem models.CartItem
-		if err := db.Where("user_id = ? AND product_id = ?", user.ID, body.ProductID).First(&cartItem).Error; err == nil {
+		err := db.Where("user_id = ? AND product_id = ?", userID, body.ProductID).First(&cartItem).Error
+		if err == nil {
+			// Update existing item
+			if cartItem.Quantity+body.Quantity > product.Stock {
+				return c.Status(400).JSON(fiber.Map{
+					"error": fmt.Sprintf("only %d items available", product.Stock-cartItem.Quantity),
+				})
+			}
 			cartItem.Quantity += body.Quantity
 			db.Save(&cartItem)
 		} else {
+			// Create new cart item
+			if body.Quantity > product.Stock {
+				return c.Status(400).JSON(fiber.Map{
+					"error": fmt.Sprintf("only %d items available", product.Stock),
+				})
+			}
 			cartItem = models.CartItem{
-				UserID:    user.ID,
+				UserID:    userID,
 				ProductID: product.ID,
 				Quantity:  body.Quantity,
 			}
@@ -96,10 +114,10 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 			}
 
 			orderItem := models.OrderItem{
-				OrderID:   order.ID,
-				ProductID: item.ProductID,
-				Quantity:  item.Quantity,
-				UnitPriceCents:         item.Product.PriceCents,
+				OrderID:        order.ID,
+				ProductID:      item.ProductID,
+				Quantity:       item.Quantity,
+				UnitPriceCents: item.Product.PriceCents,
 			}
 			db.Create(&orderItem)
 
