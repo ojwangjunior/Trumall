@@ -13,6 +13,7 @@ import AboutPage from "./components/AboutPage";
 import ProductDetailPage from "./components/ProductDetailPage";
 import CreateStorePage from "./components/CreateStorePage";
 import MyStoresPage from "./components/MyStoresPage";
+import MyAccountPage from "./components/MyAccountPage";
 import ProtectedRoute from "./context/ProtectedRoute";
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
               <Route path="/sell" element={<SellPage />} />
               <Route path="/mystores" element={<MyStoresPage />} />
               <Route path="/createstore" element={<CreateStorePage />} />
+              <Route path="/account" element={<MyAccountPage />} />
             </Route>
           </Routes>
         </main>
