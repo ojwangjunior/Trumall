@@ -10,11 +10,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      // You might want to verify the token with the backend here
-      // For now, we'll just assume the token is valid
-      // and decode it to get user info.
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
-      setUser({ id: decodedToken.sub, email: decodedToken.email, role: decodedToken.role });
+      setUser({ id: decodedToken.sub, email: decodedToken.email, role: decodedToken.role, name: decodedToken.name });
     }
     setLoading(false);
   }, []);
@@ -32,7 +29,7 @@ export const AuthProvider = ({ children }) => {
 
     localStorage.setItem("token", token);
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
-    setUser({ id: decodedToken.sub, email: decodedToken.email, role: decodedToken.role });
+    setUser({ id: decodedToken.sub, email: decodedToken.email, role: decodedToken.role, name: decodedToken.name });
   };
 
   const register = async (name, email, password, role) => {
@@ -46,14 +43,12 @@ export const AuthProvider = ({ children }) => {
       }
     );
 
-    // --- CHANGE START ---
     // Extract the token from the nested 'data' object.
     const { token } = response.data.data;
-    // --- CHANGE END ---
 
     localStorage.setItem("token", token);
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
-    setUser({ id: decodedToken.sub, email: decodedToken.email, role: decodedToken.role });
+    setUser({ id: decodedToken.sub, email: decodedToken.email, role: decodedToken.role, name: decodedToken.name });
   };
 
   const logout = () => {
