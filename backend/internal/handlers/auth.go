@@ -64,7 +64,7 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 		}
 
 		// generate JWT with role claim
-		token, err := generateToken(user.ID.String(), user.Role)
+		token, err := generateToken(user.ID.String(), user.Role, user.Name)
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create token"})
 		}
@@ -95,7 +95,7 @@ func LoginHandler(db *gorm.DB) fiber.Handler {
 		if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password)); err != nil {
 			return c.Status(401).JSON(fiber.Map{"error": "invalid credentials"})
 		}
-		token, err := generateToken(user.ID.String(), user.Role)
+		token, err := generateToken(user.ID.String(), user.Role, user.Name)
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "token"})
 		}
@@ -107,7 +107,7 @@ func LoginHandler(db *gorm.DB) fiber.Handler {
 	}
 }
 
-func generateToken(sub, role string) (string, error) {
+func generateToken(sub, role, name string) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
 		secret = "devsecret"
@@ -115,8 +115,19 @@ func generateToken(sub, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub":  sub,
 		"role": role,
+		"name": name, // Add name to claims
 		"exp":  time.Now().Add(72 * time.Hour).Unix(),
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return t.SignedString([]byte(secret))
+}
+
+func GetMeHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		user, ok := c.Locals("user").(models.User)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
+		}
+		return c.JSON(user)
+	}
 }
