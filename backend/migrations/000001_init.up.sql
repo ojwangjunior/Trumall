@@ -5,7 +5,7 @@ CREATE TABLE users (
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   name TEXT,
-  role TEXT DEFAULT 'buyer',
+  roles TEXT[] DEFAULT ARRAY['buyer']::TEXT[],
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );

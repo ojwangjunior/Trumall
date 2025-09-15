@@ -16,6 +16,7 @@ func RequireAuth() fiber.Handler {
 		if auth == "" {
 			return c.Status(401).JSON(fiber.Map{"error": "missing auth"})
 		}
+
 		// Expect: "Bearer <token>"
 		var tokenStr string
 		_, err := fmt.Sscanf(auth, "Bearer %s", &tokenStr)
@@ -27,7 +28,7 @@ func RequireAuth() fiber.Handler {
 		if secret == "" {
 			return c.Status(500).JSON(fiber.Map{"error": "server misconfigured (no jwt secret)"})
 		}
-
+		// parse and validate token
 		tok, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
 			// ensure signing method
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -53,14 +54,36 @@ func RequireAuth() fiber.Handler {
 			return c.Status(401).JSON(fiber.Map{"error": "invalid user id in token"})
 		}
 
-		role := "buyer"
-		if r, ok := claims["role"].(string); ok && r != "" {
-			role = r
+		// --- NEW: read roles array ---
+		rolesAny, exists := claims["roles"]
+		if !exists {
+			return c.Status(401).JSON(fiber.Map{"error": "roles claim missing"})
+		}
+
+		roles := []string{}
+		switch v := rolesAny.(type) {
+		case []interface{}:
+			for _, r := range v {
+				s, ok := r.(string)
+				if !ok {
+					return c.Status(401).JSON(fiber.Map{"error": "invalid role type in token"})
+				}
+				roles = append(roles, s)
+			}
+		case []string:
+			roles = v
+		default:
+			return c.Status(401).JSON(fiber.Map{"error": "invalid roles format"})
+		}
+
+		if len(roles) == 0 {
+			return c.Status(401).JSON(fiber.Map{"error": "no valid roles in token"})
 		}
 
 		// attach to context
 		c.Locals("user_id", uid)
-		c.Locals("user_role", role)
+		c.Locals("user_roles", roles)
+
 		return c.Next()
 	}
 }
@@ -68,12 +91,18 @@ func RequireAuth() fiber.Handler {
 // RequireRole ensures the user has the given role (e.g. "seller")
 func RequireRole(role string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		r := c.Locals("user_role")
-		if r == nil {
+		rolesAny := c.Locals("user_roles")
+		if rolesAny == nil {
 			return c.Status(403).JSON(fiber.Map{"error": "forbidden"})
 		}
-		if rr, ok := r.(string); ok && rr == role {
-			return c.Next()
+		roles, ok := rolesAny.([]string)
+		if !ok {
+			return c.Status(500).JSON(fiber.Map{"error": "invalid roles"})
+		}
+		for _, r := range roles {
+			if r == role {
+				return c.Next()
+			}
 		}
 		return c.Status(403).JSON(fiber.Map{"error": "forbidden: insufficient role"})
 	}

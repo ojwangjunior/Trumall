@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
@@ -23,26 +24,15 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 			Name     string `json:"name"`
 			Role     string `json:"role"` // optional: "buyer" or "seller"
 		}
-		// parse request body
 		if err := c.BodyParser(&body); err != nil {
 			return fiber.ErrBadRequest
 		}
 		if body.Email == "" || body.Password == "" {
 			return c.Status(400).JSON(fiber.Map{"error": "email and password required"})
 		}
-		// set default role
 		role := "buyer"
 		if body.Role == "seller" {
 			role = "seller"
-		}
-
-		// check if user already exists
-		var existing models.User
-		if err := db.First(&existing, "email = ?", body.Email).Error; err == nil {
-			// found a user with same email
-			return c.Status(400).JSON(fiber.Map{
-				"error": "user with this email already exists",
-			})
 		}
 
 		// hash password
@@ -57,19 +47,19 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 			Email:        body.Email,
 			PasswordHash: string(pwHash),
 			Name:         body.Name,
-			Role:         role,
+			Roles:        pq.StringArray{role},
 		}
 		if err := db.Create(&user).Error; err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create user"})
 		}
 
 		// generate JWT with role claim
-		token, err := generateToken(user.ID.String(), user.Role)
+		token, err := generateToken(user.ID.String(), user.Roles)
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create token"})
 		}
 		return c.JSON(fiber.Map{
-			"message": "Account created successfully",
+			"message": "account created successfully",
 			"token":   token,
 		})
 	}
@@ -94,27 +84,29 @@ func LoginHandler(db *gorm.DB) fiber.Handler {
 		if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password)); err != nil {
 			return c.Status(401).JSON(fiber.Map{"error": "invalid credentials"})
 		}
-		token, err := generateToken(user.ID.String(), user.Role)
+		token, err := generateToken(user.ID.String(), user.Roles)
 		if err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "token"})
 		}
 		return c.JSON(fiber.Map{
-			"message": "Login successful",
+			"message": "login successfully",
 			"token":   token,
 		})
 	}
 }
 
-func generateToken(sub, role string) (string, error) {
+func generateToken(sub string, roles []string) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
 		secret = "devsecret"
 	}
+
 	claims := jwt.MapClaims{
-		"sub":  sub,
-		"role": role,
-		"exp":  time.Now().Add(72 * time.Hour).Unix(),
+		"sub":   sub,
+		"roles": roles, // store array of roles
+		"exp":   time.Now().Add(72 * time.Hour).Unix(),
 	}
+
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return t.SignedString([]byte(secret))
 }
