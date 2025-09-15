@@ -1,16 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
 
 const SellPage = () => {
   const [itemName, setItemName] = useState('');
   const [itemPrice, setItemPrice] = useState('');
   const [itemDescription, setItemDescription] = useState('');
-  const [itemImage, setItemImage] = useState(null); // For image file
   const [stock, setStock] = useState(1);
-  const [storeId, setStoreId] = useState('YOUR_STORE_ID'); // Hardcoded to be changed
+  const [storeId, setStoreId] = useState('');
+  const [stores, setStores] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [error, setError] = useState(null);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/signin');
+    }
+
+    const fetchStores = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/api/me/stores', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        const userStores = response.data.data;
+        setStores(userStores);
+        if (userStores.length > 0) {
+          setStoreId(userStores[0].id);
+        } else {
+          navigate('/createstore');
+        }
+      } catch (error) {
+        console.error('Error fetching stores:', error);
+      }
+    };
+
+    if (user) {
+      fetchStores();
+    }
+  }, [user, navigate]);
 
   const handleSell = async (e) => {
     e.preventDefault(); // Prevent default form submission
@@ -40,18 +73,11 @@ const SellPage = () => {
       setItemName('');
       setItemPrice('');
       setItemDescription('');
-      setItemImage(null);
       setStock(1);
     } catch (error) {
       console.error('Error selling item:', error);
       setError('Error selling item. Please try again.');
       setIsSubmitting(false);
-    }
-  };
-
-  const handleImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setItemImage(e.target.files[0]);
     }
   };
 
@@ -75,6 +101,22 @@ const SellPage = () => {
         )}
 
         <form onSubmit={handleSell}>
+          <div className="mb-5">
+            <label htmlFor="store" className="block text-gray-700 text-sm font-bold mb-2">
+              Store
+            </label>
+            <select
+              id="store"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              value={storeId}
+              onChange={(e) => setStoreId(e.target.value)}
+            >
+              {stores.map(store => (
+                <option key={store.id} value={store.id}>{store.name}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="mb-5">
             <label htmlFor="itemName" className="block text-gray-700 text-sm font-bold mb-2">
               Item Name
@@ -118,6 +160,7 @@ const SellPage = () => {
               placeholder="e.g., 10"
               value={stock}
               onChange={(e) => setStock(e.target.value === '' ? 0 : parseInt(e.target.value))}
+              required
               min="0"
             />
           </div>
@@ -134,25 +177,6 @@ const SellPage = () => {
               onChange={(e) => setItemDescription(e.target.value)}
               required
             />
-          </div>
-
-          <div className="mb-6">
-            <label htmlFor="itemImage" className="block text-gray-700 text-sm font-bold mb-2">
-              Item Image
-            </label>
-            <input
-              type="file"
-              id="itemImage"
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100"
-              onChange={handleImageChange}
-              accept="image/*"
-            />
-            {itemImage && <p className="text-gray-600 text-xs mt-2">Selected file: {itemImage.name}</p>}
           </div>
 
           <button

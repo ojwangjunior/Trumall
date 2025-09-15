@@ -7,9 +7,10 @@ const ProductCard = ({ product }) => {
   const { addToCart } = useContext(CartContext);
 
   const formatPrice = (priceCents, currency) => {
+    const displayCurrency = currency || 'USD'; // Default to 'USD' if currency is undefined
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: currency,
+      currency: displayCurrency,
     }).format(priceCents / 100);
   };
 
@@ -18,23 +19,28 @@ const ProductCard = ({ product }) => {
     addToCart(product);
   };
 
-  const imageUrl = `https://via.placeholder.com/300x300?text=${product.Title}`;
+  const imageUrl = `https://via.placeholder.com/300x300?text=${product.title}`;
 
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col justify-between group">
-      <Link to={`/product/${product.ID}`}>
+      <Link to={`/product/${product.id}`}>
         <div className="overflow-hidden aspect-square">
           <img
             src={imageUrl}
-            alt={product.Title}
+            alt={product.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
         <div className="p-4">
-          <h2 className="text-lg font-bold truncate">{product.Title}</h2>
+          <h2 className="text-lg font-bold truncate">{product.title}</h2>
+          {product.description && (
+            <p className="text-gray-600 text-sm mt-1 truncate">
+              {product.description}
+            </p>
+          )}
           <div className="flex items-center my-2">
             <span className="text-xl font-bold text-orange">
-              {formatPrice(product.PriceCents, product.Currency)}
+              {formatPrice(product.price_cents, product.currency)}
             </span>
           </div>
           {/* Add rating if available in the product data */}
