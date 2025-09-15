@@ -69,8 +69,9 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create token"})
 		}
 		return c.JSON(fiber.Map{
-			"message": "Account created successfully",
-			"token":   token,
+			"data": fiber.Map{
+				"token": token,
+			},
 		})
 	}
 }
@@ -99,8 +100,9 @@ func LoginHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "token"})
 		}
 		return c.JSON(fiber.Map{
-			"message": "Login successful",
-			"token":   token,
+			"data": fiber.Map{
+				"token": token,
+			},
 		})
 	}
 }
