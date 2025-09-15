@@ -11,6 +11,9 @@ import ProductsPage from "./components/ProductsPage";
 import CartPage from "./components/CartPage";
 import AboutPage from "./components/AboutPage";
 import ProductDetailPage from "./components/ProductDetailPage";
+import CreateStorePage from "./components/CreateStorePage";
+import MyStoresPage from "./components/MyStoresPage";
+import ProtectedRoute from "./context/ProtectedRoute";
 
 function App() {
   return (
@@ -23,11 +26,15 @@ function App() {
             <Route path="/signin" element={<SigninPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/buy" element={<BuyPage />} />
-            <Route path="/sell" element={<SellPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/sell" element={<SellPage />} />
+              <Route path="/mystores" element={<MyStoresPage />} />
+              <Route path="/createstore" element={<CreateStorePage />} />
+            </Route>
           </Routes>
         </main>
         <Footer />
