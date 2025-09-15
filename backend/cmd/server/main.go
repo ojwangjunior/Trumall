@@ -45,6 +45,7 @@ func main() {
 	// Auth
 	app.Post("/api/auth/register", handlers.RegisterHandler(dbConn))
 	app.Post("/api/auth/login", handlers.LoginHandler(dbConn))
+	app.Get("/api/me", middleware.RequireAuth(dbConn), handlers.GetMeHandler(dbConn))
 
 	// STORES
 	app.Post("/api/stores", middleware.RequireAuth(dbConn), handlers.CreateStoreHandler(dbConn))
