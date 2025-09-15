@@ -91,6 +91,12 @@ func ListProductsHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch products"})
 		}
 
+		for i := range products {
+			if products[i].Currency == "" {
+				products[i].Currency = "USD"
+			}
+		}
+
 		return c.JSON(products)
 	}
 }
