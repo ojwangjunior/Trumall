@@ -74,7 +74,14 @@ const CartPage = () => {
                         <div className="flex-shrink-0 h-16 w-16">
                           <img
                             className="h-16 w-16 rounded-md object-cover"
-                            src={item.Product.images && item.Product.images.length > 0 ? `http://localhost:8080${item.Product.images[0].image_url}` : `https://via.placeholder.com/150?text=${item.Product.title}`}
+                            src={
+                              item.Product.images &&
+                              item.Product.images.length > 0
+                                ? `${import.meta.env.VITE_API_BASE_URL}${
+                                    item.Product.images[0].image_url
+                                  }`
+                                : `https://via.placeholder.com/150?text=${item.Product.title}`
+                            }
                             alt={item.Product.title}
                           />
                         </div>
@@ -116,12 +123,11 @@ const CartPage = () => {
 
           <div className="mt-8 flex justify-end items-center">
             <div className="text-lg font-bold mr-4">
-              Total: {
-                new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: cartItems[0]?.Product.currency || "USD",
-                }).format(calculateTotal() / 100)
-              }
+              Total:{" "}
+              {new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: cartItems[0]?.Product.currency || "USD",
+              }).format(calculateTotal() / 100)}
             </div>
             <button className="px-6 py-3 font-semibold text-white bg-green-500 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
               Proceed to Checkout
