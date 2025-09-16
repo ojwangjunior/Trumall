@@ -43,14 +43,11 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		}
 
 		// get user id from context (set by RequireAuth middleware)
-		uidv := c.Locals("user_id")
-		if uidv == nil {
+		user, ok := c.Locals("user").(models.User)
+		if !ok {
 			return c.Status(401).JSON(fiber.Map{"error": "unauthenticated"})
 		}
-		uid, ok := uidv.(uuid.UUID)
-		if !ok {
-			return c.Status(500).JSON(fiber.Map{"error": "invalid user id in context"})
-		}
+		uid := user.ID
 
 		// load store and check ownership
 		var store models.Store
@@ -92,6 +89,12 @@ func ListProductsHandler(db *gorm.DB) fiber.Handler {
 		// 👇 Preload Store so each product comes with its store
 		if err := db.Preload("Store").Find(&products).Error; err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch products"})
+		}
+
+		for i := range products {
+			if products[i].Currency == "" {
+				products[i].Currency = "USD"
+			}
 		}
 
 		return c.JSON(products)

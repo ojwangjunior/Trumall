@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"trumall/internal/models"
@@ -14,22 +13,12 @@ import (
 // Create a new store
 func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		// Get logged-in user ID from middleware (set during authentication)
-		//ensures only authenticated users can create stores
-		userID := c.Locals("user_id")
-		if userID == nil {
+		// Get logged-in user from middleware
+		user, ok := c.Locals("user").(models.User)
+		if !ok {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
 		}
-
-		// Convert userID (string) -> UUID format
-		// uid, err := uuid.Parse(userID.(string))
-		uid, ok := userID.(uuid.UUID)
-		if !ok {
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "invalid user id type"})
-		}
-		// if err != nil {
-		// 	return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "invalid user id"})
-		// }
+        uid := user.ID
 
 		// Parse the request body (store name + description)
 		var body struct {
@@ -60,6 +49,26 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 
 		// Return the newly created store
 		return c.Status(http.StatusCreated).JSON(fiber.Map{"data": store})
+	}
+}
+
+// Get stores for the logged-in user
+func GetUserStoresHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		user, ok := c.Locals("user").(models.User)
+		if !ok {
+			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "unauthorized"})
+		}
+		userIDStr := user.ID.String()
+		
+		var stores []models.Store
+		// Query the database for stores where owner_id matches the logged-in user
+		if err := db.Where("owner_id = ?", userIDStr).Find(&stores).Error; err != nil {
+			log.Printf("get user stores error: %v", err)
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch user stores"})
+		}
+
+		return c.JSON(fiber.Map{"data": stores})
 	}
 }
 

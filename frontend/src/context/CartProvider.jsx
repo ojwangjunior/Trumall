@@ -1,0 +1,66 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { CartContext } from "./cart";
+
+export const CartProvider = ({ children }) => {
+  const [cartItems, setCartItems] = useState([]);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/api/cart", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        setCartItems(response.data);
+      } catch (error) {
+        console.error("Error fetching cart:", error);
+      }
+    };
+
+    fetchCart();
+  }, []);
+
+  const addToCart = async (product) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/cart/add",
+        {
+          productID: product.ID,
+          quantity: product.quantity || 1,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setCartItems(response.data);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+
+  const removeFromCart = async (productId) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:8080/api/cart/${productId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setCartItems(response.data);
+    } catch (error) {
+      console.error("Error removing from cart:", error);
+    }
+  };
+
+  return (
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
