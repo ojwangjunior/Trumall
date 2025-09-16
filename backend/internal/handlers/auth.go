@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"os"
 	"time"
 
@@ -41,6 +42,21 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to hash password"})
 		}
 
+		var existing models.User
+		err = db.First(&existing, "email = ?", body.Email).Error
+		if err == nil {
+			log.Printf("Found existing user: %v", existing.Email)
+			// found a user with same email
+			return c.Status(400).JSON(fiber.Map{
+				"error": "user with this email already exists",
+			})
+		} else if err == gorm.ErrRecordNotFound {
+			log.Printf("User with email %s not found, proceeding to create.", body.Email)
+		} else {
+			log.Printf("Error checking for existing user: %v", err)
+			return c.Status(500).JSON(fiber.Map{"error": "database error when checking user existence"})
+		}
+
 		// create user
 		user := models.User{
 			ID:           uuid.New(),
@@ -59,8 +75,9 @@ func RegisterHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create token"})
 		}
 		return c.JSON(fiber.Map{
-			"message": "account created successfully",
-			"token":   token,
+			"data": fiber.Map{
+				"token": token,
+			},
 		})
 	}
 }
@@ -89,8 +106,9 @@ func LoginHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(500).JSON(fiber.Map{"error": "token"})
 		}
 		return c.JSON(fiber.Map{
-			"message": "login successfully",
-			"token":   token,
+			"data": fiber.Map{
+				"token": token,
+			},
 		})
 	}
 }
