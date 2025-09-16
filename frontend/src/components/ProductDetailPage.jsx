@@ -45,7 +45,7 @@ const ProductDetailPage = () => {
       ...product,
       quantity,
     });
-    addToCart({ ...product, quantity });
+    addToCart({ ...product, quantity, id: product.id }); // Pass product.id explicitly
   };
 
   return (
@@ -127,7 +127,7 @@ const ProductDetailPage = () => {
               <span className="font-bold w-1/3">{spec.name}</span>
               <span className="w-2/3">{spec.value}</span>
             </li>
-          ))}
+          ))
         </ul>
       </div> */} 
     </div>

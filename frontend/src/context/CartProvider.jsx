@@ -28,7 +28,7 @@ export const CartProvider = ({ children }) => {
       const response = await axios.post(
         "http://localhost:8080/api/cart/add",
         {
-          productID: product.ID,
+          product_id: product.id, // Changed from product.ID to product.id
           quantity: product.quantity || 1,
         },
         {
