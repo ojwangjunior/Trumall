@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
+import { CartContext } from "../context/CartProvider";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
@@ -13,6 +14,7 @@ const Header = () => {
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
   const accountDropdownRef = useRef(null);
   const { user, logout } = useContext(AuthContext);
+  const { cartItems } = useContext(CartContext);
   const navigate = useNavigate();
 
   const handleSearch = (e) => {
@@ -459,7 +461,7 @@ const Header = () => {
                 </svg>
                 {/* Cart count badge */}
                 <span className="absolute -top-2 -right-1 bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  0
+                  {cartItems.length}
                 </span>
               </div>
               <div className="flex flex-col">
