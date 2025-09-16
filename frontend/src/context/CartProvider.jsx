@@ -10,7 +10,7 @@ export const CartProvider = ({ children }) => {
 
   const fetchCart = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/cart", {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/cart`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -30,7 +30,7 @@ export const CartProvider = ({ children }) => {
   const addToCart = async (product) => {
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/cart/add",
+        `${import.meta.env.VITE_API_BASE_URL}/api/cart/add`,
         {
           product_id: product.id,
           quantity: product.quantity || 1,
@@ -58,7 +58,7 @@ export const CartProvider = ({ children }) => {
   const removeFromCart = async (productId) => {
     try {
       await axios.delete(
-        `http://localhost:8080/api/cart/${productId}`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/cart/${productId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
