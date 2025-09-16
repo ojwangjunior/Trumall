@@ -41,7 +41,7 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 		if err == nil {
 			if cartItem.Quantity+body.Quantity > product.Stock {
 				return c.Status(400).JSON(fiber.Map{
-					"error": fmt.Sprintf("cannot add more than available stock. Only %d more items can be added.", product.Stock-cartItem.Quantity),
+					"error": fmt.Sprintf("Out of stock. %d more items can be added.", product.Stock-cartItem.Quantity),
 				})
 			}
 			cartItem.Quantity += body.Quantity
