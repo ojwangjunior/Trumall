@@ -10,6 +10,8 @@ const SellPage = () => {
   const [stock, setStock] = useState(1);
   const [storeId, setStoreId] = useState('');
   const [stores, setStores] = useState([]);
+  const [images, setImages] = useState([]); // Changed to array for multiple images
+  const [imagePreviews, setImagePreviews] = useState([]); // For displaying image previews
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [error, setError] = useState(null);
@@ -45,23 +47,37 @@ const SellPage = () => {
     }
   }, [user, navigate]);
 
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    setImages(selectedFiles);
+
+    // Generate image previews
+    const previews = selectedFiles.map(file => URL.createObjectURL(file));
+    setImagePreviews(previews);
+  };
+
   const handleSell = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault();
     setIsSubmitting(true);
     setSubmissionSuccess(false);
     setError(null);
 
-    try {
-      const priceCents = Math.round(parseFloat(itemPrice) * 100);
+    const formData = new FormData();
+    formData.append('store_id', storeId);
+    formData.append('title', itemName);
+    formData.append('description', itemDescription);
+    formData.append('price_cents', Math.round(parseFloat(itemPrice) * 100));
+    formData.append('stock', stock);
+    formData.append('currency', 'USD');
 
-      const response = await axios.post('http://localhost:8080/api/products', {
-        store_id: storeId,
-        title: itemName,
-        description: itemDescription,
-        price_cents: priceCents,
-        stock: stock,
-      }, {
+    images.forEach((image, index) => {
+      formData.append(`images`, image); // Append each image with the key 'images'
+    });
+
+    try {
+      const response = await axios.post('http://localhost:8080/api/products', formData, {
         headers: {
+          'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
@@ -74,6 +90,8 @@ const SellPage = () => {
       setItemPrice('');
       setItemDescription('');
       setStock(1);
+      setImages([]); // Clear selected images
+      setImagePreviews([]); // Clear image previews
     } catch (error) {
       console.error('Error selling item:', error);
       setError('Error selling item. Please try again.');
@@ -177,6 +195,25 @@ const SellPage = () => {
               onChange={(e) => setItemDescription(e.target.value)}
               required
             />
+          </div>
+
+          <div className="mb-5">
+            <label htmlFor="images" className="block text-gray-700 text-sm font-bold mb-2">
+              Item Images (JPEG, PNG, WebP)
+            </label>
+            <input
+              type="file"
+              id="images"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
+              onChange={handleFileChange}
+              multiple // Allow multiple file selection
+              accept=".jpg,.jpeg,.png,.webp" // Accept specific image types
+            />
+            <div className="mt-2 flex flex-wrap gap-2">
+              {imagePreviews.map((preview, index) => (
+                <img key={index} src={preview} alt={`Preview ${index}`} className="w-24 h-24 object-cover rounded-md" />
+              ))}
+            </div>
           </div>
 
           <button

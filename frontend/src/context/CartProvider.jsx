@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, createContext } from "react"; // Import createContext
 import axios from "axios";
-import { CartContext } from "./cart";
+
+export const CartContext = createContext(); // Define and export CartContext
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
@@ -27,7 +28,7 @@ export const CartProvider = ({ children }) => {
       const response = await axios.post(
         "http://localhost:8080/api/cart/add",
         {
-          productID: product.ID,
+          product_id: product.id, // Changed from product.ID to product.id
           quantity: product.quantity || 1,
         },
         {

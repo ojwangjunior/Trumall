@@ -14,8 +14,8 @@ import (
 func AddToCartHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		type request struct {
-			ProductID string `json:"product_id"`
-			Quantity  int    `json:"quantity"`
+			ProductID uuid.UUID `json:"product_id"` // Changed to uuid.UUID
+			Quantity  int       `json:"quantity"`
 		}
 		var body request
 		if err := c.BodyParser(&body); err != nil {
@@ -23,14 +23,11 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 		}
 
 		// Get user ID from JWT
-		userIDLocal := c.Locals("user_id")
-		if userIDLocal == nil {
+		user, ok := c.Locals("user").(models.User) // Correctly get the user object
+		if !ok {
 			return c.Status(401).JSON(fiber.Map{"error": "unauthorized"})
 		}
-		userID, ok := userIDLocal.(uuid.UUID)
-		if !ok {
-			return c.Status(500).JSON(fiber.Map{"error": "invalid user id"})
-		}
+		userID := user.ID // Extract userID from the user object
 
 		// Check if product exists
 		var product models.Product
@@ -61,10 +58,13 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 				UserID:    userID,
 				ProductID: product.ID,
 				Quantity:  body.Quantity,
+				Price:     product.PriceCents, // Set price from product
 			}
 			db.Create(&cartItem)
 		}
 
+		// Preload product for the response
+		db.Preload("Product").First(&cartItem, "id = ?", cartItem.ID)
 		return c.JSON(cartItem)
 	}
 }

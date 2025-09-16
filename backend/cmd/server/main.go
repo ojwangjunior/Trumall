@@ -34,6 +34,9 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
 
+	// Serve static files
+	app.Static("/public", "./public")
+
 	// ✅ Root health-check
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
@@ -59,6 +62,7 @@ func main() {
 	// Products
 	app.Post("/api/products", middleware.RequireAuth(dbConn), handlers.CreateProductHandler(dbConn))
 	app.Get("/api/products", handlers.ListProductsHandler(dbConn))
+	app.Get("/api/products/:id", handlers.GetProductHandler(dbConn)) // Added this line
 	app.Post("/api/stores/:id/products", middleware.RequireAuth(dbConn), middleware.RequireRole("seller"), handlers.CreateProductHandler(dbConn))
 
 	// Orders
