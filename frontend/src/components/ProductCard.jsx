@@ -99,6 +99,10 @@ const ProductCard = ({ product }) => {
               </span>
             )}
           </div>
+
+          <div className="text-sm text-gray-600 mb-4">
+            Stock: {product.stock}
+          </div>
         </div>
       </Link>
 
