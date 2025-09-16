@@ -14,7 +14,7 @@ import (
 func AddToCartHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		type request struct {
-			ProductID uuid.UUID `json:"product_id"` // Changed to uuid.UUID
+			ProductID uuid.UUID `json:"product_id"`
 			Quantity  int       `json:"quantity"`
 		}
 		var body request
@@ -23,7 +23,7 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 		}
 
 		// Get user ID from JWT
-		user, ok := c.Locals("user").(models.User) // Correctly get the user object
+		user, ok := c.Locals("user").(models.User)
 		if !ok {
 			return c.Status(401).JSON(fiber.Map{"error": "unauthorized"})
 		}
@@ -39,10 +39,9 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 		var cartItem models.CartItem
 		err := db.Where("user_id = ? AND product_id = ?", userID, body.ProductID).First(&cartItem).Error
 		if err == nil {
-			// Update existing item
 			if cartItem.Quantity+body.Quantity > product.Stock {
 				return c.Status(400).JSON(fiber.Map{
-					"error": fmt.Sprintf("only %d items available", product.Stock-cartItem.Quantity),
+					"error": fmt.Sprintf("cannot add more than available stock. Only %d more items can be added.", product.Stock-cartItem.Quantity),
 				})
 			}
 			cartItem.Quantity += body.Quantity
@@ -74,7 +73,7 @@ func GetCartHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		user := c.Locals("user").(models.User)
 		var items []models.CartItem
-		db.Preload("Product").Where("user_id = ?", user.ID).Find(&items)
+		db.Preload("Product.Images").Where("user_id = ?", user.ID).Find(&items)
 		return c.JSON(items)
 	}
 }
