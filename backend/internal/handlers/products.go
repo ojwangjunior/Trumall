@@ -85,6 +85,7 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		files := form.File["images"]
 		var productImages []models.ProductImage
 
+		// Create the directory if it doesn't exist
 		uploadPath := "public/images/products"
 		if err := os.MkdirAll(uploadPath, os.ModePerm); err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create upload directory"})
@@ -152,5 +153,30 @@ func ListProductsHandler(db *gorm.DB) fiber.Handler {
 		}
 
 		return c.JSON(products)
+	}
+}
+
+// GetProductHandler - get a single product by ID with store info and images
+func GetProductHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		id := c.Params("id")
+		productID, err := uuid.Parse(id)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid product ID"})
+		}
+
+		var product models.Product
+		if err := db.Preload("Store").Preload("Images").First(&product, "id = ?", productID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "product not found"})
+			}
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch product"})
+		}
+
+		if product.Currency == "" {
+			product.Currency = "USD"
+		}
+
+		return c.JSON(product)
 	}
 }
