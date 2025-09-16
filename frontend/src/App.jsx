@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Header from "./components/Header";
 import HomePage from "./components/HomePage";
@@ -15,8 +15,12 @@ import CreateStorePage from "./components/CreateStorePage";
 import MyStoresPage from "./components/MyStoresPage";
 import MyAccountPage from "./components/MyAccountPage";
 import ProtectedRoute from "./context/ProtectedRoute";
+import Toast from "./components/Toast";
+import { CartContext } from "./context/CartProvider";
 
 function App() {
+  const { cartError, setCartError } = useContext(CartContext);
+
   return (
     <Router>
       <div className="flex flex-col min-h-screen bg-gray-100">
@@ -40,6 +44,9 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        {cartError && (
+          <Toast message={cartError} type="error" onClose={() => setCartError(null)} />
+        )}
       </div>
     </Router>
   );
