@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { CartContext } from "../context/cart";
+import { CartContext } from "../context/CartProvider";
 import { Link } from "react-router-dom";
 
 const CartPage = () => {
@@ -8,7 +8,7 @@ const CartPage = () => {
   const calculateTotal = () => {
     return cartItems
       .reduce((total, item) => {
-        return total + item.Price * item.quantity;
+        return total + item.price * item.quantity;
       }, 0)
       .toFixed(2);
   };
@@ -74,13 +74,13 @@ const CartPage = () => {
                         <div className="flex-shrink-0 h-16 w-16">
                           <img
                             className="h-16 w-16 rounded-md object-cover"
-                            src={`https://via.placeholder.com/150?text=${item.Product.Title}`}
-                            alt={item.Product.Title}
+                            src={item.Product.images && item.Product.images.length > 0 ? item.Product.images[0].image_url : `https://via.placeholder.com/150?text=${item.Product.title}`}
+                            alt={item.Product.title}
                           />
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {item.Product.Title}
+                            {item.Product.title}
                           </div>
                         </div>
                       </div>
@@ -88,8 +88,8 @@ const CartPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Intl.NumberFormat("en-US", {
                         style: "currency",
-                        currency: item.Product.Currency,
-                      }).format(item.Price / 100)}
+                        currency: item.Product.currency || "USD",
+                      }).format(item.price / 100)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {item.quantity}
@@ -97,8 +97,8 @@ const CartPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Intl.NumberFormat("en-US", {
                         style: "currency",
-                        currency: item.Product.Currency,
-                      }).format((item.Price * item.quantity) / 100)}
+                        currency: item.Product.currency || "USD",
+                      }).format((item.price * item.quantity) / 100)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
@@ -119,7 +119,7 @@ const CartPage = () => {
               Total: {
                 new Intl.NumberFormat("en-US", {
                   style: "currency",
-                  currency: cartItems[0]?.Product.Currency || "USD",
+                  currency: cartItems[0]?.Product.currency || "USD",
                 }).format(calculateTotal() / 100)
               }
             </div>
