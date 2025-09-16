@@ -1,10 +1,11 @@
-import React, { useContext } from "react"; // Removed useState
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import Rating from "./Rating";
 import { CartContext } from "../context/CartProvider";
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useContext(CartContext);
+  const [isAdding, setIsAdding] = useState(false);
 
   const formatPrice = (priceCents, currency) => {
     const displayCurrency = currency || "USD";
@@ -23,11 +24,12 @@ const ProductCard = ({ product }) => {
     }).format(originalPriceCents / 100);
   };
 
-  const handleAddToCart = (e) => {
+  const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Adding to cart from ProductCard:", product);
-    addToCart(product);
+    setIsAdding(true);
+    await addToCart(product);
+    setIsAdding(false);
   };
 
   // Use the first image from the images array, or a placeholder
@@ -110,8 +112,9 @@ const ProductCard = ({ product }) => {
         <button
           onClick={handleAddToCart}
           className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+          disabled={isAdding}
         >
-          Add to Cart
+          {isAdding ? "Adding..." : "Add to Cart"}
         </button>
       </div>
     </div>
