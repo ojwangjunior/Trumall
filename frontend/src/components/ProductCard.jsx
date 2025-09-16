@@ -1,11 +1,10 @@
-import React, { useContext, useState } from "react"; // Import useState
+import React, { useContext } from "react"; // Removed useState
 import { Link } from "react-router-dom";
 import Rating from "./Rating";
 import { CartContext } from "../context/CartProvider";
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useContext(CartContext);
-  const [showFullDescription, setShowFullDescription] = useState(false); // State for description truncation
 
   const formatPrice = (priceCents, currency) => {
     const displayCurrency = currency || "USD";
@@ -38,16 +37,6 @@ const ProductCard = ({ product }) => {
       : `https://via.placeholder.com/300x300?text=${encodeURIComponent(
           product.title
         )}`;
-
-  const truncateDescription = (description, maxLength) => {
-    if (!description) return "";
-    if (description.length <= maxLength) return description;
-    return description.substring(0, maxLength) + "...";
-  };
-
-  const displayedDescription = showFullDescription
-    ? product.description
-    : truncateDescription(product.description, 100); // Truncate to 100 characters
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full">
@@ -83,21 +72,10 @@ const ProductCard = ({ product }) => {
             {product.title}
           </h3>
 
+          {/* Display full description, it will be truncated by CSS line-clamp-3 if too long */}
           {product.description && (
-            <p className="text-gray-600 text-sm mb-2">
-              {displayedDescription}
-              {product.description.length > 100 && (
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowFullDescription(!showFullDescription);
-                  }}
-                  className="text-blue-500 hover:underline ml-1"
-                >
-                  {showFullDescription ? "Show Less" : "Read More"}
-                </button>
-              )}
+            <p className="text-gray-600 text-sm mb-2 line-clamp-3">
+              {product.description}
             </p>
           )}
 
