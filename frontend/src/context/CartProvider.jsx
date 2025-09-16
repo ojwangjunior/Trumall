@@ -6,20 +6,20 @@ export const CartContext = createContext(); // Define and export CartContext
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
 
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const response = await axios.get("http://localhost:8080/api/cart", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        setCartItems(response.data);
-      } catch (error) {
-        console.error("Error fetching cart:", error);
-      }
-    };
+  const fetchCart = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/cart", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setCartItems(response.data);
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchCart();
   }, []);
 
@@ -45,7 +45,7 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (productId) => {
     try {
-      const response = await axios.delete(
+      await axios.delete(
         `http://localhost:8080/api/cart/${productId}`,
         {
           headers: {
@@ -53,7 +53,7 @@ export const CartProvider = ({ children }) => {
           },
         }
       );
-      setCartItems(response.data);
+      fetchCart(); // Re-fetch cart after successful removal
     } catch (error) {
       console.error("Error removing from cart:", error);
     }
