@@ -173,8 +173,8 @@ const MyAccountPage = () => {
                       )}`}
                     >
                       <Shield className="w-4 h-4 inline mr-1" />
-                      {user.role
-                        ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
+                      {user.roles && user.roles.length > 0
+                        ? user.roles[0].charAt(0).toUpperCase() + user.roles[0].slice(1)
                         : "User"}
                     </span>
                   </div>
@@ -226,7 +226,7 @@ const MyAccountPage = () => {
                             Account Type
                           </p>
                           <p className="text-sm text-slate-600">
-                            {user.role || "Standard User"}
+                            {user.roles && user.roles.includes("seller") ? "Seller" : "Buyer"}
                           </p>
                         </div>
                       </div>
