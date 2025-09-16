@@ -11,19 +11,15 @@ const MyStoresPage = () => {
   useEffect(() => {
     const fetchStores = async () => {
       try {
-        // --- CHANGE START ---
-        // Use the new, more efficient endpoint that only returns the user's stores.
         const response = await axios.get(
-          "http://localhost:8080/api/me/stores",
+          `${import.meta.env.VITE_API_BASE_URL}/api/me/stores`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           }
         );
-        // No more client-side filtering needed! The backend does the work.
         setStores(response.data.data);
-        // --- CHANGE END ---
       } catch (error) {
         console.error("Error fetching stores:", error);
       } finally {
