@@ -35,7 +35,7 @@ const ProductCard = ({ product }) => {
   // Use the first image from the images array, or a placeholder
   const imageUrl =
     product.images && product.images.length > 0
-      ? `http://localhost:8080${product.images[0].image_url}`
+      ? `${import.meta.env.VITE_API_BASE_URL}${product.images[0].image_url}`
       : `https://via.placeholder.com/300x300?text=${encodeURIComponent(
           product.title
         )}`;
