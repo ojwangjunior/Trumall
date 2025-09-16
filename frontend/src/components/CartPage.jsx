@@ -74,7 +74,7 @@ const CartPage = () => {
                         <div className="flex-shrink-0 h-16 w-16">
                           <img
                             className="h-16 w-16 rounded-md object-cover"
-                            src={item.Product.images && item.Product.images.length > 0 ? item.Product.images[0].image_url : `https://via.placeholder.com/150?text=${item.Product.title}`}
+                            src={item.Product.images && item.Product.images.length > 0 ? `http://localhost:8080${item.Product.images[0].image_url}` : `https://via.placeholder.com/150?text=${item.Product.title}`}
                             alt={item.Product.title}
                           />
                         </div>
