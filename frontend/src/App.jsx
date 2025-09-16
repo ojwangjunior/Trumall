@@ -14,6 +14,7 @@ import ProductDetailPage from "./components/ProductDetailPage";
 import CreateStorePage from "./components/CreateStorePage";
 import MyStoresPage from "./components/MyStoresPage";
 import MyAccountPage from "./components/MyAccountPage";
+import OrdersPage from "./components/OrdersPage"; // Import OrdersPage
 import ProtectedRoute from "./context/ProtectedRoute";
 import Toast from "./components/Toast";
 import { CartContext } from "./context/CartProvider";
@@ -40,6 +41,7 @@ function App() {
               <Route path="/mystores" element={<MyStoresPage />} />
               <Route path="/createstore" element={<CreateStorePage />} />
               <Route path="/account" element={<MyAccountPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
             </Route>
           </Routes>
         </main>
