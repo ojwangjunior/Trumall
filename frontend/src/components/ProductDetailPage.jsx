@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Rating from "./Rating";
-import { CartContext } from "../context/cart";
+import { CartContext } from "../context/CartProvider"; // Corrected import path
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -10,12 +10,18 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [mainImage, setMainImage] = useState(''); // State for the main displayed image
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const response = await axios.get(`http://localhost:8080/api/products/${id}`);
         setProduct(response.data);
+        if (response.data.images && response.data.images.length > 0) {
+          setMainImage(`http://localhost:8080${response.data.images[0].image_url}`);
+        } else {
+          setMainImage(`https://via.placeholder.com/600x400?text=${encodeURIComponent(response.data.title)}`);
+        }
         setLoading(false);
       } catch (error) {
         console.error("Error fetching product:", error);
@@ -45,32 +51,51 @@ const ProductDetailPage = () => {
   return (
     <div className="bg-white p-8 rounded-lg shadow-md">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Product Image */}
+        {/* Product Image Gallery */}
         <div>
           <img
-            src={`https://via.placeholder.com/300x300?text=${product.Title}`}
-            alt={product.Title}
-            className="w-full rounded-lg"
+            src={mainImage}
+            alt={product.title}
+            className="w-full h-96 object-cover rounded-lg mb-4"
           />
+          <div className="flex gap-2 overflow-x-auto">
+            {product.images && product.images.length > 0 ? (
+              product.images.map((img, index) => (
+                <img
+                  key={index}
+                  src={`http://localhost:8080${img.image_url}`}
+                  alt={`${product.title} thumbnail ${index + 1}`}
+                  className={`w-24 h-24 object-cover rounded-md cursor-pointer ${mainImage === `http://localhost:8080${img.image_url}` ? 'border-2 border-orange-500' : ''}`}
+                  onClick={() => setMainImage(`http://localhost:8080${img.image_url}`)}
+                />
+              ))
+            ) : (
+              <img
+                src={`https://via.placeholder.com/100x100?text=No+Image`}
+                alt="No Image"
+                className="w-24 h-24 object-cover rounded-md"
+              />
+            )}
+          </div>
         </div>
 
         {/* Product Info */}
         <div>
-          <h1 className="text-3xl font-bold mb-2">{product.Title}</h1>
+          <h1 className="text-3xl font-bold mb-2">{product.title}</h1>
           <div className="flex items-center mb-4">
             {/* Add rating if available in the product data */}
             {/* <Rating rating={product.rating} /> */}
-            {/* <span className="text-gray-500 ml-2">({product.reviews} reviews)</span> */}
+            {/* <span className="text-gray-500 ml-2">({product.reviews} reviews)</span> */} 
           </div>
           <div className="flex items-center mb-4">
-            <span className="text-3xl font-bold text-orange">
+            <span className="text-3xl font-bold text-orange-500">
               {new Intl.NumberFormat("en-US", {
                 style: "currency",
-                currency: product.Currency,
-              }).format(product.PriceCents / 100)}
+                currency: product.currency,
+              }).format(product.price_cents / 100)}
             </span>
           </div>
-          <p className="text-gray-700 mb-6">{product.Description}</p>
+          <p className="text-gray-700 mb-6">{product.description}</p>
 
           <div className="flex items-center mb-6">
             <span className="mr-4">Quantity:</span>
@@ -85,7 +110,7 @@ const ProductDetailPage = () => {
 
           <button
             onClick={handleAddToCart}
-            className="w-full bg-orange text-white py-3 rounded-md hover:bg-orange-dark"
+            className="w-full bg-orange-500 text-white py-3 rounded-md hover:bg-orange-600"
           >
             Add to Cart
           </button>
@@ -104,7 +129,7 @@ const ProductDetailPage = () => {
             </li>
           ))}
         </ul>
-      </div> */}
+      </div> */} 
     </div>
   );
 };
