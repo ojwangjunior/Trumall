@@ -28,38 +28,93 @@ const HomePage = () => {
   }, []);
 
   if (loading) {
-    return <div className="text-center py-8">Loading products...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center py-8 text-red-500">Error: {error.message}</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-2">
+            ⚠️ Error Loading Products
+          </div>
+          <p className="text-gray-600">{error.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-gray-100">
+    <div className="bg-gray-50 min-h-screen">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-12 gap-8">
-          <div className="col-span-3">
+          <div className="col-span-12 lg:col-span-3">
             <CategoryMenu />
           </div>
-          <div className="col-span-9">
-            <div className="bg-white rounded-md shadow-md p-4">
+          <div className="col-span-12 lg:col-span-9">
+            <div className="bg-white rounded-lg shadow-md p-4 mb-8">
               <img
                 src="https://via.placeholder.com/800x400?text=Flash+Sale"
                 alt="Flash Sale"
-                className="w-full rounded-md"
+                className="w-full rounded-lg"
               />
             </div>
           </div>
         </div>
 
         <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Featured Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-bold text-gray-900">
+              Featured Products
+            </h2>
+            <Link
+              to="/products"
+              className="text-orange-500 hover:text-orange-600 font-medium flex items-center gap-1"
+            >
+              View All
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </Link>
           </div>
+
+          {products.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-gray-400 text-6xl mb-4">📦</div>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                No Products Found
+              </h3>
+              <p className="text-gray-500">
+                Check back later for new products!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
