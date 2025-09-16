@@ -28,7 +28,7 @@ const MyAccountPage = () => {
           setLoading(false);
           return;
         }
-        const response = await axios.get('http://localhost:8080/api/me', {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
