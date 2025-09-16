@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext } from "react"; // Import createContext
+import React, { useState, useEffect, createContext } from "react";
 import axios from "axios";
 
 export const CartContext = createContext(); // Define and export CartContext
@@ -6,6 +6,7 @@ export const CartContext = createContext(); // Define and export CartContext
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [cartError, setCartError] = useState(null);
+  const [cartSuccess, setCartSuccess] = useState(null);
 
   const fetchCart = async () => {
     try {
@@ -15,10 +16,10 @@ export const CartProvider = ({ children }) => {
         },
       });
       setCartItems(response.data);
-      setCartError(null); // Clear any previous errors on successful fetch
+      setCartError(null); 
     } catch (error) {
       console.error("Error fetching cart:", error);
-      setCartError("Failed to fetch cart items."); // Set a generic error for fetching
+      setCartError("Failed to fetch cart items.");
     }
   };
 
@@ -31,7 +32,7 @@ export const CartProvider = ({ children }) => {
       const response = await axios.post(
         "http://localhost:8080/api/cart/add",
         {
-          product_id: product.id, // Changed from product.ID to product.id
+          product_id: product.id,
           quantity: product.quantity || 1,
         },
         {
@@ -41,7 +42,8 @@ export const CartProvider = ({ children }) => {
         }
       );
       setCartItems(response.data);
-      setCartError(null); // Clear any previous errors on successful add
+      setCartError(null);
+      setCartSuccess("Item added to cart!");
     } catch (error) {
       console.error("Error adding to cart:", error);
       if (error.response && error.response.data && error.response.data.error) {
@@ -49,6 +51,7 @@ export const CartProvider = ({ children }) => {
       } else {
         setCartError("Failed to add item to cart.");
       }
+      setCartSuccess(null); 
     }
   };
 
@@ -62,16 +65,18 @@ export const CartProvider = ({ children }) => {
           },
         }
       );
-      fetchCart(); // Re-fetch cart after successful removal
-      setCartError(null); // Clear any previous errors on successful remove
+      fetchCart();
+      setCartError(null);
+      setCartSuccess("Item removed from cart!");
     } catch (error) {
       console.error("Error removing from cart:", error);
-      setCartError("Failed to remove item from cart."); // Set a generic error for removing
+      setCartError("Failed to remove item from cart.");
+      setCartSuccess(null);
     }
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, cartError, setCartError }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, cartError, setCartError, cartSuccess, setCartSuccess }}>
       {children}
     </CartContext.Provider>
   );
