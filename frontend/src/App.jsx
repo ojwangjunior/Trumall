@@ -19,7 +19,7 @@ import Toast from "./components/Toast";
 import { CartContext } from "./context/CartProvider";
 
 function App() {
-  const { cartError, setCartError } = useContext(CartContext);
+  const { cartError, setCartError, cartSuccess, setCartSuccess } = useContext(CartContext);
 
   return (
     <Router>
@@ -46,6 +46,9 @@ function App() {
         <Footer />
         {cartError && (
           <Toast message={cartError} type="error" onClose={() => setCartError(null)} />
+        )}
+        {cartSuccess && (
+          <Toast message={cartSuccess} type="success" onClose={() => setCartSuccess(null)} />
         )}
       </div>
     </Router>
