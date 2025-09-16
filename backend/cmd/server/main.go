@@ -34,6 +34,9 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
 
+	// Serve static files
+	app.Static("/public", "./public")
+
 	// ✅ Root health-check
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
