@@ -2,19 +2,22 @@ import React from "react";
 
 const Rating = ({ rating }) => {
   const stars = [];
+  const fullStars = Math.floor(rating || 0);
+  const hasHalfStar = (rating || 0) % 1 >= 0.5;
+
   for (let i = 1; i <= 5; i++) {
-    if (i <= rating) {
+    if (i <= fullStars) {
       stars.push(
-        <span key={i} className="text-orange">
+        <span key={i} className="text-yellow-400">
           ★
         </span>
       );
-    } else if (i - 0.5 <= rating) {
+    } else if (i === fullStars + 1 && hasHalfStar) {
       stars.push(
-        <span key={i} className="text-orange">
+        <span key={i} className="text-yellow-400">
           ★
         </span>
-      ); // Using full star for half star for simplicity
+      );
     } else {
       stars.push(
         <span key={i} className="text-gray-300">
@@ -23,7 +26,7 @@ const Rating = ({ rating }) => {
       );
     }
   }
-  return <div>{stars}</div>;
+  return <div className="flex">{stars}</div>;
 };
 
 export default Rating;
