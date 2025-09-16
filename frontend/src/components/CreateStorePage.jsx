@@ -13,7 +13,7 @@ const CreateStorePage = () => {
     setError(null);
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/stores",
+        `${import.meta.env.VITE_API_BASE_URL}/api/stores`,
         {
           name,
           description,

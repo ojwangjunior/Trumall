@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { CartContext } from "../context/cart";
+import { CartContext } from "../context/CartProvider";
 import { Link } from "react-router-dom";
 
 const CartPage = () => {
@@ -8,7 +8,7 @@ const CartPage = () => {
   const calculateTotal = () => {
     return cartItems
       .reduce((total, item) => {
-        return total + item.Price * item.quantity;
+        return total + item.price * item.quantity;
       }, 0)
       .toFixed(2);
   };
@@ -74,13 +74,20 @@ const CartPage = () => {
                         <div className="flex-shrink-0 h-16 w-16">
                           <img
                             className="h-16 w-16 rounded-md object-cover"
-                            src={`https://via.placeholder.com/150?text=${item.Product.Title}`}
-                            alt={item.Product.Title}
+                            src={
+                              item.Product.images &&
+                              item.Product.images.length > 0
+                                ? `${import.meta.env.VITE_API_BASE_URL}${
+                                    item.Product.images[0].image_url
+                                  }`
+                                : `https://via.placeholder.com/150?text=${item.Product.title}`
+                            }
+                            alt={item.Product.title}
                           />
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {item.Product.Title}
+                            {item.Product.title}
                           </div>
                         </div>
                       </div>
@@ -88,8 +95,8 @@ const CartPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Intl.NumberFormat("en-US", {
                         style: "currency",
-                        currency: item.Product.Currency,
-                      }).format(item.Price / 100)}
+                        currency: item.Product.currency || "USD",
+                      }).format(item.price / 100)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {item.quantity}
@@ -97,8 +104,8 @@ const CartPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Intl.NumberFormat("en-US", {
                         style: "currency",
-                        currency: item.Product.Currency,
-                      }).format((item.Price * item.quantity) / 100)}
+                        currency: item.Product.currency || "USD",
+                      }).format((item.price * item.quantity) / 100)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
@@ -116,12 +123,11 @@ const CartPage = () => {
 
           <div className="mt-8 flex justify-end items-center">
             <div className="text-lg font-bold mr-4">
-              Total: {
-                new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: cartItems[0]?.Product.Currency || "USD",
-                }).format(calculateTotal() / 100)
-              }
+              Total:{" "}
+              {new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: cartItems[0]?.Product.currency || "USD",
+              }).format(calculateTotal() / 100)}
             </div>
             <button className="px-6 py-3 font-semibold text-white bg-green-500 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
               Proceed to Checkout

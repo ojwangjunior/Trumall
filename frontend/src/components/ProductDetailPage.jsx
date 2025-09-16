@@ -15,10 +15,10 @@ const ProductDetailPage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/products/${id}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`);
         setProduct(response.data);
         if (response.data.images && response.data.images.length > 0) {
-          setMainImage(`http://localhost:8080${response.data.images[0].image_url}`);
+          setMainImage(`${import.meta.env.VITE_API_BASE_URL}${response.data.images[0].image_url}`);
         } else {
           setMainImage(`https://via.placeholder.com/600x400?text=${encodeURIComponent(response.data.title)}`);
         }
@@ -63,10 +63,10 @@ const ProductDetailPage = () => {
               product.images.map((img, index) => (
                 <img
                   key={index}
-                  src={`http://localhost:8080${img.image_url}`}
+                  src={`${import.meta.env.VITE_API_BASE_URL}${img.image_url}`}
                   alt={`${product.title} thumbnail ${index + 1}`}
-                  className={`w-24 h-24 object-cover rounded-md cursor-pointer ${mainImage === `http://localhost:8080${img.image_url}` ? 'border-2 border-orange-500' : ''}`}
-                  onClick={() => setMainImage(`http://localhost:8080${img.image_url}`)}
+                  className={`w-24 h-24 object-cover rounded-md cursor-pointer ${mainImage === `${import.meta.env.VITE_API_BASE_URL}${img.image_url}` ? 'border-2 border-orange-500' : ''}`}
+                  onClick={() => setMainImage(`${import.meta.env.VITE_API_BASE_URL}${img.image_url}`)}
                 />
               ))
             ) : (
