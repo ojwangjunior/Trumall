@@ -41,7 +41,7 @@ func Connect() (*gorm.DB, error) {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file:///home/ombimahillary/ojwang/Trumall/backend/migrations",
+		"file://migrations",
 		"postgres",
 		driver,
 	)
