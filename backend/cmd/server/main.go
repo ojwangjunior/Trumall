@@ -15,7 +15,7 @@ import (
 
 func main() {
 	// Load env vars
-	if err := godotenv.Load("/home/ombimahillary/ojwang/Trumall/backend/.env"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Println("no .env file loaded, using environment")
 	}
 
@@ -58,7 +58,7 @@ func main() {
 	app.Get("/api/stores/:id", handlers.GetStoreHandler(dbConn))
 	// get stores for the logged in user
 	app.Get("/api/me/stores", middleware.RequireAuth(dbConn), handlers.GetUserStoresHandler(dbConn))
-	
+
 	// Products
 	app.Post("/api/products", middleware.RequireAuth(dbConn), handlers.CreateProductHandler(dbConn))
 	app.Get("/api/products", handlers.ListProductsHandler(dbConn))
