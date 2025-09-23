@@ -33,7 +33,7 @@ const SellPage = () => {
             },
           }
         );
-        const userStores = response.data.data;
+        const userStores = response.data;
         setStores(userStores);
         if (userStores.length > 0) {
           setStoreId(userStores[0].id);
