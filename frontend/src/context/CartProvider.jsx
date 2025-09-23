@@ -1,9 +1,11 @@
-import React, { useState, useEffect, createContext } from "react";
+import React, { useState, useEffect, createContext, useContext } from "react";
 import axios from "axios";
+import { AuthContext } from "./AuthContext";
 
 export const CartContext = createContext(); // Define and export CartContext
 
 export const CartProvider = ({ children }) => {
+  const { user } = useContext(AuthContext);
   const [cartItems, setCartItems] = useState([]);
   const [cartError, setCartError] = useState(null);
   const [cartSuccess, setCartSuccess] = useState(null);
@@ -24,8 +26,10 @@ export const CartProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchCart();
-  }, []);
+    if (user) {
+      fetchCart();
+    }
+  }, [user]);
 
   const addToCart = async (product) => {
     try {
