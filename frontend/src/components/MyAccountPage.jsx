@@ -349,12 +349,12 @@ const MyAccountPage = () => {
                       <p className="text-slate-600 mb-4">
                         You haven't created any stores yet.
                       </p>
-                      <a
-                        href="/create-store"
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-block"
-                      >
-                        Create a Store
-                      </a>
+              <a
+                href="/createstore"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Create a Store
+              </a>
                     </div>
                   )}
                 </div>
