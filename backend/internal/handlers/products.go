@@ -85,8 +85,14 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		files := form.File["images"]
 		var productImages []models.ProductImage
 
+		// Determine base upload directory from env (default ./public)
+		baseUploadDir := os.Getenv("UPLOAD_DIR")
+		if baseUploadDir == "" {
+			baseUploadDir = "./public"
+		}
+
 		// Create the directory if it doesn't exist
-		uploadPath := "public/images/products"
+		uploadPath := filepath.Join(baseUploadDir, "images", "products")
 		if err := os.MkdirAll(uploadPath, os.ModePerm); err != nil {
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create upload directory"})
 		}
@@ -107,10 +113,14 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 				return c.Status(500).JSON(fiber.Map{"error": "failed to save image"})
 			}
 
+			// Build the public URL path consistently using forward slashes
+			// e.g. /public/images/products/<file>
+			webPath := filepath.ToSlash(filepath.Join(string(filepath.Separator), baseUploadDir, "images", "products", newFileName))
+
 			productImages = append(productImages, models.ProductImage{
 				ID:        uuid.New(),
 				ProductID: p.ID,
-				ImageURL:  "/" + filePath, // Store the URL path
+				ImageURL:  webPath,
 			})
 		}
 		p.Images = productImages

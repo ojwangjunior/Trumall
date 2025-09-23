@@ -15,7 +15,7 @@ import (
 
 func main() {
 	// Load env vars
-	if err := godotenv.Load("/home/ombimahillary/ojwang/Trumall/backend/.env"); err != nil {
+	if err := godotenv.Load(".env"); err != nil {
 		log.Println("no .env file loaded, using environment")
 	}
 
