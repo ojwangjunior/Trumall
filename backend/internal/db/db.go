@@ -41,9 +41,9 @@ func Connect() (*gorm.DB, error) {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
-		"postgres",
-		driver,
+	    "file://../../migrations",
+	    "postgres",
+	    driver,
 	)
 	if err != nil {
 		log.Fatalf("failed to create migrate instance: %v", err)
