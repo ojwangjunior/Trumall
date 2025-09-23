@@ -19,6 +19,9 @@ import ProtectedRoute from "./context/ProtectedRoute";
 import Toast from "./components/Toast";
 import { CartContext } from "./context/CartProvider";
 
+import StoreDetailPage from "./components/StoreDetailPage";
+import EditStorePage from "./components/EditStorePage";
+
 function App() {
   const { cartError, setCartError, cartSuccess, setCartSuccess } = useContext(CartContext);
 
@@ -42,6 +45,8 @@ function App() {
               <Route path="/createstore" element={<CreateStorePage />} />
               <Route path="/account" element={<MyAccountPage />} />
               <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/store/:id" element={<StoreDetailPage />} />
+              <Route path="/store/:id/edit" element={<EditStorePage />} />
             </Route>
           </Routes>
         </main>
