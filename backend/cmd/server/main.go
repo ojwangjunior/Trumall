@@ -58,11 +58,14 @@ func main() {
 	app.Get("/api/stores/:id", handlers.GetStoreHandler(dbConn))
 	// get stores for the logged in user
 	app.Get("/api/me/stores", middleware.RequireAuth(dbConn), handlers.GetUserStoresHandler(dbConn))
+	app.Get("/api/my-stores", middleware.RequireAuth(dbConn), handlers.GetMyStoresHandler(dbConn))
+	app.Put("/api/stores/:id", middleware.RequireAuth(dbConn), handlers.UpdateStoreHandler(dbConn))
 	
 	// Products
 	app.Post("/api/products", middleware.RequireAuth(dbConn), handlers.CreateProductHandler(dbConn))
 	app.Get("/api/products", handlers.ListProductsHandler(dbConn))
-	app.Get("/api/products/:id", handlers.GetProductHandler(dbConn)) // Added this line
+	app.Get("/api/products/:id", handlers.GetProductHandler(dbConn))
+	app.Get("/api/stores/:id/products", handlers.ListProductsByStoreHandler(dbConn)) // New route to list products by store ID
 	app.Post("/api/stores/:id/products", middleware.RequireAuth(dbConn), middleware.RequireRole("seller"), handlers.CreateProductHandler(dbConn))
 
 	// Orders
