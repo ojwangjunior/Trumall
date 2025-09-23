@@ -10,7 +10,7 @@ const SellPage = () => {
   const [stock, setStock] = useState(1);
   const [storeId, setStoreId] = useState("");
   const [stores, setStores] = useState([]);
-  const [images, setImages] = useState([]);
+  const [setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -112,11 +112,11 @@ const SellPage = () => {
         `${import.meta.env.VITE_API_BASE_URL}/api/products`,
         {
           store_id: storeId,
-          name: itemName,
+          title: itemName, 
           description: itemDescription,
-          price: parseFloat(itemPrice),
+          price_cents: Math.round(parseFloat(itemPrice) * 100),
           stock: parseInt(stock),
-          image_urls: uploadedImageUrls, // Send uploaded image URLs
+          image_urls: uploadedImageUrls,
         },
         {
           headers: {
