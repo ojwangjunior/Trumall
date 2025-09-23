@@ -180,3 +180,26 @@ func GetProductHandler(db *gorm.DB) fiber.Handler {
 		return c.JSON(product)
 	}
 }
+
+func ListProductsByStoreHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		storeID := c.Params("id")
+		parsedStoreID, err := uuid.Parse(storeID)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid store ID"})
+		}
+
+		var products []models.Product
+		if err := db.Preload("Store").Preload("Images").Where("store_id = ?", parsedStoreID).Find(&products).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch products for store"})
+		}
+
+		for i := range products {
+			if products[i].Currency == "" {
+				products[i].Currency = "USD"
+			}
+		}
+
+		return c.JSON(products)
+	}
+}
