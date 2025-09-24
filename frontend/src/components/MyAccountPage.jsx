@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import axios from 'axios';
+import axios from "axios";
 import {
   User,
   Mail,
@@ -15,38 +15,55 @@ import {
 
 const MyAccountPage = () => {
   const [user, setUser] = useState(null);
+  const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
           setLoading(false);
           return;
         }
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setUser(response.data);
+
+        const userResponse = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setUser(userResponse.data);
+
+        if (userResponse.data.roles.includes("seller")) {
+          const storesResponse = await axios.get(
+            `${import.meta.env.VITE_API_BASE_URL}/api/my-stores`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          setStores(storesResponse.data);
+        }
       } catch (err) {
-        setError(err.response?.data?.error || 'Error fetching user data.');
+        setError(err.response?.data?.error || "Error fetching data.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
+    fetchData();
   }, []);
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   if (loading) {
@@ -174,7 +191,8 @@ const MyAccountPage = () => {
                     >
                       <Shield className="w-4 h-4 inline mr-1" />
                       {user.roles && user.roles.length > 0
-                        ? user.roles[0].charAt(0).toUpperCase() + user.roles[0].slice(1)
+                        ? user.roles[0].charAt(0).toUpperCase() +
+                          user.roles[0].slice(1)
                         : "User"}
                     </span>
                   </div>
@@ -226,7 +244,9 @@ const MyAccountPage = () => {
                             Account Type
                           </p>
                           <p className="text-sm text-slate-600">
-                            {user.roles && user.roles.includes("seller") ? "Seller" : "Buyer"}
+                            {user.roles && user.roles.includes("seller")
+                              ? "Seller"
+                              : "Buyer"}
                           </p>
                         </div>
                       </div>
@@ -281,7 +301,7 @@ const MyAccountPage = () => {
           </div>
 
           {/* Seller Dashboard Card */}
-          {user.role === "seller" && (
+          {user.roles && user.roles.includes("seller") && (
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-8 py-6">
                 <div className="flex items-center space-x-4">
@@ -301,42 +321,42 @@ const MyAccountPage = () => {
 
               <div className="p-8">
                 <div className="grid gap-4">
-                  <a
-                    href="/mystores"
-                    className="flex items-center justify-between p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-colors group"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                        <Store className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900">
-                          Manage My Stores
-                        </p>
-                        <p className="text-sm text-slate-600">
-                          View and edit your store listings
-                        </p>
-                      </div>
+                  {stores.length > 0 ? (
+                    stores.map((store) => (
+                      <a
+                        key={store.id}
+                        href={`/store/${store.id}`}
+                        className="flex items-center justify-between p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-colors group"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <Store className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-900">
+                              {store.name}
+                            </p>
+                            <p className="text-sm text-slate-600">
+                              {store.description}
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />
+                      </a>
+                    ))
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-slate-600 mb-4">
+                        You haven't created any stores yet.
+                      </p>
+              <a
+                href="/createstore"
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Create a Store
+              </a>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />
-                  </a>
-
-                  <button className="flex items-center justify-between p-4 bg-slate-50 hover:bg-slate-100 rounded-xl transition-colors group">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <Settings className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900">
-                          Seller Settings
-                        </p>
-                        <p className="text-sm text-slate-600">
-                          Configure your seller preferences
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />
-                  </button>
+                  )}
                 </div>
               </div>
             </div>

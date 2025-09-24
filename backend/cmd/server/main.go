@@ -15,9 +15,18 @@ import (
 
 func main() {
 	// Load env vars
-	if err := godotenv.Load(".env"); err != nil {
-		log.Println("no .env file loaded, using environment")
-	}
+	err := godotenv.Load("../../.env")
+    if err != nil {
+        log.Printf("Error loading ../../.env file: %v", err)
+        log.Println("Trying current directory...")
+        err = godotenv.Load(".env")
+        if err != nil {
+            log.Printf("Error loading .env from current dir: %v", err)
+            log.Println("Using system environment variables")
+        }
+    } else {
+        log.Println("Successfully loaded .env file")
+    }
 
 	// Connect DB
 	dbConn, err := db.Connect()
@@ -58,11 +67,14 @@ func main() {
 	app.Get("/api/stores/:id", handlers.GetStoreHandler(dbConn))
 	// get stores for the logged in user
 	app.Get("/api/me/stores", middleware.RequireAuth(dbConn), handlers.GetUserStoresHandler(dbConn))
-
+	app.Get("/api/my-stores", middleware.RequireAuth(dbConn), handlers.GetMyStoresHandler(dbConn))
+	app.Put("/api/stores/:id", middleware.RequireAuth(dbConn), handlers.UpdateStoreHandler(dbConn))
+	
 	// Products
 	app.Post("/api/products", middleware.RequireAuth(dbConn), handlers.CreateProductHandler(dbConn))
 	app.Get("/api/products", handlers.ListProductsHandler(dbConn))
-	app.Get("/api/products/:id", handlers.GetProductHandler(dbConn)) // Added this line
+	app.Get("/api/products/:id", handlers.GetProductHandler(dbConn))
+	app.Get("/api/stores/:id/products", handlers.ListProductsByStoreHandler(dbConn)) // New route to list products by store ID
 	app.Post("/api/stores/:id/products", middleware.RequireAuth(dbConn), middleware.RequireRole("seller"), handlers.CreateProductHandler(dbConn))
 
 	// Orders
@@ -73,6 +85,8 @@ func main() {
 
 	//cart
 	app.Post("/api/cart/add", middleware.RequireAuth(dbConn), handlers.AddToCartHandler(dbConn))
+	app.Post("/api/cart/increase", middleware.RequireAuth(dbConn), handlers.IncreaseCartItemQuantityHandler(dbConn))
+	app.Post("/api/cart/decrease", middleware.RequireAuth(dbConn), handlers.DecreaseCartItemQuantityHandler(dbConn))
 	app.Get("/api/cart", middleware.RequireAuth(dbConn), handlers.GetCartHandler(dbConn))
 	app.Delete("/api/cart/:id", middleware.RequireAuth(dbConn), handlers.RemoveFromCartHandler(dbConn))
 	app.Post("/api/cart/checkout", middleware.RequireAuth(dbConn), handlers.CheckoutHandler(dbConn))

@@ -19,7 +19,7 @@ const MyStoresPage = () => {
             },
           }
         );
-        setStores(response.data.data);
+        setStores(response.data.data || []);
       } catch (error) {
         console.error("Error fetching stores:", error);
       } finally {

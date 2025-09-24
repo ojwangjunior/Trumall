@@ -10,8 +10,11 @@ const SellPage = () => {
   const [stock, setStock] = useState(1);
   const [storeId, setStoreId] = useState("");
   const [stores, setStores] = useState([]);
-  const [images, setImages] = useState([]);
+  const [setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [error, setError] = useState(null);
@@ -33,7 +36,7 @@ const SellPage = () => {
             },
           }
         );
-        const userStores = response.data.data;
+        const userStores = response.data;
         setStores(userStores);
         if (userStores.length > 0) {
           setStoreId(userStores[0].id);
@@ -50,13 +53,40 @@ const SellPage = () => {
     }
   }, [user, navigate]);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const selectedFiles = Array.from(e.target.files);
     setImages(selectedFiles);
+    setImagePreviews(selectedFiles.map((file) => URL.createObjectURL(file)));
 
-    // Generate image previews
-    const previews = selectedFiles.map((file) => URL.createObjectURL(file));
-    setImagePreviews(previews);
+    if (selectedFiles.length > 0) {
+      setUploadingImages(true);
+      setUploadError(null);
+      const uploadedUrls = [];
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append("image", file);
+        try {
+          const response = await axios.post(
+            `${import.meta.env.VITE_API_BASE_URL}/api/upload/image`,
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          uploadedUrls.push(response.data.image_url);
+        } catch (uploadErr) {
+          console.error("Error uploading image:", uploadErr);
+          setUploadError("Failed to upload one or more images.");
+          setUploadingImages(false);
+          return;
+        }
+      }
+      setUploadedImageUrls(uploadedUrls);
+      setUploadingImages(false);
+    }
   };
 
   const handleSell = async (e) => {
@@ -65,25 +95,31 @@ const SellPage = () => {
     setSubmissionSuccess(false);
     setError(null);
 
-    const formData = new FormData();
-    formData.append("store_id", storeId);
-    formData.append("title", itemName);
-    formData.append("description", itemDescription);
-    formData.append("price_cents", Math.round(parseFloat(itemPrice) * 100));
-    formData.append("stock", stock);
-    formData.append("currency", "USD");
+    if (uploadingImages) {
+      setError("Please wait for images to finish uploading.");
+      setIsSubmitting(false);
+      return;
+    }
 
-    images.forEach((image) => {
-      formData.append(`images`, image);
-    });
+    if (uploadError) {
+      setError("Image upload failed. Please try again.");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/products`,
-        formData,
+        {
+          store_id: storeId,
+          title: itemName, 
+          description: itemDescription,
+          price_cents: Math.round(parseFloat(itemPrice) * 100),
+          stock: parseInt(stock),
+          image_urls: uploadedImageUrls,
+        },
         {
           headers: {
-            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         }
@@ -98,12 +134,17 @@ const SellPage = () => {
       setStock(1);
       setImages([]);
       setImagePreviews([]);
+      setUploadedImageUrls([]); // Clear uploaded URLs after successful submission
     } catch (error) {
       console.error("Error selling item:", error);
       setError("Error selling item. Please try again.");
       setIsSubmitting(false);
     }
   };
+
+  console.log('storeId:', storeId);
+
+  console.log('storeId:', storeId);
 
   return (
     <div className="container mx-auto mt-8 p-4">
@@ -132,6 +173,16 @@ const SellPage = () => {
           >
             <strong className="font-bold">Error!</strong>
             <span className="block sm:inline"> {error}</span>
+          </div>
+        )}
+
+        {uploadError && (
+          <div
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+            role="alert"
+          >
+            <strong className="font-bold">Upload Error!</strong>
+            <span className="block sm:inline"> {uploadError}</span>
           </div>
         )}
 
@@ -247,7 +298,11 @@ const SellPage = () => {
               onChange={handleFileChange}
               multiple
               accept=".jpg,.jpeg,.png,.webp"
+              disabled={uploadingImages} // Disable input during upload
             />
+            {uploadingImages && (
+              <p className="text-blue-500 text-sm mt-1">Uploading images...</p>
+            )}
             <div className="mt-2 flex flex-wrap gap-2">
               {imagePreviews.map((preview, index) => (
                 <img
@@ -263,7 +318,7 @@ const SellPage = () => {
           <button
             type="submit"
             className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300"
-            disabled={isSubmitting}
+            disabled={isSubmitting || uploadingImages}
           >
             {isSubmitting ? "Listing Item..." : "Sell Item"}
           </button>

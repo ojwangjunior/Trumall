@@ -78,13 +78,85 @@ func GetCartHandler(db *gorm.DB) fiber.Handler {
 	}
 }
 
-// Remove from cart
 func RemoveFromCartHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		user := c.Locals("user").(models.User)
 		id := c.Params("id")
 		db.Where("id = ? AND user_id = ?", id, user.ID).Delete(&models.CartItem{})
 		return c.JSON(fiber.Map{"message": "removed"})
+	}
+}
+
+// Increase product quantity in cart
+func IncreaseCartItemQuantityHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		type request struct {
+			ProductID uuid.UUID `json:"product_id"`
+		}
+		var body request
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(400).JSON(fiber.Map{"error": "invalid request"})
+		}
+
+		user, ok := c.Locals("user").(models.User)
+		if !ok {
+			return c.Status(401).JSON(fiber.Map{"error": "unauthorized"})
+		}
+
+		var cartItem models.CartItem
+		if err := db.Where("user_id = ? AND product_id = ?", user.ID, body.ProductID).First(&cartItem).Error; err != nil {
+			return c.Status(404).JSON(fiber.Map{"error": "item not found in cart"})
+		}
+
+		var product models.Product
+		if err := db.First(&product, "id = ?", body.ProductID).Error; err != nil {
+			return c.Status(404).JSON(fiber.Map{"error": "product not found"})
+		}
+
+		if cartItem.Quantity+1 > product.Stock {
+			return c.Status(400).JSON(fiber.Map{"error": "not enough stock"})
+		}
+
+		cartItem.Quantity++
+		db.Save(&cartItem)
+
+		var items []models.CartItem
+		db.Preload("Product.Images").Where("user_id = ?", user.ID).Find(&items)
+		return c.JSON(items)
+	}
+}
+
+// Decrease product quantity in cart
+func DecreaseCartItemQuantityHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		type request struct {
+			ProductID uuid.UUID `json:"product_id"`
+		}
+		var body request
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(400).JSON(fiber.Map{"error": "invalid request"})
+		}
+
+		user, ok := c.Locals("user").(models.User)
+		if !ok {
+			return c.Status(401).JSON(fiber.Map{"error": "unauthorized"})
+		}
+
+		var cartItem models.CartItem
+		if err := db.Where("user_id = ? AND product_id = ?", user.ID, body.ProductID).First(&cartItem).Error; err != nil {
+			return c.Status(404).JSON(fiber.Map{"error": "item not found in cart"})
+		}
+
+		cartItem.Quantity--
+		if cartItem.Quantity <= 0 {
+			db.Delete(&cartItem)
+		} else {
+			db.Save(&cartItem)
+		}
+
+		var items []models.CartItem
+		db.Preload("Product.Images").Where("user_id = ?", user.ID).Find(&items)
+		return c.JSON(items)
 	}
 }
 
