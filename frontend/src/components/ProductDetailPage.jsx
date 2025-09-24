@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import Rating from "./Rating";
 import { CartContext } from "../context/CartProvider"; // Corrected import path
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -11,6 +13,8 @@ const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState(''); // State for the main displayed image
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -31,6 +35,25 @@ const ProductDetailPage = () => {
 
     fetchProduct();
   }, [id]);
+
+  const isOwner = user && product && product.store && user.id === product.store.owner_id;
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        navigate(`/mystores`); // or to the store page
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        // Handle error display to user
+      }
+    }
+  };
+
 
   if (loading) {
     return <div>Loading...</div>;
@@ -108,12 +131,29 @@ const ProductDetailPage = () => {
             />
           </div>
 
-          <button
-            onClick={handleAddToCart}
-            className="w-full bg-orange-500 text-white py-3 rounded-md hover:bg-orange-600"
-          >
-            Add to Cart
-          </button>
+          {isOwner ? (
+            <div className="flex space-x-4">
+              <button
+                onClick={() => navigate(`/product/${id}/edit`)}
+                className="w-full bg-blue-500 text-white py-3 rounded-md hover:bg-blue-600"
+              >
+                Edit Product
+              </button>
+              <button
+                onClick={handleDelete}
+                className="w-full bg-red-500 text-white py-3 rounded-md hover:bg-red-600"
+              >
+                Delete Product
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              className="w-full bg-orange-500 text-white py-3 rounded-md hover:bg-orange-600"
+            >
+              Add to Cart
+            </button>
+          )}
         </div>
       </div>
 
