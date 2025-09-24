@@ -172,7 +172,7 @@ const MyAccountPage = () => {
 
           {/* Profile Card */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6">
+            <div className="bg-blue-500 px-8 py-6">
               <div className="flex items-center space-x-4">
                 <div className="w-16 h-16 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center">
                   <span className="text-2xl font-bold text-white">
