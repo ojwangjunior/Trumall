@@ -3,7 +3,7 @@ import { CartContext } from "../context/CartProvider";
 import { Link } from "react-router-dom";
 
 const CartPage = () => {
-  const { cartItems, removeFromCart } = useContext(CartContext);
+  const { cartItems, removeFromCart, increaseQuantity, decreaseQuantity } = useContext(CartContext);
 
   const calculateTotal = () => {
     return cartItems
@@ -99,7 +99,21 @@ const CartPage = () => {
                       }).format(item.price / 100)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item.quantity}
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => decreaseQuantity(item.Product.id)}
+                          className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          -
+                        </button>
+                        <span>{item.quantity}</span>
+                        <button
+                          onClick={() => increaseQuantity(item.Product.id)}
+                          className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          +
+                        </button>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Intl.NumberFormat("en-US", {
