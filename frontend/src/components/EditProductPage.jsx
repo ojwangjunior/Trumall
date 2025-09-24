@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
-const SellPage = () => {
+const EditProductPage = () => {
+  const { id } = useParams();
   const [itemName, setItemName] = useState("");
   const [itemPrice, setItemPrice] = useState("");
   const [itemDescription, setItemDescription] = useState("");
@@ -23,32 +24,23 @@ const SellPage = () => {
       navigate("/signin");
     }
 
-    const fetchStores = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/api/me/stores`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        const userStores = response.data;
-        setStores(userStores);
-        if (userStores.length > 0) {
-          setStoreId(userStores[0].id);
-        } else {
-          navigate("/createstore");
+    const fetchProduct = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`);
+            const product = response.data;
+            setItemName(product.title);
+            setItemPrice((product.price_cents / 100).toString());
+            setItemDescription(product.description);
+            setStock(product.stock);
+            setStoreId(product.store_id);
+        } catch (error) {
+            console.error("Error fetching product:", error);
+            setError("Failed to fetch product data.");
         }
-      } catch (error) {
-        console.error("Error fetching stores:", error);
-      }
     };
 
-    if (user) {
-      fetchStores();
-    }
-  }, [user, navigate]);
+    fetchProduct();
+  }, [id, user, navigate]);
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -56,7 +48,7 @@ const SellPage = () => {
     setImagePreviews(selectedFiles.map((file) => URL.createObjectURL(file)));
   };
 
-  const handleSell = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmissionSuccess(false);
@@ -75,8 +67,8 @@ const SellPage = () => {
     });
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/products`,
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`,
         formData,
         {
           headers: {
@@ -86,18 +78,15 @@ const SellPage = () => {
         }
       );
 
-      console.log("Selling item:", response.data);
+      console.log("Updating item:", response.data);
       setIsSubmitting(false);
       setSubmissionSuccess(true);
-      setItemName("");
-      setItemPrice("");
-      setItemDescription("");
-      setStock(1);
-      setImages([]);
-      setImagePreviews([]);
+      setTimeout(() => {
+        navigate(`/product/${id}`);
+      }, 2000);
     } catch (error) {
-      console.error("Error selling item:", error);
-      setError("Error selling item. Please try again.");
+      console.error("Error updating item:", error);
+      setError("Error updating item. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -106,7 +95,7 @@ const SellPage = () => {
     <div className="container mx-auto mt-8 p-4">
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
         <h2 className="text-3xl font-bold mb-6 text-center">
-          List Your Item for Sale
+          Edit Your Item
         </h2>
 
         {submissionSuccess && (
@@ -117,7 +106,7 @@ const SellPage = () => {
             <strong className="font-bold">Success!</strong>
             <span className="block sm:inline">
               {" "}
-              Your item has been listed for sale.
+              Your item has been updated.
             </span>
           </div>
         )}
@@ -132,28 +121,7 @@ const SellPage = () => {
           </div>
         )}
 
-        <form onSubmit={handleSell}>
-          <div className="mb-5">
-            <label
-              htmlFor="store"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Store
-            </label>
-            <select
-              id="store"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              value={storeId}
-              onChange={(e) => setStoreId(e.target.value)}
-            >
-              {stores.map((store) => (
-                <option key={store.id} value={store.id}>
-                  {store.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
+        <form onSubmit={handleUpdate}>
           <div className="mb-5">
             <label
               htmlFor="itemName"
@@ -263,7 +231,7 @@ const SellPage = () => {
             className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Listing Item..." : "Sell Item"}
+            {isSubmitting ? "Updating Item..." : "Save Changes"}
           </button>
         </form>
       </div>
@@ -271,4 +239,4 @@ const SellPage = () => {
   );
 };
 
-export default SellPage;
+export default EditProductPage;

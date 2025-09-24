@@ -87,7 +87,7 @@ const StoreDetailPage = () => {
           </div>
 
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-900 px-8 py-6">
               <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center">

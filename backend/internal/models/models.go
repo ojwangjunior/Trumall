@@ -41,7 +41,7 @@ type Product struct {
 	Title            string         `gorm:"not null" json:"title"`
 	Description      *string        `json:"description,omitempty"`
 	PriceCents       int64          `gorm:"not null" json:"price_cents"`
-	Currency         string         `gorm:"default:USD" json:"currency"`
+	Currency   string    `gorm:"default:KES" json:"currency"`
 	SKU              *string        `json:"sku,omitempty"`
 	Stock            int            `gorm:"default:0" json:"stock"`
 	AuthenticityHash *string        `json:"authenticity_hash,omitempty"`

@@ -47,7 +47,7 @@ export const CartProvider = ({ children }) => {
           },
         }
       );
-      setCartItems(response.data);
+      fetchCart();
       setCartError(null);
       setCartSuccess("Item added to cart!");
     } catch (error) {

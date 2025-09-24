@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     if (token) {
       const decodedToken = JSON.parse(atob(token.split(".")[1]));
-      setUser({ id: decodedToken.sub, email: decodedToken.email, role: decodedToken.role, name: decodedToken.name });
+      setUser({ id: decodedToken.sub, email: decodedToken.email, roles: decodedToken.roles, name: decodedToken.name });
     }
     setLoading(false);
   }, []);
@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
 
     localStorage.setItem("token", token);
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
-    setUser({ id: decodedToken.sub, email: decodedToken.email, role: decodedToken.role, name: decodedToken.name });
+    setUser({ id: decodedToken.sub, email: decodedToken.email, roles: decodedToken.roles, name: decodedToken.name });
   };
 
   const register = async (name, email, password, role) => {
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
 
     localStorage.setItem("token", token);
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
-    setUser({ id: decodedToken.sub, email: decodedToken.email, role: decodedToken.role, name: decodedToken.name });
+    setUser({ id: decodedToken.sub, email: decodedToken.email, roles: decodedToken.roles, name: decodedToken.name });
   };
 
   const logout = () => {

@@ -95,7 +95,7 @@ const CartPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Intl.NumberFormat("en-US", {
                         style: "currency",
-                        currency: item.Product.currency || "USD",
+                        currency: item.Product.currency || "KES",
                       }).format(item.price / 100)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -118,7 +118,7 @@ const CartPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Intl.NumberFormat("en-US", {
                         style: "currency",
-                        currency: item.Product.currency || "USD",
+                        currency: item.Product.currency || "KES",
                       }).format((item.price * item.quantity) / 100)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -140,7 +140,7 @@ const CartPage = () => {
               Total:{" "}
               {new Intl.NumberFormat("en-US", {
                 style: "currency",
-                currency: cartItems[0]?.Product.currency || "USD",
+                currency: cartItems[0]?.Product.currency || "KES",
               }).format(calculateTotal() / 100)}
             </div>
             <button className="px-6 py-3 font-semibold text-white bg-green-500 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">

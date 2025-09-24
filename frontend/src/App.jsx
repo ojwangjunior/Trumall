@@ -21,6 +21,9 @@ import { CartContext } from "./context/CartProvider";
 
 import StoreDetailPage from "./components/StoreDetailPage";
 import EditStorePage from "./components/EditStorePage";
+import EditProductPage from "./components/EditProductPage";
+import SellerProtectedRoute from "./context/SellerProtectedRoute";
+import UnauthorizedPage from "./components/UnauthorizedPage";
 
 function App() {
   const { cartError, setCartError, cartSuccess, setCartSuccess } = useContext(CartContext);
@@ -39,14 +42,18 @@ function App() {
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route element={<ProtectedRoute />}>
-              <Route path="/sell" element={<SellPage />} />
               <Route path="/mystores" element={<MyStoresPage />} />
-              <Route path="/createstore" element={<CreateStorePage />} />
               <Route path="/account" element={<MyAccountPage />} />
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/store/:id" element={<StoreDetailPage />} />
               <Route path="/store/:id/edit" element={<EditStorePage />} />
+              <Route path="/product/:id/edit" element={<EditProductPage />} />
+            </Route>
+            <Route element={<SellerProtectedRoute />}>
+              <Route path="/sell" element={<SellPage />} />
+              <Route path="/createstore" element={<CreateStorePage />} />
             </Route>
           </Routes>
         </main>

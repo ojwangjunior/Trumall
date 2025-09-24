@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import axios from "axios";
 import {
@@ -124,12 +124,12 @@ const MyAccountPage = () => {
           <p className="text-slate-600 mb-6">
             Please log in to view your account details
           </p>
-          <a
-            href="/login"
+          <Link
+            to="/signin"
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-block"
           >
             Sign In
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -172,7 +172,7 @@ const MyAccountPage = () => {
 
           {/* Profile Card */}
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6">
+            <div className="bg-blue-500 px-8 py-6">
               <div className="flex items-center space-x-4">
                 <div className="w-16 h-16 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center">
                   <span className="text-2xl font-bold text-white">
@@ -323,9 +323,9 @@ const MyAccountPage = () => {
                 <div className="grid gap-4">
                   {stores.length > 0 ? (
                     stores.map((store) => (
-                      <a
+                      <Link
                         key={store.id}
-                        href={`/store/${store.id}`}
+                        to={`/store/${store.id}`}
                         className="flex items-center justify-between p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-colors group"
                       >
                         <div className="flex items-center space-x-3">
@@ -342,19 +342,19 @@ const MyAccountPage = () => {
                           </div>
                         </div>
                         <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600" />
-                      </a>
+                        </Link>
                     ))
                   ) : (
                     <div className="text-center py-4">
                       <p className="text-slate-600 mb-4">
                         You haven't created any stores yet.
                       </p>
-              <a
-                href="/createstore"
+              <Link
+                to="/createstore"
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
                 Create a Store
-              </a>
+              </Link>
                     </div>
                   )}
                 </div>
