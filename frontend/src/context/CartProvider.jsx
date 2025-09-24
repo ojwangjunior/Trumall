@@ -28,6 +28,8 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       fetchCart();
+    } else {
+      setCartItems([]);
     }
   }, [user]);
 
@@ -79,8 +81,46 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const increaseQuantity = async (productId) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/cart/increase`,
+        { product_id: productId },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setCartItems(response.data);
+      setCartError(null);
+    } catch (error) {
+      console.error("Error increasing quantity:", error);
+      setCartError("Failed to increase quantity.");
+    }
+  };
+
+  const decreaseQuantity = async (productId) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/cart/decrease`,
+        { product_id: productId },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setCartItems(response.data);
+      setCartError(null);
+    } catch (error) {
+      console.error("Error decreasing quantity:", error);
+      setCartError("Failed to decrease quantity.");
+    }
+  };
+
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, cartError, setCartError, cartSuccess, setCartSuccess }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, increaseQuantity, decreaseQuantity, cartError, setCartError, cartSuccess, setCartSuccess }}>
       {children}
     </CartContext.Provider>
   );
