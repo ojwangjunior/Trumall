@@ -68,7 +68,7 @@ const SellPage = () => {
     formData.append("description", itemDescription);
     formData.append("price_cents", Math.round(parseFloat(itemPrice) * 100));
     formData.append("stock", parseInt(stock));
-    formData.append("currency", "USD");
+    formData.append("currency", "KES");
 
     images.forEach((image) => {
       formData.append("images", image);
@@ -181,7 +181,7 @@ const SellPage = () => {
               htmlFor="itemPrice"
               className="block text-gray-700 text-sm font-bold mb-2"
             >
-              Item Price ($)
+              Item Price (KES)
             </label>
             <input
               type="number"
