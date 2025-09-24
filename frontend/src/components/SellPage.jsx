@@ -102,10 +102,6 @@ const SellPage = () => {
     }
   };
 
-  console.log("storeId:", storeId);
-
-  console.log("storeId:", storeId);
-
   return (
     <div className="container mx-auto mt-8 p-4">
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
