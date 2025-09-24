@@ -1,4 +1,5 @@
-import React from "react";
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { ShieldX, ArrowRight, Home, UserPlus } from "lucide-react";
 
 const UnauthorizedPage = () => {
@@ -35,23 +36,23 @@ const UnauthorizedPage = () => {
 
             {/* Action buttons */}
             <div className="space-y-3">
-              <button
-                onClick={() => (window.location.href = "/signup")}
+              <Link
+                to="/signup"
                 className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center gap-2 group"
               >
                 <UserPlus className="w-4 h-4" />
                 Register as a Seller
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </button>
+              </Link>
 
-              <button
-                onClick={() => (window.location.href = "/")}
+              <Link
+                to="/"
                 className="w-full border-2 border-gray-200 hover:border-orange-300 text-gray-700 hover:text-orange-600 font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group hover:bg-orange-50"
               >
                 <Home className="w-4 h-4" />
                 Go to Homepage
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </button>
+              </Link>
             </div>
 
             {/* Help text */}
