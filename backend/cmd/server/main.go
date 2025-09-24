@@ -85,6 +85,8 @@ func main() {
 
 	//cart
 	app.Post("/api/cart/add", middleware.RequireAuth(dbConn), handlers.AddToCartHandler(dbConn))
+	app.Post("/api/cart/increase", middleware.RequireAuth(dbConn), handlers.IncreaseCartItemQuantityHandler(dbConn))
+	app.Post("/api/cart/decrease", middleware.RequireAuth(dbConn), handlers.DecreaseCartItemQuantityHandler(dbConn))
 	app.Get("/api/cart", middleware.RequireAuth(dbConn), handlers.GetCartHandler(dbConn))
 	app.Delete("/api/cart/:id", middleware.RequireAuth(dbConn), handlers.RemoveFromCartHandler(dbConn))
 	app.Post("/api/cart/checkout", middleware.RequireAuth(dbConn), handlers.CheckoutHandler(dbConn))
