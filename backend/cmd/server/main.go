@@ -15,7 +15,7 @@ import (
 
 func main() {
 	// Load env vars
-	err := godotenv.Load("../../.env")
+	err := godotenv.Load(".env")
     if err != nil {
         log.Printf("Error loading ../../.env file: %v", err)
         log.Println("Trying current directory...")

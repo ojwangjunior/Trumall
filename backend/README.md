@@ -24,3 +24,7 @@ GRANT ALL PRIVILEGES ON DATABASE trustmall_dev TO trustmall;
 - Then veryfy it was created
 
 ``\dx``
+
+- to open db
+psql -U trustmall -d trustmall_dev -h localhost -p 5432
+
