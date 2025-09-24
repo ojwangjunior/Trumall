@@ -21,6 +21,7 @@ import { CartContext } from "./context/CartProvider";
 
 import StoreDetailPage from "./components/StoreDetailPage";
 import EditStorePage from "./components/EditStorePage";
+import EditProductPage from "./components/EditProductPage";
 
 function App() {
   const { cartError, setCartError, cartSuccess, setCartSuccess } = useContext(CartContext);
@@ -47,6 +48,7 @@ function App() {
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/store/:id" element={<StoreDetailPage />} />
               <Route path="/store/:id/edit" element={<EditStorePage />} />
+              <Route path="/product/:id/edit" element={<EditProductPage />} />
             </Route>
           </Routes>
         </main>
