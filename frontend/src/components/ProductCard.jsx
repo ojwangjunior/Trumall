@@ -8,7 +8,7 @@ const ProductCard = ({ product }) => {
   const [isAdding, setIsAdding] = useState(false);
 
   const formatPrice = (priceCents, currency) => {
-    const displayCurrency = currency || "USD";
+    const displayCurrency = currency || "KES";
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: displayCurrency,
