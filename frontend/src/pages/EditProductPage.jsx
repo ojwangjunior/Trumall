@@ -3,6 +3,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
 
+import EditProductHeader from "../components/product/EditProductHeader";
+import SellSuccessDisplay from "../components/sell/SellSuccessDisplay"; // Reusing from sell
+import SellErrorDisplay from "../components/sell/SellErrorDisplay"; // Reusing from sell
+import EditProductForm from "../components/product/EditProductForm";
+
 const EditProductPage = () => {
   const { id } = useParams();
   const [itemName, setItemName] = useState("");
@@ -96,144 +101,28 @@ const EditProductPage = () => {
   return (
     <div className="container mx-auto mt-8 p-4">
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold mb-6 text-center">Edit Your Item</h2>
+        <EditProductHeader />
 
-        {submissionSuccess && (
-          <div
-            className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-            role="alert"
-          >
-            <strong className="font-bold">Success!</strong>
-            <span className="block sm:inline">
-              {" "}
-              Your item has been updated.
-            </span>
-          </div>
-        )}
+        <SellSuccessDisplay submissionSuccess={submissionSuccess} />
 
-        {error && (
-          <div
-            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-            role="alert"
-          >
-            <strong className="font-bold">Error!</strong>
-            <span className="block sm:inline"> {error}</span>
-          </div>
-        )}
+        <SellErrorDisplay error={error} />
 
-        <form onSubmit={handleUpdate}>
-          <div className="mb-5">
-            <label
-              htmlFor="itemName"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Item Name
-            </label>
-            <input
-              type="text"
-              id="itemName"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., Vintage Leather Jacket"
-              value={itemName}
-              onChange={(e) => setItemName(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="mb-5">
-            <label
-              htmlFor="itemPrice"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Item Price (KES)
-            </label>
-            <input
-              type="number"
-              id="itemPrice"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., 99.99"
-              value={itemPrice}
-              onChange={(e) => setItemPrice(e.target.value)}
-              required
-              min="0"
-              step="0.01"
-            />
-          </div>
-
-          <div className="mb-5">
-            <label
-              htmlFor="stock"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Stock
-            </label>
-            <input
-              type="number"
-              id="stock"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., 10"
-              value={stock}
-              onChange={(e) =>
-                setStock(e.target.value === "" ? 0 : parseInt(e.target.value))
-              }
-              required
-              min="0"
-            />
-          </div>
-
-          <div className="mb-5">
-            <label
-              htmlFor="itemDescription"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Item Description
-            </label>
-            <textarea
-              id="itemDescription"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500 h-32 resize-none"
-              placeholder="Describe your item in detail..."
-              value={itemDescription}
-              onChange={(e) => setItemDescription(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="mb-5">
-            <label
-              htmlFor="images"
-              className="block text-gray-700 text-sm font-bold mb-2"
-            >
-              Item Images (JPEG, PNG, WebP)
-            </label>
-            <input
-              type="file"
-              id="images"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
-              onChange={handleFileChange}
-              multiple
-              accept=".jpg,.jpeg,.png,.webp"
-            />
-
-            <div className="mt-2 flex flex-wrap gap-2">
-              {imagePreviews.map((preview, index) => (
-                <img
-                  key={index}
-                  src={preview}
-                  alt={`Preview ${index}`}
-                  className="w-24 h-24 object-cover rounded-md"
-                />
-              ))}
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg focus:outline-none focus:shadow-outline transition duration-300"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Updating Item..." : "Save Changes"}
-          </button>
-        </form>
+        <EditProductForm
+          itemName={itemName}
+          setItemName={setItemName}
+          itemPrice={itemPrice}
+          setItemPrice={setItemPrice}
+          itemDescription={itemDescription}
+          setItemDescription={setItemDescription}
+          stock={stock}
+          setStock={setStock}
+          storeId={storeId}
+          // setStoreId={setStoreId} // storeId is not being set in this form
+          handleFileChange={handleFileChange}
+          imagePreviews={imagePreviews}
+          isSubmitting={isSubmitting}
+          handleUpdate={handleUpdate}
+        />
       </div>
     </div>
   );

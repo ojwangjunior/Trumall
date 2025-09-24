@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+
+import MyStoresHeader from "../components/store/MyStoresHeader";
+import StoreListDisplay from "../components/store/StoreListDisplay";
+import EmptyMyStoresState from "../components/store/EmptyMyStoresState";
+import LoadingState from "../components/account/LoadingState"; // Reusing from account
 
 const MyStoresPage = () => {
   const [stores, setStores] = useState([]);
@@ -35,41 +39,18 @@ const MyStoresPage = () => {
   }, [user]);
 
   if (loading) {
-    return <div className="text-center mt-8">Loading...</div>;
+    return <LoadingState />;
   }
 
   return (
     <div className="container mx-auto mt-8 p-4">
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold">My Stores</h2>
-          <Link to="/createstore">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Create New Store
-            </button>
-          </Link>
-        </div>
+        <MyStoresHeader />
+
         {stores.length === 0 ? (
-          <p>
-            You haven't created any stores yet. Click the button above to get
-            started!
-          </p>
+          <EmptyMyStoresState />
         ) : (
-          <ul className="space-y-4">
-            {stores.map((store) => (
-              <li key={store.id} className="border-b pb-4 last:border-b-0">
-                <Link
-                  to={`/store/${store.id}`}
-                  className="block hover:bg-gray-50 p-2 rounded"
-                >
-                  <h3 className="text-xl font-semibold text-blue-600">
-                    {store.name}
-                  </h3>
-                  <p className="text-gray-600 mt-1">{store.description}</p>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <StoreListDisplay stores={stores} />
         )}
       </div>
     </div>
