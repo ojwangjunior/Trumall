@@ -213,3 +213,118 @@ func ListProductsByStoreHandler(db *gorm.DB) fiber.Handler {
 		return c.JSON(products)
 	}
 }
+
+// UpdateProductHandler requires auth and checks that the authenticated user is the store owner.
+func UpdateProductHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// Get product ID from URL
+		productID, err := uuid.Parse(c.Params("id"))
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid product ID"})
+		}
+
+		// Find the existing product
+		var product models.Product
+		if err := db.Preload("Store").First(&product, "id = ?", productID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "product not found"})
+			}
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "database error"})
+		}
+
+		// Get user from context
+		user, ok := c.Locals("user").(models.User)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthenticated"})
+		}
+
+		// Verify store ownership
+		if product.Store.OwnerID != user.ID {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "you do not own this product's store"})
+		}
+
+		// Parse multipart form
+		form, err := c.MultipartForm()
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "failed to parse form"})
+		}
+
+		// Get product data from form values
+		if titles, ok := form.Value["title"]; ok && len(titles) > 0 {
+			product.Title = titles[0]
+		}
+		if descriptions, ok := form.Value["description"]; ok && len(descriptions) > 0 {
+			desc := descriptions[0]
+			product.Description = &desc
+		}
+		if priceCentsStrs, ok := form.Value["price_cents"]; ok && len(priceCentsStrs) > 0 {
+			priceCents, err := strconv.ParseInt(priceCentsStrs[0], 10, 64)
+			if err == nil {
+				product.PriceCents = priceCents
+			}
+		}
+		if stocks, ok := form.Value["stock"]; ok && len(stocks) > 0 {
+			stock, err := strconv.Atoi(stocks[0])
+			if err == nil {
+				product.Stock = stock
+			}
+		}
+		if currencies, ok := form.Value["currency"]; ok && len(currencies) > 0 {
+			product.Currency = currencies[0]
+		}
+
+		if err := db.Save(&product).Error; err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to update product"})
+		}
+
+		db.Preload("Store").Preload("Images").First(&product, "id = ?", product.ID)
+		return c.Status(fiber.StatusOK).JSON(product)
+	}
+}
+
+// DeleteProductHandler requires auth and checks that the authenticated user is the store owner.
+func DeleteProductHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// Get product ID from URL
+		productID, err := uuid.Parse(c.Params("id"))
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid product ID"})
+		}
+
+		// Find the existing product
+		var product models.Product
+		if err := db.Preload("Store").First(&product, "id = ?", productID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "product not found"})
+			}
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "database error"})
+		}
+
+		// Get user from context
+		user, ok := c.Locals("user").(models.User)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthenticated"})
+		}
+
+		// Verify store ownership
+		if product.Store.OwnerID != user.ID {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "you do not own this product's store"})
+		}
+
+		err = db.Transaction(func(tx *gorm.DB) error {
+			if err := tx.Where("product_id = ?", product.ID).Delete(&models.ProductImage{}).Error; err != nil {
+				return err
+			}
+			if err := tx.Delete(&product).Error; err != nil {
+				return err
+			}
+			return nil
+		})
+
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to delete product"})
+		}
+
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "product deleted successfully"})
+	}
+}
