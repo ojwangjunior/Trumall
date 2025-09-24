@@ -1,29 +1,29 @@
 import React, { useContext } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Header from "./components/Header";
-import HomePage from "./components/HomePage";
-import Footer from "./components/Footer";
+import Header from "./components/layout/Header";
+import HomePage from "./pages/HomePage";
+import Footer from "./components/layout/Footer";
 import SigninPage from "./pages/SigninPage";
 import SignupPage from "./pages/SignupPage";
-import BuyPage from "./components/BuyPage";
-import SellPage from "./components/SellPage";
-import ProductsPage from "./components/ProductsPage";
-import CartPage from "./components/CartPage";
-import AboutPage from "./components/AboutPage";
-import ProductDetailPage from "./components/ProductDetailPage";
-import CreateStorePage from "./components/CreateStorePage";
-import MyStoresPage from "./components/MyStoresPage";
-import MyAccountPage from "./components/MyAccountPage";
-import OrdersPage from "./components/OrdersPage"; // Import OrdersPage
+import BuyPage from "./pages/BuyPage";
+import SellPage from "./pages/SellPage";
+import ProductsPage from "./pages/ProductsPage";
+import CartPage from "./pages/CartPage";
+import AboutPage from "./pages/AboutPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
+import CreateStorePage from "./pages/CreateStorePage";
+import MyStoresPage from "./pages/MyStoresPage";
+import MyAccountPage from "./pages/MyAccountPage";
+import OrdersPage from "./pages/OrdersPage"; // Import OrdersPage
 import ProtectedRoute from "./context/ProtectedRoute";
-import Toast from "./components/Toast";
+import Toast from "./components/common/Toast";
 import { CartContext } from "./context/CartProvider";
 
-import StoreDetailPage from "./components/StoreDetailPage";
-import EditStorePage from "./components/EditStorePage";
-import EditProductPage from "./components/EditProductPage";
+import StoreDetailPage from "./pages/StoreDetailPage";
+import EditStorePage from "./pages/EditStorePage";
+import EditProductPage from "./pages/EditProductPage";
 import SellerProtectedRoute from "./context/SellerProtectedRoute";
-import UnauthorizedPage from "./components/UnauthorizedPage";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 function App() {
   const { cartError, setCartError, cartSuccess, setCartSuccess } = useContext(CartContext);
