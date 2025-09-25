@@ -19,4 +19,8 @@ func InvokeSorobanCredit(userStellarAddress string, amount int, mpesaReceipt str
 		"--arg", userStellarAddress,
 		"--arg", fmt.Sprintf("%d", amount),
 		"--arg", mpesaReceipt,
-		
+		"--secret-key", secret,
+		"--rpc-url", rpcURL,
+		"--network-passphrase", network,
+	)
+	
