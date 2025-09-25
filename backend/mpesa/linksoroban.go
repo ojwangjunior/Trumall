@@ -12,5 +12,7 @@ func InvokeSorobanCredit(userStellarAddress string, amount int, mpesaReceipt str
 	secret := os.Getenv("SOROBAN_SECRET_KEY")
 	network := os.Getenv("SOROBAN_NETWORK_PASSPHRASE")
 
-	
-}
+	// Example: invoke contract function `contribute` that expects (address, amount, memo)
+	cmd := exec.Command("soroban", "invoke",
+		"--id", contractID,
+		
