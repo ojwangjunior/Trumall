@@ -1,0 +1,114 @@
+import React, { useContext, useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { CartContext } from "../context/CartProvider";
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+
+import ProductImageGallery from "../components/product/ProductImageGallery";
+import ProductInfoSection from "../components/product/ProductInfoSection";
+import ProductLoadingState from "../components/product/ProductLoadingState";
+import ProductNotFoundState from "../components/product/ProductNotFoundState";
+
+const ProductDetailPage = () => {
+  const { id } = useParams();
+  const { addToCart } = useContext(CartContext);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
+  const [mainImage, setMainImage] = useState("");
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`
+        );
+        setProduct(response.data);
+        if (response.data.images && response.data.images.length > 0) {
+          setMainImage(
+            `${import.meta.env.VITE_API_BASE_URL}${
+              response.data.images[0].image_url
+            }`
+          );
+        } else {
+          setMainImage(
+            `https://via.placeholder.com/600x400?text=${encodeURIComponent(
+              response.data.title
+            )}`
+          );
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  const isOwner =
+    user && product && product.store && user.id === product.store.owner_id;
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        await axios.delete(
+          `${import.meta.env.VITE_API_BASE_URL}/api/products/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        navigate(`/mystores`); // or to the store page
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        // Handle error display to user
+      }
+    }
+  };
+
+  if (loading) {
+    return <ProductLoadingState />;
+  }
+
+  if (!product) {
+    return <ProductNotFoundState />;
+  }
+
+  const handleAddToCart = () => {
+    console.log("Adding to cart from ProductDetailPage:", {
+      ...product,
+      quantity,
+    });
+    addToCart({ ...product, quantity, id: product.id }); // Pass product.id explicitly
+  };
+
+  return (
+    <div className="bg-white p-8 rounded-lg shadow-md">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <ProductImageGallery
+          product={product}
+          mainImage={mainImage}
+          setMainImage={setMainImage}
+        />
+
+        <ProductInfoSection
+          product={product}
+          quantity={quantity}
+          setQuantity={setQuantity}
+          isOwner={isOwner}
+          handleDelete={handleDelete}
+          handleAddToCart={handleAddToCart}
+          id={id}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default ProductDetailPage;
