@@ -25,15 +25,19 @@ type Order struct {
 	UpdatedAt  time.Time `json:"updated_at"`
 }
 type Payment struct {
-	ID           uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
-	OrderID      uuid.UUID `gorm:"type:uuid;index" json:"order_id"`
-	Provider     string    `json:"provider"`
-	ProviderTxID *string   `json:"provider_tx_id,omitempty"`
-	AmountCents  int64     `json:"amount_cents"`
-	Currency     string    `gorm:"default:USD" json:"currency"`
-	Status       string    `gorm:"default:initiated" json:"status"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID                uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
+	OrderID           uuid.UUID `gorm:"type:uuid;not null"`
+	Provider          string    `gorm:"not null"`
+	ProviderTxID      *string   // e.g. Stripe ID or generic provider ref
+	AmountCents       int64     `gorm:"not null"`
+	Currency          string    `gorm:"default:'KES'"`
+	Status            string    `gorm:"default:'initiated'"` // initiated | pending | paid | failed
+	Phone             *string   // customer phone
+	CheckoutRequestID *string   // M-Pesa STK request ID
+	MpesaReceipt      *string   // M-Pesa receipt number from callback
+	SorobanTxID       *string   // Stellar Soroban tx id
+	CreatedAt         time.Time `gorm:"autoCreateTime"`
+	UpdatedAt         time.Time `gorm:"autoUpdateTime"`
 }
 type Product struct {
 	ID               uuid.UUID      `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
@@ -41,7 +45,7 @@ type Product struct {
 	Title            string         `gorm:"not null" json:"title"`
 	Description      *string        `json:"description,omitempty"`
 	PriceCents       int64          `gorm:"not null" json:"price_cents"`
-	Currency   string    `gorm:"default:KES" json:"currency"`
+	Currency         string         `gorm:"default:KES" json:"currency"`
 	SKU              *string        `json:"sku,omitempty"`
 	Stock            int            `gorm:"default:0" json:"stock"`
 	AuthenticityHash *string        `json:"authenticity_hash,omitempty"`
@@ -94,4 +98,43 @@ type CartItem struct {
 	Product   Product   `gorm:"foreignKey:ProductID"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+// STK Callback Wrapper matches the whole payload from Safaricom
+type StkCallbackWrapper struct {
+	Body struct {
+		StkCallback struct {
+			MerchantRequestID string `json:"MerchantRequestID"`
+			CheckoutRequestID string `json:"CheckoutRequestID"`
+			ResultCode        int    `json:"ResultCode"`
+			ResultDesc        string `json:"ResultDesc"`
+			CallbackMetadata  struct {
+				Item []struct {
+					Name  string      `json:"Name"`
+					Value interface{} `json:"Value,omitempty"`
+				} `json:"Item"`
+			} `json:"CallbackMetadata"`
+		} `json:"stkCallback"`
+	} `json:"Body"`
+}
+
+type StkCallbackBody struct {
+	StkCallback StkCallback `json:"stkCallback"`
+}
+
+type StkCallback struct {
+	MerchantRequestID string            `json:"MerchantRequestID"`
+	CheckoutRequestID string            `json:"CheckoutRequestID"`
+	ResultCode        int               `json:"ResultCode"`
+	ResultDesc        string            `json:"ResultDesc"`
+	CallbackMetadata  *CallbackMetadata `json:"CallbackMetadata,omitempty"`
+}
+
+type CallbackMetadata struct {
+	Item []CallbackItem `json:"Item"`
+}
+
+type CallbackItem struct {
+	Name  string      `json:"Name"`
+	Value interface{} `json:"Value,omitempty"`
 }

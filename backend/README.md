@@ -25,6 +25,10 @@ GRANT ALL PRIVILEGES ON DATABASE trustmall_dev TO trustmall;
 
 ``\dx``
 
-- to open db
-psql -U trustmall -d trustmall_dev -h localhost -p 5432
 
+
+PassKey bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919
+
+Consure Key jo88XqPxzYjVjITKrIBNAiUyLguSyvYVxyGyJ9zx74B9sFFK
+
+consumer secret e8q902XKkGB8njTPgO5HDzCBQpyEEAwo0jSARlBHeG3B3Gg9HOooAOApVMVIqmvG

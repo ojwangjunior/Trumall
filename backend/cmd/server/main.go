@@ -11,10 +11,24 @@ import (
 	"trumall/internal/db"
 	"trumall/internal/handlers"
 	"trumall/internal/middleware"
+	"trumall/mpesa"
+	"trumall/payments"
 )
 
 func main() {
 	// Load env vars
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Printf("Error loading ../../.env file: %v", err)
+		log.Println("Trying current directory...")
+		err = godotenv.Load(".env")
+		if err != nil {
+			log.Printf("Error loading .env from current dir: %v", err)
+			log.Println("Using system environment variables")
+		}
+	} else {
+		log.Println("Successfully loaded .env file")
+	}
 	err := godotenv.Load(".env")
     if err != nil {
         log.Printf("Error loading ../../.env file: %v", err)
@@ -69,7 +83,7 @@ func main() {
 	app.Get("/api/me/stores", middleware.RequireAuth(dbConn), handlers.GetUserStoresHandler(dbConn))
 	app.Get("/api/my-stores", middleware.RequireAuth(dbConn), handlers.GetMyStoresHandler(dbConn))
 	app.Put("/api/stores/:id", middleware.RequireAuth(dbConn), handlers.UpdateStoreHandler(dbConn))
-	
+
 	// Products
 	app.Post("/api/products", middleware.RequireAuth(dbConn), handlers.CreateProductHandler(dbConn))
 	app.Get("/api/products", handlers.ListProductsHandler(dbConn))
@@ -93,6 +107,10 @@ func main() {
 	app.Get("/api/cart", middleware.RequireAuth(dbConn), handlers.GetCartHandler(dbConn))
 	app.Delete("/api/cart/:id", middleware.RequireAuth(dbConn), handlers.RemoveFromCartHandler(dbConn))
 	app.Post("/api/cart/checkout", middleware.RequireAuth(dbConn), handlers.CheckoutHandler(dbConn))
+
+	//mpesa API
+	app.Post("/api/mpesa/callback", mpesa.StkCallbackHandler(dbConn))
+	app.Post("/api/payments/mpesa", payments.CreateMpesaPaymentHandler(dbConn))
 
 	// Start server
 	port := os.Getenv("PORT")
