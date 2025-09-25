@@ -15,4 +15,6 @@ func InvokeSorobanCredit(userStellarAddress string, amount int, mpesaReceipt str
 	// Example: invoke contract function `contribute` that expects (address, amount, memo)
 	cmd := exec.Command("soroban", "invoke",
 		"--id", contractID,
+		"--fn", "contribute",
+		"--arg", userStellarAddress,
 		
