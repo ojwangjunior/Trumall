@@ -23,4 +23,5 @@ func InvokeSorobanCredit(userStellarAddress string, amount int, mpesaReceipt str
 		"--rpc-url", rpcURL,
 		"--network-passphrase", network,
 	)
+	out, err := cmd.CombinedOutput()
 	
