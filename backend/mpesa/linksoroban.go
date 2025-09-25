@@ -24,4 +24,9 @@ func InvokeSorobanCredit(userStellarAddress string, amount int, mpesaReceipt str
 		"--network-passphrase", network,
 	)
 	out, err := cmd.CombinedOutput()
-	
+	if err != nil {
+		return fmt.Errorf("soroban invoke failed: %v - %s", err, string(out))
+	}
+	// parse output if needed
+	return nil
+}
