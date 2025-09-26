@@ -15,4 +15,5 @@ type oauthResp struct {
 }
 
 func GetAccessToken() (string, error) {
+	consumer := os.Getenv("MPESA_CONSUMER_KEY")
 	
