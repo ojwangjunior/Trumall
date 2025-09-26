@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
 import { useToast } from "../context/ToastContext"; // Import useToast
 
 import EditStoreHeader from "../components/store/EditStoreHeader";
