@@ -2,10 +2,9 @@ import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext"; // Import useToast
 
 import SellPageHeader from "../components/sell/SellPageHeader";
-import SellSuccessDisplay from "../components/sell/SellSuccessDisplay";
-import SellErrorDisplay from "../components/sell/SellErrorDisplay";
 import SellForm from "../components/sell/SellForm";
 
 const SellPage = () => {
@@ -19,9 +18,9 @@ const SellPage = () => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
-  const [error, setError] = useState(null);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { showToast } = useToast(); // Initialize useToast
 
   useEffect(() => {
     if (!user) {
@@ -43,17 +42,19 @@ const SellPage = () => {
         if (userStores.length > 0) {
           setStoreId(userStores[0].id);
         } else {
+          showToast("You need to create a store first.", "info"); // Use showToast
           navigate("/createstore");
         }
       } catch (error) {
         console.error("Error fetching stores:", error);
+        showToast("Error fetching your stores.", "error"); // Use showToast
       }
     };
 
     if (user) {
       fetchStores();
     }
-  }, [user, navigate]);
+  }, [user, navigate, showToast]); // Add showToast to dependency array
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -65,7 +66,6 @@ const SellPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmissionSuccess(false);
-    setError(null);
 
     const formData = new FormData();
     formData.append("store_id", storeId);
@@ -94,6 +94,7 @@ const SellPage = () => {
       console.log("Selling item:", response.data);
       setIsSubmitting(false);
       setSubmissionSuccess(true);
+      showToast("Product listed successfully!", "success"); // Use showToast for success
       setItemName("");
       setItemPrice("");
       setItemDescription("");
@@ -102,7 +103,7 @@ const SellPage = () => {
       setImagePreviews([]);
     } catch (error) {
       console.error("Error selling item:", error);
-      setError("Error selling item. Please try again.");
+      showToast("Error selling item. Please try again.", "error"); // Use showToast for error
       setIsSubmitting(false);
     }
   };
@@ -111,10 +112,6 @@ const SellPage = () => {
     <div className="container mx-auto mt-8 p-4">
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
         <SellPageHeader />
-
-        <SellSuccessDisplay submissionSuccess={submissionSuccess} />
-
-        <SellErrorDisplay error={error} />
 
         <SellForm
           itemName={itemName}
