@@ -48,4 +48,8 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 		PartyB:            shortcode,
 		PhoneNumber:       phone,
 		CallBackURL:       os.Getenv("MPESA_CALLBACK_URL"),
-		
+		AccountReference:  accountRef,
+		TransactionDesc:   fmt.Sprintf("Trumall order %s", orderID),
+	}
+
+	
