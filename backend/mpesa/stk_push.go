@@ -45,4 +45,7 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 		TransactionType:   "CustomerPayBillOnline",
 		Amount:            amount,
 		PartyA:            phone, // payer MSISDN in format 2547XXXXXXXX
+		PartyB:            shortcode,
+		PhoneNumber:       phone,
+		CallBackURL:       os.Getenv("MPESA_CALLBACK_URL"),
 		
