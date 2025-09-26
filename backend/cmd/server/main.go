@@ -29,18 +29,18 @@ func main() {
 	} else {
 		log.Println("Successfully loaded .env file")
 	}
-	err := godotenv.Load(".env")
-    if err != nil {
-        log.Printf("Error loading ../../.env file: %v", err)
-        log.Println("Trying current directory...")
-        err = godotenv.Load(".env")
-        if err != nil {
-            log.Printf("Error loading .env from current dir: %v", err)
-            log.Println("Using system environment variables")
-        }
-    } else {
-        log.Println("Successfully loaded .env file")
-    }
+	// err = godotenv.Load(".env")
+	// if err != nil {
+	// 	log.Printf("Error loading ../../.env file: %v", err)
+	// 	log.Println("Trying current directory...")
+	// 	err = godotenv.Load(".env")
+	// 	if err != nil {
+	// 		log.Printf("Error loading .env from current dir: %v", err)
+	// 		log.Println("Using system environment variables")
+	// 	}
+	// } else {
+	// 	log.Println("Successfully loaded .env file")
+	// }
 
 	// Connect DB
 	dbConn, err := db.Connect()
