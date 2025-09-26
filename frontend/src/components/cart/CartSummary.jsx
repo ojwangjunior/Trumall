@@ -90,4 +90,14 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
                 <span>Credit/Debit Card</span>
               </label>
               <label className="flex items-center space-x-2">
-                
+                <input
+                  type="radio"
+                  value="cod"
+                  checked={paymentMethod === "cod"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                />
+                <span>Cash on Delivery</span>
+              </label>
+            </div>
+
+           
