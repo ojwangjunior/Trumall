@@ -69,4 +69,7 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md relative">
             <h2 className="text-xl font-semibold mb-4">Choose Payment Method</h2>
 
-           
+            {/* Payment options */}
+            <div className="space-y-2">
+              <label className="flex items-center space-x-2">
+                
