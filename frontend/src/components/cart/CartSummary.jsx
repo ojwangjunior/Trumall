@@ -78,4 +78,7 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
                   checked={paymentMethod === "mpesa"}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
+                <span>M-Pesa</span>
+              </label>
+              <label className="flex items-center space-x-2">
               
