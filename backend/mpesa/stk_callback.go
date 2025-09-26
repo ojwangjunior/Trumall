@@ -20,3 +20,6 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 			log.Println("callback decode err:", err)
 			return c.Status(fiber.StatusBadRequest).SendString("invalid payload")
 		}
+
+		sc := cb.Body.StkCallback
+		
