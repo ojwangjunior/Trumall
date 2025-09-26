@@ -34,4 +34,8 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
         alert("✅ STK Push sent! Check your phone to complete payment.");
         setShowModal(false);
         setPhone("");
-        
+        setPaymentMethod("");
+      } catch (err) {
+        console.error("Checkout error:", err);
+        setError("Payment failed to start. Please try again.");
+     
