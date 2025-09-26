@@ -50,4 +50,8 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
     <div className="mt-8 flex justify-end items-center">
       <div className="text-lg font-bold mr-4">
         Total:{" "}
-        
+        {new Intl.NumberFormat("en-KE", {
+          style: "currency",
+          currency: cartItems[0]?.Product.currency || "KES",
+        }).format(calculateTotal() / 100)}
+      </div>
