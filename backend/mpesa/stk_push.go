@@ -63,4 +63,8 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 	if err != nil {
 		return "", err
 	}
+	defer resp.Body.Close()
+
+	// Example response contains CheckoutRequestID and MerchantRequestID
+	var r map[string]interface{}
 	
