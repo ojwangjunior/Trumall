@@ -14,6 +14,7 @@ const MpesaPaymentModal = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneError, setPhoneError] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("mpesa");
 
   const validatePhone = (phone) => {
     const phoneRegex = /^(?:\+?254|0)?([17]\d{8})$/;
@@ -43,41 +44,53 @@ const MpesaPaymentModal = ({
   };
 
   const handleCheckout = async () => {
-    if (!phoneNumber || !validatePhone(phoneNumber)) {
-      setPhoneError("Please enter a valid phone number");
+    if (!paymentMethod) {
+      showToast("Please select a payment method", "error");
       return;
     }
 
-    setIsProcessing(true);
-    try {
-      const formattedPhone = formatPhone(phoneNumber);
-      const axios = (await import("axios")).default;
+    if (paymentMethod === "mpesa") {
+      if (!phoneNumber || !validatePhone(phoneNumber)) {
+        setPhoneError("Please enter a valid phone number");
+        return;
+      }
 
-      await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/api/cart/checkout`,
-        {
-          order_id: Date.now().toString(),
-          phone: formattedPhone,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+      setIsProcessing(true);
+      try {
+        const formattedPhone = formatPhone(phoneNumber);
+        const axios = (await import("axios")).default;
+
+        await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/cart/checkout`,
+          {
+            order_id: Date.now().toString(),
+            phone: formattedPhone,
           },
-        }
-      );
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
-      onPaymentSuccess();
+        onPaymentSuccess();
+        showToast(
+          "STK Push sent! Check your phone to complete payment.",
+          "success"
+        );
+        onClose();
+      } catch (err) {
+        console.error("Checkout error:", err);
+        onPaymentError(err);
+        showToast("Payment failed to start. Please try again.", "error");
+      } finally {
+        setIsProcessing(false);
+      }
+    } else {
       showToast(
-        "STK Push sent! Check your phone to complete payment.",
-        "success"
+        `Payment method "${paymentMethod}" not implemented yet`,
+        "info"
       );
-      onClose(); 
-    } catch (err) {
-      console.error("Checkout error:", err);
-      onPaymentError(err);
-      showToast("Payment failed to start. Please try again.", "error");
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -97,12 +110,14 @@ const MpesaPaymentModal = ({
         {/* Modal Header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-            <Phone className="w-6 h-6 text-green-600" />
+            <CreditCard className="w-6 h-6 text-green-600" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">M-Pesa Payment</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              Complete Your Payment
+            </h2>
             <p className="text-sm text-gray-500">
-              Enter your phone number to proceed
+              Choose a payment method to proceed
             </p>
           </div>
         </div>
@@ -118,47 +133,85 @@ const MpesaPaymentModal = ({
               }).format(totalAmount)}
             </span>
           </div>
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Payment Method:</span>
-            <span className="font-semibold text-green-600">
-              M-Pesa STK Push
-            </span>
+        </div>
+
+        {/* Payment Method Selection */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Payment Method
+          </label>
+          <div className="space-y-2">
+            <label className="flex items-center space-x-2 p-3 border rounded-lg has-[:checked]:bg-green-50 has-[:checked]:border-green-500">
+              <input
+                type="radio"
+                value="mpesa"
+                name="paymentMethod"
+                checked={paymentMethod === "mpesa"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+              />
+              <span>M-Pesa</span>
+            </label>
+            <label className="flex items-center space-x-2 p-3 border rounded-lg has-[:checked]:bg-green-50 has-[:checked]:border-green-500">
+              <input
+                type="radio"
+                value="card"
+                name="paymentMethod"
+                checked={paymentMethod === "card"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+              />
+              <span>Credit/Debit Card</span>
+            </label>
+            <label className="flex items-center space-x-2 p-3 border rounded-lg has-[:checked]:bg-green-50 has-[:checked]:border-green-500">
+              <input
+                type="radio"
+                value="cod"
+                name="paymentMethod"
+                checked={paymentMethod === "cod"}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+              />
+              <span>Cash on Delivery</span>
+            </label>
           </div>
         </div>
 
-        {/* Phone Input */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            M-Pesa Phone Number
-          </label>
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="tel"
-              value={phoneNumber}
-              onChange={handlePhoneChange}
-              placeholder="0712345678 or 254712345678"
-              className={`
-                w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors
-                ${
-                  phoneError
-                    ? "border-red-300 focus:ring-red-500/20 focus:border-red-500"
-                    : "border-gray-300 focus:ring-green-500/20 focus:border-green-500"
-                }
-              `}
-              disabled={isProcessing}
-            />
-          </div>
-          {phoneError && (
-            <div className="flex items-center gap-1 mt-2 text-sm text-red-600">
-              <AlertCircle className="w-4 h-4" />
-              <span>{phoneError}</span>
+        {/* M-Pesa Phone Input */}
+        {paymentMethod === "mpesa" && (
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              M-Pesa Phone Number
+            </label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={handlePhoneChange}
+                placeholder="0712345678 or 254712345678"
+                className={`
+                  w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors
+                  ${
+                    phoneError
+                      ? "border-red-300 focus:ring-red-500/20 focus:border-red-500"
+                      : "border-gray-300 focus:ring-green-500/20 focus:border-green-500"
+                  }
+                `}
+                disabled={isProcessing}
+              />
             </div>
-          )}
-          <p className="text-xs text-gray-500 mt-1">
-            You will receive an STK push notification on this number
-          </p>
-        </div>
+            {phoneError && (
+              <div className="flex items-center gap-1 mt-2 text-sm text-red-600">
+                <AlertCircle className="w-4 h-4" />
+                <span>{phoneError}</span>
+              </div>
+            )}
+            <p className="text-xs text-gray-500 mt-1">
+              You will receive an STK push notification on this number
+            </p>
+          </div>
+        )}
 
         {/* Modal Actions */}
         <div className="flex gap-3">
@@ -171,11 +224,15 @@ const MpesaPaymentModal = ({
           </button>
           <button
             onClick={handleCheckout}
-            disabled={isProcessing || !phoneNumber || !!phoneError}
+            disabled={
+              isProcessing ||
+              (paymentMethod === "mpesa" && (!phoneNumber || !!phoneError))
+            }
             className={`
               flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors
               ${
-                isProcessing || !phoneNumber || !!phoneError
+                isProcessing ||
+                (paymentMethod === "mpesa" && (!phoneNumber || !!phoneError))
                   ? "bg-gray-400 text-white cursor-not-allowed"
                   : "bg-green-600 text-white hover:bg-green-700"
               }
