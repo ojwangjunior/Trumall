@@ -39,7 +39,7 @@ const MyStoresPage = () => {
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, showToast]);
 
   if (loading) {
     return <LoadingState />;
