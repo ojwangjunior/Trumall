@@ -104,4 +104,6 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
             {paymentMethod === "mpesa" && (
               <form onSubmit={handleCheckout} className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-              
+                  M-Pesa Number
+                </label>
+                
