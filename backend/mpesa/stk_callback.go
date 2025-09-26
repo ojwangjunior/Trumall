@@ -27,4 +27,9 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 			var receipt, phone string
 			for _, it := range sc.CallbackMetadata.Item {
 				n := strings.ToLower(it.Name)
+				switch n {
+				case "amount":
+					if v, ok := it.Value.(float64); ok {
+						amount = int(v)
+					}
 				
