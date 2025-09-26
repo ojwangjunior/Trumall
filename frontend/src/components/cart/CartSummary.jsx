@@ -24,4 +24,11 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
             order_id: Date.now().toString(),
             phone,
           },
-          
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+       
