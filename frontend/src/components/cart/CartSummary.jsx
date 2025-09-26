@@ -81,4 +81,10 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
                 <span>M-Pesa</span>
               </label>
               <label className="flex items-center space-x-2">
-              
+                <input
+                  type="radio"
+                  value="card"
+                  checked={paymentMethod === "card"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                />
+            
