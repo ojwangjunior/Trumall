@@ -48,4 +48,5 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 
 			// Update DB
 			if err := dbConn.Model(&models.Payment{}).
+				Where("checkout_request_id = ?", sc.CheckoutRequestID).
 				
