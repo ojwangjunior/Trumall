@@ -25,4 +25,6 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 		if sc.ResultCode == 0 {
 			var amount int
 			var receipt, phone string
-			
+			for _, it := range sc.CallbackMetadata.Item {
+				n := strings.ToLower(it.Name)
+				
