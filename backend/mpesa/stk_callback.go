@@ -16,4 +16,7 @@ import (
 func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var cb models.StkCallbackWrapper
-		
+		if err := json.Unmarshal(c.Body(), &cb); err != nil {
+			log.Println("callback decode err:", err)
+			return c.Status(fiber.StatusBadRequest).SendString("invalid payload")
+		}
