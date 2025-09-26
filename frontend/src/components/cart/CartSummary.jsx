@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { ShoppingCart, CreditCard, Shield } from "lucide-react";
 import MpesaPaymentModal from "./MpesaPaymentModal";
+import { CartContext } from "../../context/cart-context";
 
 const CartSummary = ({ calculateTotal, cartItems }) => {
+  // const { showToast } = useToast();
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const navigate = useNavigate();
+  const { clearCart } = useContext(CartContext);
 
   const handleCheckoutClick = () => {
     if (cartItems.length === 0) return;
@@ -11,10 +16,11 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
   };
 
   const handlePaymentSuccess = () => {
-    // Logic to run after successful payment (e.g., clear cart, navigate)
-    // For now, just close the modal. Cart clearing logic might be in CartProvider.
+
     setShowPaymentModal(false);
-    // showToast("Payment completed successfully!", "success"); // MpesaPaymentModal already shows a toast
+    navigate("/orders");
+    clearCart();
+    // showToast("Payment completed successfully!", "success");
   };
 
   const handlePaymentError = (error) => {
