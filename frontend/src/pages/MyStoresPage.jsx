@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
 import { useToast } from "../context/ToastContext";
 
 import MyStoresHeader from "../components/store/MyStoresHeader";
