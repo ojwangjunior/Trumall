@@ -22,7 +22,11 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
       }
     );
 
-  
+    alert("STK Push sent! Check your phone to complete payment.");
+  } catch (err) {
+    console.error("Checkout error:", err);
+    alert("Payment failed to start");
+  }
  };
 
  
