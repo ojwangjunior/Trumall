@@ -71,4 +71,6 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 				Where("checkout_request_id = ?", sc.CheckoutRequestID).
 				Updates(map[string]interface{}{
 					"status":     "failed",
-					
+					"updated_at": time.Now(),
+				}).Error
+		
