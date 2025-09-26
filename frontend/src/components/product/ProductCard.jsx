@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import Rating from "../common/Rating";
-import { CartContext } from "../../context/CartProvider";
+import { CartContext } from "../../context/cart-context";
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useContext(CartContext);
