@@ -40,4 +40,12 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 					switch v := it.Value.(type) {
 					case float64:
 						phone = fmt.Sprintf("254%d", int64(v))
-					
+					case string:
+						phone = v
+					}
+				}
+			}
+
+			// Update DB
+			if err := dbConn.Model(&models.Payment{}).
+				
