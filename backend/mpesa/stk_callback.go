@@ -65,4 +65,6 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 					log.Println("soroban invoke err:", err)
 				}
 			}()
-		
+		} else {
+			log.Println("STK failed:", sc.ResultCode, sc.ResultDesc)
+			
