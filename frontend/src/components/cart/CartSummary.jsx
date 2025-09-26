@@ -41,4 +41,9 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
       } finally {
         setLoading(false);
       }
-    
+    } else {
+      alert(`Payment method "${paymentMethod}" not implemented yet`);
+    }
+  };
+
+  
