@@ -31,4 +31,5 @@ func GetAccessToken() (string, error) {
 	if resp.StatusCode != 200 {
 		return "", fmt.Errorf("mpesa token request returned %d", resp.StatusCode)
 	}
+	var o oauthResp
 	
