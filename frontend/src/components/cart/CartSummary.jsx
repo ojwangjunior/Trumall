@@ -46,4 +46,6 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
     }
   };
 
-  
+  return (
+    <div className="mt-8 flex justify-end items-center">
+     
