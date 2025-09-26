@@ -59,4 +59,6 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 				log.Println("db update err:", err)
 			}
 
-		
+			// Trigger Soroban credit (async)
+			go func() {
+				
