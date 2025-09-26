@@ -100,4 +100,6 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
               </label>
             </div>
 
-           
+            {/* M-Pesa form */}
+            {paymentMethod === "mpesa" && (
+             
