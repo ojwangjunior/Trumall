@@ -60,4 +60,7 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 
 	client := &http.Client{Timeout: 15 * time.Second}
 	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
 	
