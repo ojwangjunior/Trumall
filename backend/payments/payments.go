@@ -13,4 +13,7 @@ import (
 func CreateMpesaPaymentHandler(dbConn *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var body struct {
+			OrderID string `json:"order_id"`
+			Phone   string `json:"phone"`
+		}
 		
