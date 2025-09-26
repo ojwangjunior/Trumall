@@ -48,4 +48,6 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
 
   return (
     <div className="mt-8 flex justify-end items-center">
-     
+      <div className="text-lg font-bold mr-4">
+        Total:{" "}
+        
