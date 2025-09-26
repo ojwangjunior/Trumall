@@ -58,4 +58,5 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 
+	client := &http.Client{Timeout: 15 * time.Second}
 	
