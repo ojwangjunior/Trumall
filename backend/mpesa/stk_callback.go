@@ -53,4 +53,10 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 					"status":        "paid",
 					"mpesa_receipt": receipt,
 					"phone":         phone,
-					
+					"amount_cents":  amount * 100,
+					"updated_at":    time.Now(),
+				}).Error; err != nil {
+				log.Println("db update err:", err)
+			}
+
+		
