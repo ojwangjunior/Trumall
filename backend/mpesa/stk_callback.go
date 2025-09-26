@@ -73,4 +73,8 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 					"status":     "failed",
 					"updated_at": time.Now(),
 				}).Error
-		
+		}
+
+		return c.JSON(fiber.Map{"ResultCode": 0, "ResultDesc": "Accepted"})
+	}
+}
