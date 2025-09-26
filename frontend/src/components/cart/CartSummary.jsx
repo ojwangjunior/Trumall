@@ -9,4 +9,5 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
   const [error, setError] = useState("");
 
   const handleCheckout = async (e) => {
-    
+    e.preventDefault();
+   
