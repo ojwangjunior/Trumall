@@ -7,6 +7,8 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
 
   try {
     const phone = prompt("Enter your M-Pesa number (format: 2547XXXXXXXX)");
+    if (!phone) return;
+
    
 
  
