@@ -1,0 +1,3 @@
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS mpesa_receipt TEXT;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS checkout_request_id TEXT;

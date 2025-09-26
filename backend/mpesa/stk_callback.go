@@ -15,6 +15,8 @@ import (
 
 func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		log.Println("Received M-Pesa Callback:", string(c.Body())) // <== log raw callback
+
 		var cb models.StkCallbackWrapper
 		if err := json.Unmarshal(c.Body(), &cb); err != nil {
 			log.Println("callback decode err:", err)
