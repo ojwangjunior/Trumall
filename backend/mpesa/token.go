@@ -22,4 +22,5 @@ func GetAccessToken() (string, error) {
 	req, _ := http.NewRequest("GET", url, nil)
 	req.SetBasicAuth(consumer, secret)
 	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
 	
