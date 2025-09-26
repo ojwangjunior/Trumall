@@ -13,4 +13,6 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
     if (!paymentMethod) return alert("Please select a payment method");
     if (cartItems.length === 0) return;
 
-   
+    if (paymentMethod === "mpesa") {
+      try {
+       
