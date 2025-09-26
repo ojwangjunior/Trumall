@@ -19,4 +19,5 @@ func GetAccessToken() (string, error) {
 	secret := os.Getenv("MPESA_CONSUMER_SECRET")
 	url := os.Getenv("MPESA_OAUTH_URL") // sandbox or prod
 
+	req, _ := http.NewRequest("GET", url, nil)
 	
