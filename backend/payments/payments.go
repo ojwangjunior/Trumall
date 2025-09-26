@@ -31,4 +31,14 @@ func CreateMpesaPaymentHandler(dbConn *gorm.DB) fiber.Handler {
 			return c.Status(500).SendString(fmt.Sprintf("stk push failed: %v", err))
 		}
 
+		// Save payment record
+		payment := models.Payment{
+			OrderID:           order.ID,
+			Provider:          "mpesa",
+			AmountCents:       order.TotalCents,
+			Currency:          "KES",
+			Status:            "pending",
+			CheckoutRequestID: &checkoutID,
+			Phone:             &body.Phone,
+		}
 		
