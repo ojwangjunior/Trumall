@@ -61,4 +61,8 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 
 			// Trigger Soroban credit (async)
 			go func() {
-				
+				if err := InvokeSorobanCredit("", amount, receipt); err != nil {
+					log.Println("soroban invoke err:", err)
+				}
+			}()
+		
