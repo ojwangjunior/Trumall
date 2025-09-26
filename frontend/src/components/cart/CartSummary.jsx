@@ -17,7 +17,14 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
       },
       {
         headers: {
-     
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // if auth needed
+        },
+      }
+    );
+
+  
+ };
+
  
   return (
     <div className="mt-8 flex justify-end items-center">
