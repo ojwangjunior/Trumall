@@ -41,4 +41,10 @@ func CreateMpesaPaymentHandler(dbConn *gorm.DB) fiber.Handler {
 			CheckoutRequestID: &checkoutID,
 			Phone:             &body.Phone,
 		}
-		
+		if err := dbConn.Create(&payment).Error; err != nil {
+			return c.Status(500).SendString("failed to save payment")
+		}
+
+		return c.JSON(payment)
+	}
+}
