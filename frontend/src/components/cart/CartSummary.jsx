@@ -87,4 +87,7 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
                   checked={paymentMethod === "card"}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 />
-            
+                <span>Credit/Debit Card</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                
