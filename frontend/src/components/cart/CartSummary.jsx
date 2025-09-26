@@ -10,4 +10,7 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
 
   const handleCheckout = async (e) => {
     e.preventDefault();
+    if (!paymentMethod) return alert("Please select a payment method");
+    if (cartItems.length === 0) return;
+
    
