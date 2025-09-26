@@ -14,7 +14,7 @@ const MpesaPaymentModal = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneError, setPhoneError] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("mpesa");
+  const [paymentMethod, setPaymentMethod] = useState("");
 
   const validatePhone = (phone) => {
     const phoneRegex = /^(?:\+?254|0)?([17]\d{8})$/;
@@ -226,6 +226,7 @@ const MpesaPaymentModal = ({
             onClick={handleCheckout}
             disabled={
               isProcessing ||
+              !paymentMethod ||
               (paymentMethod === "mpesa" && (!phoneNumber || !!phoneError))
             }
             className={`
