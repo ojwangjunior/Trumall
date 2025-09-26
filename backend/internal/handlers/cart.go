@@ -37,7 +37,9 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 
 		// Check if cart item already exists
 		var cartItem models.CartItem
-		err := db.Where("user_id = ? AND product_id = ?", userID, body.ProductID).First(&cartItem).Error
+		fmt.Println("userID:", userID.String(), "productID:", body.ProductID.String())
+
+		err := db.Where("user_id = ? AND product_id = ?", userID.String(), body.ProductID.String()).First(&cartItem).Error
 		if err == nil {
 			if cartItem.Quantity+body.Quantity > product.Stock {
 				return c.Status(400).JSON(fiber.Map{
@@ -190,7 +192,7 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 			BuyerID:    user.ID,
 			StoreID:    storeID,
 			TotalCents: totalCents,
-			Currency:   "KES",   // Change to USD if you really want USD
+			Currency:   "KES", // Change to USD if you really want USD
 			Status:     "pending",
 		}
 		if err := db.Create(&order).Error; err != nil {
