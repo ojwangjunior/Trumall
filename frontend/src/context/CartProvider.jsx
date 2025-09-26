@@ -19,8 +19,13 @@ export const CartProvider = ({ children }) => {
       });
       setCartItems(response.data);
     } catch (error) {
-      console.error("Error fetching cart:", error);
-      showToast("Failed to fetch cart items.", "error");
+      if (error.response && (error.response.status === 404 || error.response.status === 204)) {
+        // Cart is empty or not found, which is not an error in this context
+        setCartItems([]);
+      } else {
+        console.error("Error fetching cart:", error);
+        showToast("Failed to fetch cart items.", "error");
+      }
     }
   };
 
