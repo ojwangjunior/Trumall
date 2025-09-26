@@ -33,4 +33,9 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 
 	shortcode := os.Getenv("MPESA_SHORTCODE")
 	passkey := os.Getenv("MPESA_PASSKEY")
+	// Kenya local time (important to match expected timestamp)
+	loc, _ := time.LoadLocation("Africa/Nairobi")
+	ts := time.Now().In(loc).Format("20060102150405")
+	password := base64.StdEncoding.EncodeToString([]byte(shortcode + passkey + ts))
+
 	
