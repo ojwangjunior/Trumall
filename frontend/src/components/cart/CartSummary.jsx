@@ -20,4 +20,8 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
 
         await axios.post(
           `${import.meta.env.VITE_API_BASE_URL}/api/cart/checkout`,
-         
+          {
+            order_id: Date.now().toString(),
+            phone,
+          },
+          
