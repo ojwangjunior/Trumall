@@ -14,4 +14,6 @@ import (
 )
 
 func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
-	
+	return func(c *fiber.Ctx) error {
+		var cb models.StkCallbackWrapper
+		
