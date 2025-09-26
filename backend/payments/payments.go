@@ -22,4 +22,8 @@ func CreateMpesaPaymentHandler(dbConn *gorm.DB) fiber.Handler {
 
 		// lookup order, get amount
 		var order models.Order
+		if err := dbConn.First(&order, "id = ?", body.OrderID).Error; err != nil {
+			return c.Status(404).SendString("order not found")
+		}
+
 		
