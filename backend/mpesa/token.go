@@ -32,4 +32,4 @@ func GetAccessToken() (string, error) {
 		return "", fmt.Errorf("mpesa token request returned %d", resp.StatusCode)
 	}
 	var o oauthResp
-	
+	if err := json.NewDecoder(resp.Body).Decode(&o); err != nil {
