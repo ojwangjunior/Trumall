@@ -32,4 +32,8 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 					if v, ok := it.Value.(float64); ok {
 						amount = int(v)
 					}
+				case "mpesareceiptnumber":
+					if v, ok := it.Value.(string); ok {
+						receipt = v
+					}
 				
