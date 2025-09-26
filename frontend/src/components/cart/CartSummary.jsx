@@ -72,4 +72,10 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
             {/* Payment options */}
             <div className="space-y-2">
               <label className="flex items-center space-x-2">
-                
+                <input
+                  type="radio"
+                  value="mpesa"
+                  checked={paymentMethod === "mpesa"}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                />
+              
