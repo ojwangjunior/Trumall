@@ -37,7 +37,9 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 
 		// Check if cart item already exists
 		var cartItem models.CartItem
-		err := db.Where("user_id = ? AND product_id = ?", userID, body.ProductID).First(&cartItem).Error
+		fmt.Println("userID:", userID.String(), "productID:", body.ProductID.String())
+
+		err := db.Where("user_id = ? AND product_id = ?", userID.String(), body.ProductID.String()).First(&cartItem).Error
 		if err == nil {
 			if cartItem.Quantity+body.Quantity > product.Stock {
 				return c.Status(400).JSON(fiber.Map{
@@ -166,19 +168,38 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 		user := c.Locals("user").(models.User)
 
 		var cart []models.CartItem
-		db.Preload("Product").Where("user_id = ?", user.ID).Find(&cart)
+		if err := db.Preload("Product").Where("user_id = ?", user.ID).Find(&cart).Error; err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "failed to fetch cart"})
+		}
 		if len(cart) == 0 {
 			return c.Status(400).JSON(fiber.Map{"error": "cart is empty"})
 		}
 
-		// Create order
-		order := models.Order{
-			BuyerID: user.ID,
-			Status:  "pending",
+		// ✅ Get StoreID from the first product in the cart
+		storeID := cart[0].Product.StoreID
+		if storeID == uuid.Nil {
+			return c.Status(400).JSON(fiber.Map{"error": "invalid store for product"})
 		}
-		db.Create(&order)
 
-		// Create order items + deduct stock
+		// ✅ Calculate total
+		var totalCents int64
+		for _, item := range cart {
+			totalCents += int64(item.Quantity) * int64(item.Product.PriceCents)
+		}
+
+		// ✅ Create order with storeID
+		order := models.Order{
+			BuyerID:    user.ID,
+			StoreID:    storeID,
+			TotalCents: totalCents,
+			Currency:   "KES", // Change to USD if you really want USD
+			Status:     "pending",
+		}
+		if err := db.Create(&order).Error; err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "failed to create order"})
+		}
+
+		// ✅ Create order items + deduct stock
 		for _, item := range cart {
 			if item.Quantity > item.Product.Stock {
 				return c.Status(400).JSON(fiber.Map{"error": "not enough stock for " + item.Product.Title})
@@ -190,7 +211,9 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 				Quantity:       item.Quantity,
 				UnitPriceCents: item.Product.PriceCents,
 			}
-			db.Create(&orderItem)
+			if err := db.Create(&orderItem).Error; err != nil {
+				return c.Status(500).JSON(fiber.Map{"error": "failed to create order item"})
+			}
 
 			// Deduct stock
 			db.Model(&models.Product{}).
@@ -198,7 +221,7 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 				Update("stock", gorm.Expr("stock - ?", item.Quantity))
 		}
 
-		// Clear cart
+		// ✅ Clear cart
 		db.Where("user_id = ?", user.ID).Delete(&models.CartItem{})
 
 		return c.JSON(order)

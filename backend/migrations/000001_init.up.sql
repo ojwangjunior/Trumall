@@ -63,14 +63,19 @@ CREATE TABLE reviews (
 CREATE TABLE payments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  provider TEXT NOT NULL,
-  provider_tx_id TEXT,
+  provider TEXT NOT NULL,                   -- 'mpesa', 'stripe', etc.
+  provider_tx_id TEXT,                      -- generic provider transaction ref
   amount_cents BIGINT NOT NULL,
-  currency TEXT NOT NULL DEFAULT 'USD',
-  status TEXT NOT NULL DEFAULT 'initiated',
+  currency TEXT NOT NULL DEFAULT 'KES',     -- default M-Pesa currency
+  status TEXT NOT NULL DEFAULT 'initiated', -- initiated | pending | paid | failed
+  phone TEXT,
+  checkout_request_id TEXT,                 -- set when initiating STK
+  mpesa_receipt TEXT,                       -- set when callback confirms
+  soroban_tx_id TEXT,                       -- set when pushing to Soroban
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+
 
 CREATE INDEX idx_products_store ON products(store_id);
 CREATE INDEX idx_orders_buyer ON orders(buyer_id);

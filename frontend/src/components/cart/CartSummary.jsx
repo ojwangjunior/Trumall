@@ -1,6 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from "axios";
 
 const CartSummary = ({ calculateTotal, cartItems }) => {
+  const handleCheckout = async () => {
+  if (cartItems.length === 0) return;
+
+  try {
+    const phone = prompt("Enter your M-Pesa number (format: 2547XXXXXXXX)");
+    if (!phone) return;
+
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/api/cart/checkout`,
+      {
+        order_id: Date.now().toString(),
+        phone,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // if auth needed
+        },
+      }
+    );
+
+    alert("STK Push sent! Check your phone to complete payment.");
+  } catch (err) {
+    console.error("Checkout error:", err);
+    alert("Payment failed to start");
+  }
+ };
+
+ 
   return (
     <div className="mt-8 flex justify-end items-center">
       <div className="text-lg font-bold mr-4">
@@ -10,7 +39,7 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
           currency: cartItems[0]?.Product.currency || "KES",
         }).format(calculateTotal() / 100)}
       </div>
-      <button className="px-6 py-3 font-semibold text-white bg-green-500 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
+      <button onClick={handleCheckout} className="px-6 py-3 font-semibold text-white bg-green-500 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors">
         Proceed to Checkout
       </button>
     </div>
