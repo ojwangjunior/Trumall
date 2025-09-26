@@ -38,4 +38,7 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 	ts := time.Now().In(loc).Format("20060102150405")
 	password := base64.StdEncoding.EncodeToString([]byte(shortcode + passkey + ts))
 
+	reqBody := StkRequest{
+		BusinessShortCode: shortcode,
+		Password:          password,
 	
