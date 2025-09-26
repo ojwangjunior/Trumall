@@ -15,4 +15,7 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
 
     if (paymentMethod === "mpesa") {
       try {
-       
+        setLoading(true);
+        setError("");
+
+      
