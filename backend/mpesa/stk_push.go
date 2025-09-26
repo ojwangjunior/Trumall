@@ -52,4 +52,6 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 		TransactionDesc:   fmt.Sprintf("Trumall order %s", orderID),
 	}
 
+	b, _ := json.Marshal(reqBody)
+	url := os.Getenv("MPESA_STK_URL") // sandbox/prod endpoint
 	
