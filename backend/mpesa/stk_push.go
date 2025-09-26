@@ -73,4 +73,7 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 
 	if resp.StatusCode != 200 {
 		return "", fmt.Errorf("mpesa stk push error: %v", r)
+	}
+	if val, ok := r["CheckoutRequestID"].(string); ok {
+		return val, nil
 	
