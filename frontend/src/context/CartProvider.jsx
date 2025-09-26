@@ -123,6 +123,24 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const clearCart = async () => {
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/api/cart/clear`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setCartItems([]);
+      showToast("Cart cleared successfully!", "success");
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+      showToast("Failed to clear cart.", "error");
+    }
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -131,6 +149,7 @@ export const CartProvider = ({ children }) => {
         removeFromCart,
         increaseQuantity,
         decreaseQuantity,
+        clearCart,
       }}
     >
       {children}
