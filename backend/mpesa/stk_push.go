@@ -21,3 +21,6 @@ type StkRequest struct {
 	PartyB            string `json:"PartyB"`
 	PhoneNumber       string `json:"PhoneNumber"`
 	CallBackURL       string `json:"CallBackURL"`
+	AccountReference  string `json:"AccountReference"`
+	TransactionDesc   string `json:"TransactionDesc"`
+}
