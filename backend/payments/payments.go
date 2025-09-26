@@ -20,4 +20,6 @@ func CreateMpesaPaymentHandler(dbConn *gorm.DB) fiber.Handler {
 			return c.Status(400).SendString("invalid request")
 		}
 
+		// lookup order, get amount
+		var order models.Order
 		
