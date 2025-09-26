@@ -12,8 +12,9 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
     const res = await axios.post(
       `${import.meta.env.VITE_API_BASE_URL}/api/cart/checkout`,
       {
-   
-
+        order_id: Date.now().toString(),
+        phone,
+     
  
   return (
     <div className="mt-8 flex justify-end items-center">
