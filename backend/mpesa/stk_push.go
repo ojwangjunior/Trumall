@@ -27,4 +27,8 @@ type StkRequest struct {
 
 func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkoutRequestID string, err error) {
 	token, err := GetAccessToken()
+	if err != nil {
+		return "", err
+	}
+
 	
