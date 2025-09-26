@@ -6,4 +6,6 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
- 
+  const [error, setError] = useState("");
+
+  
