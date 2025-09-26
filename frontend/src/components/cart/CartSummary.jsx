@@ -32,4 +32,6 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
         );
 
         alert("✅ STK Push sent! Check your phone to complete payment.");
-       
+        setShowModal(false);
+        setPhone("");
+        
