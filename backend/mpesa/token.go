@@ -13,3 +13,6 @@ type oauthResp struct {
 	AccessToken string `json:"access_token"`
 	ExpiresIn   string `json:"expires_in"`
 }
+
+func GetAccessToken() (string, error) {
+	
