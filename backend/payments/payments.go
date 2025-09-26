@@ -26,4 +26,5 @@ func CreateMpesaPaymentHandler(dbConn *gorm.DB) fiber.Handler {
 			return c.Status(404).SendString("order not found")
 		}
 
+		checkoutID, err := mpesa.InitiateSTK(body.Phone, int(order.TotalCents/100), order.ID.String(), order.ID.String())
 		
