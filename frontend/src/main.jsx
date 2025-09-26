@@ -4,13 +4,16 @@ import './index.css';
 import App from './App.jsx';
 import { CartProvider } from './context/CartProvider';
 import { AuthProvider } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext'; // Import ToastProvider
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
-      <CartProvider>
-        <App />
-      </CartProvider>
+      <ToastProvider> {/* ToastProvider should wrap CartProvider */}
+        <CartProvider>
+          <App />
+        </CartProvider>
+      </ToastProvider>
     </AuthProvider>
   </StrictMode>,
 );
