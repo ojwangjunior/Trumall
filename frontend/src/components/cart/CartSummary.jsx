@@ -5,4 +5,5 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
   const [showModal, setShowModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [phone, setPhone] = useState("");
-  
+  const [loading, setLoading] = useState(false);
+ 
