@@ -16,4 +16,8 @@ func CreateMpesaPaymentHandler(dbConn *gorm.DB) fiber.Handler {
 			OrderID string `json:"order_id"`
 			Phone   string `json:"phone"`
 		}
+		if err := c.BodyParser(&body); err != nil {
+			return c.Status(400).SendString("invalid request")
+		}
+
 		
