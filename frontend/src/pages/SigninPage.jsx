@@ -16,7 +16,7 @@ const SigninPage = () => {
 
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const { showToast } = useToast(); // Initialize useToast
+  const { showToast } = useToast();
 
   const handleSignin = async (e) => {
     e.preventDefault();
@@ -25,10 +25,13 @@ const SigninPage = () => {
     try {
       await login(email, password);
       navigate("/");
-      showToast("Login successful", "success"); // Use showToast for success
+      showToast("Login successful", "success", "top-center");
       console.log("Login successful");
     } catch (error) {
-      showToast(error.message || "Invalid email or password. Please try again.", "error"); // Use showToast for error
+      showToast(
+        error.message || "Invalid email or password. Please try again.",
+        "error"
+      );
     } finally {
       setIsLoading(false);
     }
