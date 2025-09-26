@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -68,7 +69,7 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 	// Example response contains CheckoutRequestID and MerchantRequestID
 	var r map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&r); err != nil {
-		return "", err
+		log.Println("M-Pesa STK Response:", r)
 	}
 
 	if resp.StatusCode != 200 {
