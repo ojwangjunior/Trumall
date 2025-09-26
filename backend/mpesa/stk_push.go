@@ -79,4 +79,9 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 	}
 	// Older responses nest it inside response? adjust as needed
 	if res, ok := r["Response"].(map[string]interface{}); ok {
-	
+		if id, ok := res["CheckoutRequestID"].(string); ok {
+			return id, nil
+		}
+	}
+	return "", fmt.Errorf("no checkout id in response: %v", r)
+}
