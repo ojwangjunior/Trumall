@@ -27,4 +27,8 @@ func CreateMpesaPaymentHandler(dbConn *gorm.DB) fiber.Handler {
 		}
 
 		checkoutID, err := mpesa.InitiateSTK(body.Phone, int(order.TotalCents/100), order.ID.String(), order.ID.String())
+		if err != nil {
+			return c.Status(500).SendString(fmt.Sprintf("stk push failed: %v", err))
+		}
+
 		
