@@ -59,4 +59,5 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{Timeout: 15 * time.Second}
+	resp, err := client.Do(req)
 	
