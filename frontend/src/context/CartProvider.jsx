@@ -1,25 +1,31 @@
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./auth-context";
 import { useToast } from "./ToastContext";
 
-export const CartContext = createContext(); // Define and export CartContext
+import { CartContext } from "./cart-context";
 
 export const CartProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
   const [cartItems, setCartItems] = useState([]);
   const { showToast } = useToast();
 
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/cart`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/cart`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       setCartItems(response.data);
     } catch (error) {
-      if (error.response && (error.response.status === 404 || error.response.status === 204)) {
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 204)
+      ) {
         // Cart is empty or not found, which is not an error in this context
         setCartItems([]);
       } else {
@@ -27,7 +33,7 @@ export const CartProvider = ({ children }) => {
         showToast("Failed to fetch cart items.", "error");
       }
     }
-  };
+  }, [setCartItems, showToast]);
 
   useEffect(() => {
     if (user) {
@@ -35,11 +41,11 @@ export const CartProvider = ({ children }) => {
     } else {
       setCartItems([]);
     }
-  }, [user]);
+  }, [user, fetchCart]);
 
   const addToCart = async (product) => {
     try {
-      const response = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/cart/add`,
         {
           product_id: product.id,
@@ -118,7 +124,15 @@ export const CartProvider = ({ children }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, increaseQuantity, decreaseQuantity }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        increaseQuantity,
+        decreaseQuantity,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
