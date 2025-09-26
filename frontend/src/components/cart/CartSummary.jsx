@@ -38,4 +38,7 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
       } catch (err) {
         console.error("Checkout error:", err);
         setError("Payment failed to start. Please try again.");
-     
+      } finally {
+        setLoading(false);
+      }
+    
