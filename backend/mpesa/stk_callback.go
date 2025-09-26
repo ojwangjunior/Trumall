@@ -67,4 +67,6 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 			}()
 		} else {
 			log.Println("STK failed:", sc.ResultCode, sc.ResultDesc)
-			
+			_ = dbConn.Model(&models.Payment{}).
+				Where("checkout_request_id = ?", sc.CheckoutRequestID).
+				
