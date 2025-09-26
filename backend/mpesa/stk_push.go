@@ -56,4 +56,6 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 	url := os.Getenv("MPESA_STK_URL") // sandbox/prod endpoint
 	req, _ := http.NewRequest("POST", url, bytes.NewReader(b))
 	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+
 	
