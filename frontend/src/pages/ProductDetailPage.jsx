@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { CartContext } from "../context/CartProvider";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 
