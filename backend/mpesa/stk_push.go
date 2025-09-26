@@ -18,4 +18,6 @@ type StkRequest struct {
 	TransactionType   string `json:"TransactionType"`
 	Amount            int    `json:"Amount"`
 	PartyA            string `json:"PartyA"`
-	
+	PartyB            string `json:"PartyB"`
+	PhoneNumber       string `json:"PhoneNumber"`
+	CallBackURL       string `json:"CallBackURL"`
