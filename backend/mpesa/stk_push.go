@@ -24,3 +24,7 @@ type StkRequest struct {
 	AccountReference  string `json:"AccountReference"`
 	TransactionDesc   string `json:"TransactionDesc"`
 }
+
+func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkoutRequestID string, err error) {
+	token, err := GetAccessToken()
+	
