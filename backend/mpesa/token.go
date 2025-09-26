@@ -13,27 +13,3 @@ type oauthResp struct {
 	AccessToken string `json:"access_token"`
 	ExpiresIn   string `json:"expires_in"`
 }
-
-func GetAccessToken() (string, error) {
-	consumer := os.Getenv("MPESA_CONSUMER_KEY")
-	secret := os.Getenv("MPESA_CONSUMER_SECRET")
-	url := os.Getenv("MPESA_OAUTH_URL") // sandbox or prod
-
-	req, _ := http.NewRequest("GET", url, nil)
-	req.SetBasicAuth(consumer, secret)
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("mpesa token request returned %d", resp.StatusCode)
-	}
-	var o oauthResp
-	if err := json.NewDecoder(resp.Body).Decode(&o); err != nil {
-		return "", err
-	}
-	return o.AccessToken, nil
-}
