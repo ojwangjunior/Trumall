@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ProductCard from "../components/product/ProductCard";
 import CategoryMenu from "../components/product/CategoryMenu";
+import { useToast } from "../context/ToastContext";
 
 const HomePage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { showToast } = useToast(); // Initialize useToast
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -20,38 +21,19 @@ const HomePage = () => {
         const data = await response.json();
         setProducts(data);
       } catch (error) {
-        setError(error);
+        showToast(error.message || "An error occurred while fetching products.", "error"); // Use showToast
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [showToast]); // Add showToast to dependency array
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="text-red-500 text-xl mb-2">
-            ⚠️ Error Loading Products
-          </div>
-          <p className="text-gray-600">{error.message}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
       </div>
     );
   }
@@ -94,8 +76,7 @@ const HomePage = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
+                  d="M9 5l7 7-7 7"n                />
               </svg>
             </Link>
           </div>
