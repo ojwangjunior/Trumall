@@ -31,4 +31,6 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 		return "", err
 	}
 
+	shortcode := os.Getenv("MPESA_SHORTCODE")
+	passkey := os.Getenv("MPESA_PASSKEY")
 	
