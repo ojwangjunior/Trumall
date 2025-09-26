@@ -36,4 +36,6 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 					if v, ok := it.Value.(string); ok {
 						receipt = v
 					}
-				
+				case "phonenumber", "phone":
+					switch v := it.Value.(type) {
+					
