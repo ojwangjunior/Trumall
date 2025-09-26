@@ -41,4 +41,8 @@ func InitiateSTK(phone string, amount int, accountRef, orderID string) (checkout
 	reqBody := StkRequest{
 		BusinessShortCode: shortcode,
 		Password:          password,
-	
+		Timestamp:         ts,
+		TransactionType:   "CustomerPayBillOnline",
+		Amount:            amount,
+		PartyA:            phone, // payer MSISDN in format 2547XXXXXXXX
+		
