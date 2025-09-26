@@ -39,7 +39,7 @@ func AddToCartHandler(db *gorm.DB) fiber.Handler {
 		var cartItem models.CartItem
 		fmt.Println("userID:", userID.String(), "productID:", body.ProductID.String())
 
-		err := db.Where("user_id = ? AND product_id = ?", userID.String(), body.ProductID.String()).First(&cartItem).Error
+		err := db.Where("user_id = ? AND product_id = ?", userID, body.ProductID).First(&cartItem).Error
 		if err == nil {
 			if cartItem.Quantity+body.Quantity > product.Stock {
 				return c.Status(400).JSON(fiber.Map{
