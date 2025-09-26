@@ -33,3 +33,7 @@ func GetAccessToken() (string, error) {
 	}
 	var o oauthResp
 	if err := json.NewDecoder(resp.Body).Decode(&o); err != nil {
+		return "", err
+	}
+	return o.AccessToken, nil
+}
