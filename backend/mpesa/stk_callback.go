@@ -23,4 +23,6 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 
 		sc := cb.Body.StkCallback
 		if sc.ResultCode == 0 {
+			var amount int
+			var receipt, phone string
 			
