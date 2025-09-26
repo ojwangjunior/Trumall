@@ -106,4 +106,7 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   M-Pesa Number
                 </label>
-                
+                <input
+                  type="tel"
+                  placeholder="2547XXXXXXXX"
+                 
