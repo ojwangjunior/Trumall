@@ -55,3 +55,10 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
           currency: cartItems[0]?.Product.currency || "KES",
         }).format(calculateTotal() / 100)}
       </div>
+
+      <button
+        onClick={() => setShowModal(true)}
+        className="px-6 py-3 font-semibold text-white bg-green-600 rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
+      >
+        Proceed to Checkout
+      </button>
