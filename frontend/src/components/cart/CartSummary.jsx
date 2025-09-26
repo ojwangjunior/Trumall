@@ -5,11 +5,10 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
   const handleCheckout = async () => {
   if (cartItems.length === 0) return;
 
-  
- };
+  try {
+   
 
 
- 
   return (
     <div className="mt-8 flex justify-end items-center">
       <div className="text-lg font-bold mr-4">
