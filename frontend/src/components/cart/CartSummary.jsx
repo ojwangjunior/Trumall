@@ -9,7 +9,8 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
     const phone = prompt("Enter your M-Pesa number (format: 2547XXXXXXXX)");
     if (!phone) return;
 
-   
+    const res = await axios.post(
+     
 
  
   return (
