@@ -29,4 +29,6 @@ func GetAccessToken() (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("mpesa token request returned %d", resp.StatusCode)
+	}
 	
