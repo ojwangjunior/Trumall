@@ -62,3 +62,11 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
       >
         Proceed to Checkout
       </button>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md relative">
+            <h2 className="text-xl font-semibold mb-4">Choose Payment Method</h2>
+
+           
