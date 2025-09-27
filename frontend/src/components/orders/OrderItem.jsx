@@ -103,7 +103,7 @@ const OrderItem = ({ order }) => {
                   {orderItem.product.images &&
                   orderItem.product.images.length > 0 ? (
                     <img
-                      src={orderItem.product.images[0].image_url}
+                      src={`${import.meta.env.VITE_API_BASE_URL}${orderItem.product.images[0].image_url}`}
                       alt={orderItem.product.title}
                       className="w-full h-full object-cover"
                     />
