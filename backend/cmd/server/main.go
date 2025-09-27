@@ -83,7 +83,7 @@ func main() {
 	app.Delete("/api/products/:id", middleware.RequireAuth(dbConn), handlers.DeleteProductHandler(dbConn))
 
 	// Orders
-	app.Post("/api/orders", middleware.RequireAuth(dbConn), handlers.CreateOrderHandler(dbConn))
+	app.Get("/api/orders", middleware.RequireAuth(dbConn), handlers.GetOrdersHandler(dbConn))
 
 	// Payments / Webhooks
 	
