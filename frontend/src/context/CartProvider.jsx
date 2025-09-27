@@ -1,29 +1,39 @@
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import axios from "axios";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "./auth-context";
+import { useToast } from "./ToastContext";
 
-export const CartContext = createContext(); // Define and export CartContext
+import { CartContext } from "./cart-context";
 
 export const CartProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
   const [cartItems, setCartItems] = useState([]);
-  const [cartError, setCartError] = useState(null);
-  const [cartSuccess, setCartSuccess] = useState(null);
+  const { showToast } = useToast();
 
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/cart`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/cart`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
       setCartItems(response.data);
-      setCartError(null); 
     } catch (error) {
-      console.error("Error fetching cart:", error);
-      setCartError("Failed to fetch cart items.");
+      if (
+        error.response &&
+        (error.response.status === 404 || error.response.status === 204)
+      ) {
+        // Cart is empty or not found, which is not an error in this context
+        setCartItems([]);
+      } else {
+        console.error("Error fetching cart:", error);
+        showToast("Failed to fetch cart items.", "error");
+      }
     }
-  };
+  }, [setCartItems, showToast]);
 
   useEffect(() => {
     if (user) {
@@ -31,11 +41,11 @@ export const CartProvider = ({ children }) => {
     } else {
       setCartItems([]);
     }
-  }, [user]);
+  }, [user, fetchCart]);
 
   const addToCart = async (product) => {
     try {
-      const response = await axios.post(
+      await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/api/cart/add`,
         {
           product_id: product.id,
@@ -48,16 +58,14 @@ export const CartProvider = ({ children }) => {
         }
       );
       fetchCart();
-      setCartError(null);
-      setCartSuccess("Item added to cart!");
+      showToast("Item added to cart!", "success");
     } catch (error) {
       console.error("Error adding to cart:", error);
       if (error.response && error.response.data && error.response.data.error) {
-        setCartError(error.response.data.error);
+        showToast(error.response.data.error, "error");
       } else {
-        setCartError("Failed to add item to cart.");
+        showToast("Failed to add item to cart.", "error");
       }
-      setCartSuccess(null); 
     }
   };
 
@@ -72,12 +80,10 @@ export const CartProvider = ({ children }) => {
         }
       );
       fetchCart();
-      setCartError(null);
-      setCartSuccess("Item removed from cart!");
+      showToast("Item removed from cart!", "success");
     } catch (error) {
       console.error("Error removing from cart:", error);
-      setCartError("Failed to remove item from cart.");
-      setCartSuccess(null);
+      showToast("Failed to remove item from cart.", "error");
     }
   };
 
@@ -93,10 +99,9 @@ export const CartProvider = ({ children }) => {
         }
       );
       setCartItems(response.data);
-      setCartError(null);
     } catch (error) {
       console.error("Error increasing quantity:", error);
-      setCartError("Failed to increase quantity.");
+      showToast("Failed to increase quantity.", "error");
     }
   };
 
@@ -112,15 +117,41 @@ export const CartProvider = ({ children }) => {
         }
       );
       setCartItems(response.data);
-      setCartError(null);
     } catch (error) {
       console.error("Error decreasing quantity:", error);
-      setCartError("Failed to decrease quantity.");
+      showToast("Failed to decrease quantity.", "error");
+    }
+  };
+
+  const clearCart = async () => {
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/api/cart/clear`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setCartItems([]);
+      showToast("Cart cleared successfully!", "success");
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+      showToast("Failed to clear cart.", "error");
     }
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, increaseQuantity, decreaseQuantity, cartError, setCartError, cartSuccess, setCartSuccess }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        increaseQuantity,
+        decreaseQuantity,
+        clearCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

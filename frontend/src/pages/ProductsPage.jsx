@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useToast } from "../context/ToastContext"; // Import useToast
 
 import ProductsHeader from "../components/product/ProductsHeader";
 import ProductSearchAndSort from "../components/product/ProductSearchAndSort";
@@ -7,14 +8,13 @@ import ProductList from "../components/product/ProductList";
 import ProductCountDisplay from "../components/product/ProductCountDisplay";
 import EmptyProductsState from "../components/product/EmptyProductsState";
 import LoadingState from "../components/account/LoadingState"; // Reusing from account
-import ErrorState from "../components/account/ErrorState"; // Reusing from account
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
+  const { showToast } = useToast(); // Initialize useToast
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -26,14 +26,14 @@ const ProductsPage = () => {
         setProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
-        setError(error.message);
+        showToast(error.message || "An error occurred while fetching products.", "error"); // Use showToast
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [showToast]); // Add showToast to dependency array
 
   const filteredProducts = products.filter(
     (product) =>
@@ -57,10 +57,6 @@ const ProductsPage = () => {
 
   if (loading) {
     return <LoadingState />;
-  }
-
-  if (error) {
-    return <ErrorState error={error} />;
   }
 
   return (

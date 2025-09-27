@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
+import { useToast } from "../context/ToastContext"; // Import useToast
 
 import StoreDetailHeader from "../components/store/StoreDetailHeader";
 import StoreInfoCard from "../components/store/StoreInfoCard";
 import StoreProductsSection from "../components/store/StoreProductsSection";
 import StoreLoadingState from "../components/store/StoreLoadingState";
-import StoreErrorState from "../components/store/StoreErrorState";
 import StoreNotFoundState from "../components/store/StoreNotFoundState";
 import UnauthorizedAccessState from "../components/store/UnauthorizedAccessState";
 
@@ -16,8 +16,8 @@ const StoreDetailPage = () => {
   const [store, setStore] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const { user } = useContext(AuthContext);
+  const { showToast } = useToast(); // Initialize useToast
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,21 +32,17 @@ const StoreDetailPage = () => {
         );
         setProducts(productsResponse.data);
       } catch (err) {
-        setError(err.response?.data?.error || "Error fetching store data.");
+        showToast(err.response?.data?.error || "Error fetching store data.", "error"); // Use showToast
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [id]);
+  }, [id, showToast]); // Add showToast to dependency array
 
   if (loading) {
     return <StoreLoadingState />;
-  }
-
-  if (error) {
-    return <StoreErrorState error={error} />;
   }
 
   if (!store) {

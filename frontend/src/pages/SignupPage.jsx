@@ -1,9 +1,9 @@
 import React, { useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../context/ToastContext"; // Import useToast
 
 import SignupHeader from "../components/auth/SignupHeader";
-import AuthErrorDisplay from "../components/auth/AuthErrorDisplay";
 import SignupForm from "../components/auth/SignupForm";
 import AuthFooter from "../components/auth/AuthFooter";
 
@@ -13,7 +13,6 @@ const SignupPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("buyer");
-  const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -21,24 +20,24 @@ const SignupPage = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { showToast } = useToast(); // Initialize useToast
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    setError(null);
 
     // Validation
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      showToast("Passwords do not match", "error"); // Use showToast
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
+      showToast("Password must be at least 6 characters long", "error"); // Use showToast
       return;
     }
 
     if (!acceptTerms) {
-      setError("Please accept the terms and conditions");
+      showToast("Please accept the terms and conditions", "error"); // Use showToast
       return;
     }
 
@@ -47,9 +46,10 @@ const SignupPage = () => {
     try {
       await register(name, email, password, role);
       navigate("/");
+      showToast("Registration successful", "success"); // Use showToast for success
       console.log("Registration successful");
     } catch (error) {
-      setError(error.message || "Error creating account. Please try again.");
+      showToast(error.message || "Error creating account. Please try again.", "error"); // Use showToast for error
     } finally {
       setIsLoading(false);
     }
@@ -68,8 +68,6 @@ const SignupPage = () => {
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-orange-600"></div>
 
             <SignupHeader />
-
-            <AuthErrorDisplay error={error} />
 
             <SignupForm
               name={name}

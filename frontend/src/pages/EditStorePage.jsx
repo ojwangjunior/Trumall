@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
+import { useToast } from "../context/ToastContext"; // Import useToast
 
 import EditStoreHeader from "../components/store/EditStoreHeader";
 import EditStoreForm from "../components/store/EditStoreForm";
 import StoreLoadingState from "../components/store/StoreLoadingState";
-import StoreErrorState from "../components/store/StoreErrorState";
 import StoreNotFoundState from "../components/store/StoreNotFoundState";
 import UnauthorizedAccessState from "../components/store/UnauthorizedAccessState";
 
@@ -16,9 +16,9 @@ const EditStorePage = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { showToast } = useToast(); // Initialize useToast
 
   useEffect(() => {
     const fetchStore = async () => {
@@ -30,14 +30,14 @@ const EditStorePage = () => {
         setName(response.data.name);
         setDescription(response.data.description);
       } catch (err) {
-        setError(err.response?.data?.error || "Error fetching store data.");
+        showToast(err.response?.data?.error || "Error fetching store data.", "error"); // Use showToast
       } finally {
         setLoading(false);
       }
     };
 
     fetchStore();
-  }, [id]);
+  }, [id, showToast]); // Add showToast to dependency array
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,18 +52,15 @@ const EditStorePage = () => {
           },
         }
       );
+      showToast("Store updated successfully!", "success"); // Use showToast for success
       navigate(`/store/${id}`);
     } catch (err) {
-      setError(err.response?.data?.error || "Error updating store.");
+      showToast(err.response?.data?.error || "Error updating store.", "error"); // Use showToast for error
     }
   };
 
   if (loading) {
     return <StoreLoadingState />;
-  }
-
-  if (error) {
-    return <StoreErrorState error={error} />;
   }
 
   if (!store) {

@@ -13,6 +13,7 @@ type OrderItem struct {
 	ProductID      uuid.UUID `gorm:"type:uuid;index" json:"product_id"`
 	UnitPriceCents int64     `json:"unit_price_cents"`
 	Quantity       int       `json:"quantity"`
+	Product        Product   `gorm:"foreignKey:ProductID" json:"product"`
 }
 type Order struct {
 	ID         uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
@@ -23,6 +24,7 @@ type Order struct {
 	Status     string    `gorm:"default:pending" json:"status"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
+	OrderItems []OrderItem `gorm:"foreignKey:OrderID" json:"order_items"`
 }
 type Payment struct {
 	ID                uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`

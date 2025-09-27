@@ -1,34 +1,37 @@
 import React, { useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../context/ToastContext"; // Import useToast
 
 import SigninHeader from "../components/auth/SigninHeader";
-import AuthErrorDisplay from "../components/auth/AuthErrorDisplay";
 import SigninForm from "../components/auth/SigninForm";
 import AuthFooter from "../components/auth/AuthFooter";
 
 const SigninPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const handleSignin = async (e) => {
     e.preventDefault();
-    setError(null);
     setIsLoading(true);
 
     try {
       await login(email, password);
       navigate("/");
+      showToast("Login successful", "success", "top-center");
       console.log("Login successful");
     } catch (error) {
-      setError(error.message || "Invalid email or password. Please try again.");
+      showToast(
+        error.message || "Invalid email or password. Please try again.",
+        "error"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -47,8 +50,6 @@ const SigninPage = () => {
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 to-orange-600"></div>
 
             <SigninHeader />
-
-            <AuthErrorDisplay error={error} />
 
             <SigninForm
               email={email}

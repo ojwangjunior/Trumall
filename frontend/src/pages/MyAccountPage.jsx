@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
 import axios from "axios";
+import { useToast } from "../context/ToastContext"; // Import useToast
 
 import AccountHeader from "../components/account/AccountHeader";
 import AccountProfileCard from "../components/account/AccountProfileCard";
@@ -9,16 +10,15 @@ import AccountInfoSection from "../components/account/AccountInfoSection";
 import AccountQuickActions from "../components/account/AccountQuickActions";
 import SellerDashboardCard from "../components/account/SellerDashboardCard";
 import LoadingState from "../components/account/LoadingState";
-import ErrorState from "../components/account/ErrorState";
 import AccessRequiredState from "../components/account/AccessRequiredState";
 
 const MyAccountPage = () => {
   const [user, setUser] = useState(null);
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { showToast } = useToast(); // Initialize useToast
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,14 +51,14 @@ const MyAccountPage = () => {
           setStores(storesResponse.data);
         }
       } catch (err) {
-        setError(err.response?.data?.error || "Error fetching data.");
+        showToast(err.response?.data?.error || "Error fetching data.", "error"); // Use showToast
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [showToast]); // Add showToast to dependency array
 
   const handleLogout = () => {
     logout();
@@ -67,10 +67,6 @@ const MyAccountPage = () => {
 
   if (loading) {
     return <LoadingState />;
-  }
-
-  if (error) {
-    return <ErrorState error={error} />;
   }
 
   if (!user) {

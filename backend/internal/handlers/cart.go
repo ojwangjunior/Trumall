@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"trumall/internal/models"
+	"trumall/mpesa" // Add this import
 )
 
 // Add product to cart
@@ -167,8 +169,17 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		user := c.Locals("user").(models.User)
 
+		type CheckoutRequest struct {
+			Phone string `json:"phone"`
+		}
+		var checkoutReq CheckoutRequest
+		if err := c.BodyParser(&checkoutReq); err != nil {
+			return c.Status(400).JSON(fiber.Map{"error": "invalid request body"})
+		}
+
 		var cart []models.CartItem
 		if err := db.Preload("Product").Where("user_id = ?", user.ID).Find(&cart).Error; err != nil {
+			log.Printf("Error fetching cart for user %s: %v", user.ID, err)
 			return c.Status(500).JSON(fiber.Map{"error": "failed to fetch cart"})
 		}
 		if len(cart) == 0 {
@@ -187,21 +198,36 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 			totalCents += int64(item.Quantity) * int64(item.Product.PriceCents)
 		}
 
+		// Start a transaction
+		tx := db.Begin()
+		if tx.Error != nil {
+			log.Printf("Error beginning transaction: %v", tx.Error)
+			return c.Status(500).JSON(fiber.Map{"error": "failed to begin transaction"})
+		}
+		defer func() {
+			if r := recover(); r != nil {
+				tx.Rollback()
+			}
+		}()
+
 		// ✅ Create order with storeID
 		order := models.Order{
 			BuyerID:    user.ID,
 			StoreID:    storeID,
 			TotalCents: totalCents,
-			Currency:   "KES", // Change to USD if you really want USD
-			Status:     "pending",
+			Currency:   "KES",
+			Status:     "pending", // Status is pending until payment is confirmed
 		}
-		if err := db.Create(&order).Error; err != nil {
+		if err := tx.Create(&order).Error; err != nil {
+			tx.Rollback()
+			log.Printf("Error creating order for user %s: %v", user.ID, err)
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create order"})
 		}
 
-		// ✅ Create order items + deduct stock
+		// ✅ Create order items (stock deduction and cart clearing moved to M-Pesa callback)
 		for _, item := range cart {
 			if item.Quantity > item.Product.Stock {
+				tx.Rollback()
 				return c.Status(400).JSON(fiber.Map{"error": "not enough stock for " + item.Product.Title})
 			}
 
@@ -211,19 +237,57 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 				Quantity:       item.Quantity,
 				UnitPriceCents: item.Product.PriceCents,
 			}
-			if err := db.Create(&orderItem).Error; err != nil {
+			if err := tx.Create(&orderItem).Error; err != nil {
+				tx.Rollback()
+				log.Printf("Error creating order item for order %s: %v", order.ID, err)
 				return c.Status(500).JSON(fiber.Map{"error": "failed to create order item"})
 			}
-
-			// Deduct stock
-			db.Model(&models.Product{}).
-				Where("id = ?", item.ProductID).
-				Update("stock", gorm.Expr("stock - ?", item.Quantity))
 		}
 
-		// ✅ Clear cart
-		db.Where("user_id = ?", user.ID).Delete(&models.CartItem{})
+		// ✅ Create Payment record
+		payment := models.Payment{
+			ID:          uuid.New(),
+			OrderID:     order.ID,
+			Provider:    "M-Pesa",
+			AmountCents: totalCents,
+			Currency:    "KES",
+			Status:      "initiated",
+			Phone:       &checkoutReq.Phone,
+		}
+		if err := tx.Create(&payment).Error; err != nil {
+			tx.Rollback()
+			log.Printf("Error creating payment for order %s: %v", order.ID, err)
+			return c.Status(500).JSON(fiber.Map{"error": "failed to create payment"})
+		}
 
-		return c.JSON(order)
+		// Check for minimum M-Pesa amount (1 KES = 100 cents)
+		if totalCents < 100 {
+			tx.Rollback()
+			return c.Status(400).JSON(fiber.Map{"error": "M-Pesa minimum amount is 1 KES"})
+		}
+
+		// ✅ Initiate M-Pesa STK Push
+		checkoutRequestID, err := mpesa.InitiateSTK(checkoutReq.Phone, int(totalCents/100), order.ID.String(), order.ID.String())
+		if err != nil {
+			tx.Rollback()
+			log.Printf("Error initiating M-Pesa STK push for order %s: %v", order.ID, err)
+			return c.Status(500).JSON(fiber.Map{"error": fmt.Sprintf("failed to initiate M-Pesa STK push: %v", err)})
+		}
+		payment.CheckoutRequestID = &checkoutRequestID
+		if err := tx.Save(&payment).Error; err != nil {
+			tx.Rollback()
+			log.Printf("Error saving payment with checkout request ID for order %s: %v", order.ID, err)
+			return c.Status(500).JSON(fiber.Map{"error": "failed to update payment with checkout request ID"})
+		}
+
+		if err := tx.Commit().Error; err != nil {
+			log.Printf("Error committing transaction for order %s: %v", order.ID, err)
+			return c.Status(500).JSON(fiber.Map{"error": "failed to commit transaction"})
+		}
+
+		return c.JSON(fiber.Map{
+			"order_id":            order.ID,
+			"checkout_request_id": checkoutRequestID,
+		})
 	}
 }

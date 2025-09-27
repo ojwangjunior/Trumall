@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
+import { useToast } from "../context/ToastContext"; // Import useToast
 
 import EditProductHeader from "../components/product/EditProductHeader";
-import SellSuccessDisplay from "../components/sell/SellSuccessDisplay"; // Reusing from sell
-import SellErrorDisplay from "../components/sell/SellErrorDisplay"; // Reusing from sell
 import EditProductForm from "../components/product/EditProductForm";
 
 const EditProductPage = () => {
@@ -20,9 +19,9 @@ const EditProductPage = () => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
-  const [error, setError] = useState(null);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { showToast } = useToast(); // Initialize useToast
 
   useEffect(() => {
     if (!user) {
@@ -42,12 +41,12 @@ const EditProductPage = () => {
         setStoreId(product.store_id);
       } catch (error) {
         console.error("Error fetching product:", error);
-        setError("Failed to fetch product data.");
+        showToast("Failed to fetch product data.", "error"); // Use showToast
       }
     };
 
     fetchProduct();
-  }, [id, user, navigate]);
+  }, [id, user, navigate, showToast]); // Add showToast to dependency array
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -59,7 +58,7 @@ const EditProductPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmissionSuccess(false);
-    setError(null);
+    // setError(null); // No longer needed, showToast handles dismissal
 
     const formData = new FormData();
     formData.append("store_id", storeId);
@@ -88,12 +87,13 @@ const EditProductPage = () => {
       console.log("Updating item:", response.data);
       setIsSubmitting(false);
       setSubmissionSuccess(true);
+      showToast("Product updated successfully!", "success"); // Use showToast for success
       setTimeout(() => {
         navigate(`/product/${id}`);
       }, 2000);
     } catch (error) {
       console.error("Error updating item:", error);
-      setError("Error updating item. Please try again.");
+      showToast("Error updating item. Please try again.", "error"); // Use showToast for error
       setIsSubmitting(false);
     }
   };
@@ -103,9 +103,9 @@ const EditProductPage = () => {
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
         <EditProductHeader />
 
-        <SellSuccessDisplay submissionSuccess={submissionSuccess} />
-
-        <SellErrorDisplay error={error} />
+        {/* <SellSuccessDisplay submissionSuccess={submissionSuccess} /> */}
+        {/* <SellErrorDisplay error={error} /> */}
+        {/* These displays are no longer needed as Toast handles notifications */}
 
         <EditProductForm
           itemName={itemName}

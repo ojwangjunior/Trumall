@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../context/auth-context";
+import { useToast } from "../context/ToastContext";
 
 import MyStoresHeader from "../components/store/MyStoresHeader";
 import StoreListDisplay from "../components/store/StoreListDisplay";
 import EmptyMyStoresState from "../components/store/EmptyMyStoresState";
-import LoadingState from "../components/account/LoadingState"; // Reusing from account
+import LoadingState from "../components/account/LoadingState";
 
 const MyStoresPage = () => {
   const [stores, setStores] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchStores = async () => {
@@ -26,6 +28,7 @@ const MyStoresPage = () => {
         setStores(response.data.data || []);
       } catch (error) {
         console.error("Error fetching stores:", error);
+        showToast("Failed to fetch your stores.", "error");
       } finally {
         setLoading(false);
       }
@@ -36,7 +39,7 @@ const MyStoresPage = () => {
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, showToast]);
 
   if (loading) {
     return <LoadingState />;

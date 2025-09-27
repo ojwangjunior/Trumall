@@ -1,9 +1,10 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { CartContext } from "../context/CartProvider";
-import { AuthContext } from "../context/AuthContext";
+import { CartContext } from "../context/cart-context";
+import { AuthContext } from "../context/auth-context";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../context/ToastContext";
 
 import ProductImageGallery from "../components/product/ProductImageGallery";
 import ProductInfoSection from "../components/product/ProductInfoSection";
@@ -19,6 +20,7 @@ const ProductDetailPage = () => {
   const [mainImage, setMainImage] = useState("");
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -43,6 +45,7 @@ const ProductDetailPage = () => {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching product:", error);
+        showToast("Failed to load product details.", "error");
         setLoading(false);
       }
     };
@@ -67,7 +70,7 @@ const ProductDetailPage = () => {
         navigate(`/mystores`); // or to the store page
       } catch (error) {
         console.error("Error deleting product:", error);
-        // Handle error display to user
+        showToast("Failed to delete product. Please try again.", "error");
       }
     }
   };

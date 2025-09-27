@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../../context/AuthContext';
+import { AuthContext } from '../../../context/auth-context';
 
 const MobileMenu = ({ closeMenu }) => {
   const { user, logout } = useContext(AuthContext);
