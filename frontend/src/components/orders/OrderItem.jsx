@@ -59,11 +59,9 @@ const OrderItem = ({ order }) => {
           <div className="flex items-center gap-4">
             {getStatusIcon(order.status)}
             <div>
-              <h3 className="font-bold text-lg text-gray-900">
-                {order.id}
-              </h3>
+              <h3 className="font-bold text-lg text-gray-900">{order.id}</h3>
               <p className="text-gray-600">
-                Ordered on {formatDate(order.date)}
+                Ordered on {formatDate(order.created_at)}
               </p>
             </div>
           </div>
@@ -78,10 +76,10 @@ const OrderItem = ({ order }) => {
             </div>
             <div className="text-right">
               <p className="font-bold text-xl text-gray-900">
-                ${order.total}
+                KES {(order.total_cents / 100).toFixed(2)}
               </p>
               <p className="text-gray-600 text-sm">
-                {order.items} items
+                {order.order_items.length} items
               </p>
             </div>
           </div>
@@ -96,18 +94,31 @@ const OrderItem = ({ order }) => {
             Items in this order
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {order.products.map((product, index) => (
+            {order.order_items.map((orderItem) => (
               <div
-                key={index}
+                key={orderItem.product.id}
                 className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
               >
-                <div className="text-2xl">{product.image}</div>
+                <div className="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden">
+                  {orderItem.product.images &&
+                  orderItem.product.images.length > 0 ? (
+                    <img
+                      src={orderItem.product.images[0].image_url}
+                      alt={orderItem.product.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
+                      No Image
+                    </div>
+                  )}
+                </div>
                 <div className="flex-1">
                   <p className="font-medium text-gray-900 text-sm">
-                    {product.name}
+                    {orderItem.product.title} (x{orderItem.quantity})
                   </p>
                   <p className="text-gray-600 text-sm">
-                    ${product.price}
+                    KES {(orderItem.unit_price_cents / 100).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -124,39 +135,40 @@ const OrderItem = ({ order }) => {
             <p className="text-gray-600 text-sm mb-1">
               Estimated delivery:{" "}
               <span className="font-medium">
-                {formatDate(order.estimatedDelivery)}
+                {/* Placeholder for estimated delivery, as it's not in backend data */}
+                N/A
               </span>
             </p>
-            {order.trackingNumber && (
+            {/* Placeholder for tracking number, as it's not in backend data */}
+            {/* order.trackingNumber && (
               <p className="text-gray-600 text-sm">
                 Tracking:{" "}
                 <span className="font-mono text-blue-600">
                   {order.trackingNumber}
                 </span>
               </p>
-            )}
+            )*/}
           </div>
 
           <div className="p-4 bg-green-50 rounded-xl border border-green-100">
-            <h5 className="font-semibold text-gray-900 mb-2">
-              Order Summary
-            </h5>
+            <h5 className="font-semibold text-gray-900 mb-2">Order Summary</h5>
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal:</span>
                 <span className="font-medium">
-                  ${(order.total * 0.9).toFixed(2)}
+                  KES {(order.total_cents / 100).toFixed(2)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping:</span>
                 <span className="font-medium">
-                  ${(order.total * 0.1).toFixed(2)}
+                  KES 0.00{" "}
+                  {/* Placeholder for shipping, as it's not in backend data */}
                 </span>
               </div>
               <div className="flex justify-between font-bold pt-1 border-t border-green-200">
                 <span>Total:</span>
-                <span>${order.total}</span>
+                <span>KES {(order.total_cents / 100).toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -168,12 +180,13 @@ const OrderItem = ({ order }) => {
             <Eye className="w-4 h-4" />
             View Details
           </button>
-          {order.trackingNumber && (
+          {/* Placeholder for tracking number, as it's not in backend data */}
+          {/* order.trackingNumber && (
             <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
               <Truck className="w-4 h-4" />
               Track Package
             </button>
-          )}
+          )*/}
           <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
             <Download className="w-4 h-4" />
             Download Invoice
