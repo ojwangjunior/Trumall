@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import OrderHeader from "../components/orders/OrderHeader";
 import OrderSearchAndFilter from "../components/orders/OrderSearchAndFilter";
 import OrderItem from "../components/orders/OrderItem";
@@ -7,62 +7,37 @@ import EmptyOrdersState from "../components/orders/EmptyOrdersState";
 const OrdersPage = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock order data
-  const orders = [
-    {
-      id: "ORD-2024-001",
-      date: "2024-09-15",
-      status: "delivered",
-      total: 299.99,
-      items: 3,
-      estimatedDelivery: "2024-09-18",
-      trackingNumber: "TRK123456789",
-      products: [
-        { name: "Wireless Headphones Pro", image: "🎧", price: 199.99 },
-        { name: "USB-C Cable", image: "🔌", price: 29.99 },
-        { name: "Phone Case", image: "📱", price: 69.99 },
-      ],
-    },
-    {
-      id: "ORD-2024-002",
-      date: "2024-09-12",
-      status: "shipped",
-      total: 149.5,
-      items: 2,
-      estimatedDelivery: "2024-09-19",
-      trackingNumber: "TRK987654321",
-      products: [
-        { name: "Smart Watch Band", image: "⌚", price: 49.99 },
-        { name: "Wireless Charger", image: "🔋", price: 99.51 },
-      ],
-    },
-    {
-      id: "ORD-2024-003",
-      date: "2024-09-10",
-      status: "processing",
-      total: 89.99,
-      items: 1,
-      estimatedDelivery: "2024-09-22",
-      trackingNumber: null,
-      products: [{ name: "Bluetooth Speaker", image: "🔊", price: 89.99 }],
-    },
-    {
-      id: "ORD-2024-004",
-      date: "2024-09-08",
-      status: "pending",
-      total: 449.97,
-      items: 4,
-      estimatedDelivery: "2024-09-25",
-      trackingNumber: null,
-      products: [
-        { name: "Gaming Mouse", image: "🖱️", price: 129.99 },
-        { name: "Keyboard", image: "⌨️", price: 199.99 },
-        { name: "Mouse Pad", image: "📋", price: 39.99 },
-        { name: "Webcam HD", image: "📹", price: 79.99 },
-      ],
-    },
-  ];
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const axios = (await import("axios")).default;
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/orders`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setOrders(response.data);
+    } catch (err) {
+      console.error("Failed to fetch orders:", err);
+      setError("Failed to load orders. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   const filteredOrders = orders.filter((order) => {
     const matchesFilter =
