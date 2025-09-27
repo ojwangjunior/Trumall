@@ -1,0 +1,1 @@
+ALTER TABLE payments DROP COLUMN IF EXISTS soroban_tx_id;
