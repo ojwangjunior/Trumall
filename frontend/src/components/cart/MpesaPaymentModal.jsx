@@ -15,6 +15,7 @@ const MpesaPaymentModal = ({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [isWaitingForConfirmation, setIsWaitingForConfirmation] = useState(false);
 
   const validatePhone = (phone) => {
     const phoneRegex = /^(?:\+?254|0)?([17]\d{8})$/;
@@ -60,10 +61,11 @@ const MpesaPaymentModal = ({
         const formattedPhone = formatPhone(phoneNumber);
         const axios = (await import("axios")).default;
 
-        await axios.post(
+        // Step 1: Initiate STK Push and get order_id and checkout_request_id
+        const response = await axios.post(
           `${import.meta.env.VITE_API_BASE_URL}/api/cart/checkout`,
           {
-            order_id: Date.now().toString(),
+            order_id: Date.now().toString(), // This should ideally come from backend after order creation
             phone: formattedPhone,
           },
           {
@@ -73,24 +75,70 @@ const MpesaPaymentModal = ({
           }
         );
 
-        onPaymentSuccess();
+        const { order_id, checkout_request_id } = response.data; // Assuming backend returns these IDs
+
         showToast(
-          "STK Push sent! Check your phone to complete payment.",
-          "success"
+          "STK Push sent! Check your phone to complete payment. Waiting for confirmation...",
+          "info"
         );
-        onClose();
+        setIsWaitingForConfirmation(true);
+        setIsProcessing(false); // STK push sent, no longer "processing" the request itself
+
+        // Step 2: Start polling for payment status
+        let pollAttempts = 0;
+        const maxPollAttempts = 20; // Poll for up to 20 * 3 seconds = 60 seconds
+        const pollInterval = setInterval(async () => {
+          pollAttempts++;
+          if (pollAttempts > maxPollAttempts) {
+            clearInterval(pollInterval);
+            showToast("Payment confirmation timed out. Please check your M-Pesa statement.", "error");
+            setIsWaitingForConfirmation(false);
+            onPaymentError(new Error("Payment confirmation timed out"));
+            return;
+          }
+
+          try {
+            // Hypothetical backend endpoint to check payment status
+            const statusResponse = await axios.get(
+              `${import.meta.env.VITE_API_BASE_URL}/api/payments/status`,
+              {
+                params: { orderId: order_id, checkoutRequestId: checkout_request_id },
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+
+            const paymentStatus = statusResponse.data.status; // Assuming backend returns { status: "paid" | "failed" | "pending" }
+
+            if (paymentStatus === "paid") {
+              clearInterval(pollInterval);
+              onPaymentSuccess(); // Call onPaymentSuccess only after confirmation
+              showToast("Payment confirmed successfully!", "success");
+              setIsWaitingForConfirmation(false);
+              onClose();
+            } else if (paymentStatus === "failed") {
+              clearInterval(pollInterval);
+              showToast("Payment failed. Please try again.", "error");
+              setIsWaitingForConfirmation(false);
+              onPaymentError(new Error("Payment failed"));
+            }
+            // If status is "pending" or "initiated", continue polling
+          } catch (pollError) {
+            console.error("Polling error:", pollError);
+            // Continue polling even if there's a temporary error
+          }
+        }, 3000); // Poll every 3 seconds
+
       } catch (err) {
         console.error("Checkout error:", err);
         onPaymentError(err);
         showToast("Payment failed to start. Please try again.", "error");
-      } finally {
-        setIsProcessing(false);
+        setIsWaitingForConfirmation(false); // Reset if error occurs before confirmation
+        setIsProcessing(false); // Reset processing state on error
       }
     } else {
-      showToast(
-        `Payment method "${paymentMethod}" not implemented yet`,
-        "info"
-      );
+      showToast(`Payment method "${paymentMethod}" not implemented yet`, "info");
     }
   };
 
@@ -198,7 +246,7 @@ const MpesaPaymentModal = ({
                       : "border-gray-300 focus:ring-green-500/20 focus:border-green-500"
                   }
                 `}
-                disabled={isProcessing}
+                disabled={isProcessing || isWaitingForConfirmation}
               />
             </div>
             {phoneError && (
@@ -217,23 +265,18 @@ const MpesaPaymentModal = ({
         <div className="flex gap-3">
           <button
             onClick={closeModal}
-            disabled={isProcessing}
+            disabled={isProcessing || isWaitingForConfirmation}
             className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleCheckout}
-            disabled={
-              isProcessing ||
-              !paymentMethod ||
-              (paymentMethod === "mpesa" && (!phoneNumber || !!phoneError))
-            }
+            disabled={isProcessing || isWaitingForConfirmation || !paymentMethod || (paymentMethod === 'mpesa' && (!phoneNumber || !!phoneError))}
             className={`
               flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors
               ${
-                isProcessing ||
-                (paymentMethod === "mpesa" && (!phoneNumber || !!phoneError))
+                isProcessing || isWaitingForConfirmation || (paymentMethod === 'mpesa' && (!phoneNumber || !!phoneError))
                   ? "bg-gray-400 text-white cursor-not-allowed"
                   : "bg-green-600 text-white hover:bg-green-700"
               }
@@ -243,6 +286,11 @@ const MpesaPaymentModal = ({
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Processing...
+              </>
+            ) : isWaitingForConfirmation ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Waiting for confirmation...
               </>
             ) : (
               <>
