@@ -48,9 +48,27 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 				}
 			}
 
-			// Update DB
-			if err := dbConn.Model(&models.Payment{}).
-				Where("checkout_request_id = ?", sc.CheckoutRequestID).
+			// Start a transaction for atomicity
+			tx := dbConn.Begin()
+			if tx.Error != nil {
+				log.Println("failed to begin transaction:", tx.Error)
+				return c.Status(fiber.StatusInternalServerError).SendString("internal server error")
+			}
+			defer func() {
+				if r := recover(); r != nil {
+					tx.Rollback()
+				}
+			}()
+
+			var payment models.Payment
+			if err := tx.Where("checkout_request_id = ?", sc.CheckoutRequestID).First(&payment).Error; err != nil {
+				log.Println("payment not found for checkout_request_id:", sc.CheckoutRequestID, err)
+				tx.Rollback()
+				return c.Status(fiber.StatusNotFound).SendString("payment not found")
+			}
+
+			// Update Payment status
+			if err := tx.Model(&payment).
 				Updates(map[string]interface{}{
 					"status":        "paid",
 					"mpesa_receipt": receipt,
@@ -58,7 +76,53 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 					"amount_cents":  amount * 100,
 					"updated_at":    time.Now(),
 				}).Error; err != nil {
-				log.Println("db update err:", err)
+				log.Println("db update payment err:", err)
+				tx.Rollback()
+				return c.Status(fiber.StatusInternalServerError).SendString("internal server error")
+			}
+
+			var order models.Order
+			if err := tx.Where("id = ?", payment.OrderID).First(&order).Error; err != nil {
+				log.Println("order not found for payment_id:", payment.ID, err)
+				tx.Rollback()
+				return c.Status(fiber.StatusNotFound).SendString("order not found")
+			}
+
+			var orderItems []models.OrderItem
+			if err := tx.Where("order_id = ?", order.ID).Find(&orderItems).Error; err != nil {
+				log.Println("failed to fetch order items for order:", order.ID, err)
+				tx.Rollback()
+				return c.Status(fiber.StatusInternalServerError).SendString("internal server error")
+			}
+
+			// Deduct stock
+			for _, orderItem := range orderItems {
+				if err := tx.Model(&models.Product{}).
+					Where("id = ?", orderItem.ProductID).
+					Update("stock", gorm.Expr("stock - ?", orderItem.Quantity)).Error; err != nil {
+					log.Println("failed to deduct stock for product:", orderItem.ProductID, err)
+					tx.Rollback()
+					return c.Status(fiber.StatusInternalServerError).SendString("internal server error")
+				}
+			}
+
+			// Clear cart
+			if err := tx.Where("user_id = ?", order.BuyerID).Delete(&models.CartItem{}).Error; err != nil {
+				log.Println("failed to clear cart for user:", order.BuyerID, err)
+				tx.Rollback()
+				return c.Status(fiber.StatusInternalServerError).SendString("internal server error")
+			}
+
+			// Update Order status
+			if err := tx.Model(&order).Updates(models.Order{Status: "paid", UpdatedAt: time.Now()}).Error; err != nil {
+				log.Println("db update order status err:", err)
+				tx.Rollback()
+				return c.Status(fiber.StatusInternalServerError).SendString("internal server error")
+			}
+
+			if err := tx.Commit().Error; err != nil {
+				log.Println("failed to commit transaction:", err)
+				return c.Status(fiber.StatusInternalServerError).SendString("internal server error")
 			}
 
 			// Trigger Soroban credit (async)
@@ -69,12 +133,44 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 			}()
 		} else {
 			log.Println("STK failed:", sc.ResultCode, sc.ResultDesc)
-			_ = dbConn.Model(&models.Payment{}).
-				Where("checkout_request_id = ?", sc.CheckoutRequestID).
+			// Start a transaction for failed payment
+			tx := dbConn.Begin()
+			if tx.Error != nil {
+				log.Println("failed to begin transaction for failed STK:", tx.Error)
+				return c.Status(fiber.StatusInternalServerError).SendString("internal server error")
+			}
+			defer func() {
+				if r := recover(); r != nil {
+					tx.Rollback()
+				}
+			}()
+
+			var payment models.Payment
+			if err := tx.Where("checkout_request_id = ?", sc.CheckoutRequestID).First(&payment).Error; err != nil {
+				log.Println("payment not found for failed STK checkout_request_id:", sc.CheckoutRequestID, err)
+				tx.Rollback()
+				return c.Status(fiber.StatusNotFound).SendString("payment not found for failed STK")
+			}
+
+			_ = tx.Model(&payment).
 				Updates(map[string]interface{}{
 					"status":     "failed",
 					"updated_at": time.Now(),
 				}).Error
+
+			var order models.Order
+			if err := tx.Where("id = ?", payment.OrderID).First(&order).Error; err != nil {
+				log.Println("order not found for failed payment_id:", payment.ID, err)
+				tx.Rollback()
+				return c.Status(fiber.StatusNotFound).SendString("order not found for failed payment")
+			}
+
+			_ = tx.Model(&order).Updates(models.Order{Status: "failed", UpdatedAt: time.Now()}).Error
+
+			if err := tx.Commit().Error; err != nil {
+				log.Println("failed to commit transaction for failed STK:", err)
+				return c.Status(fiber.StatusInternalServerError).SendString("internal server error")
+			}
 		}
 
 		return c.JSON(fiber.Map{"ResultCode": 0, "ResultDesc": "Accepted"})
