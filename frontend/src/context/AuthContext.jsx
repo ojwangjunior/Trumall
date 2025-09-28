@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 import { AuthContext } from "./auth-context";
@@ -7,14 +7,29 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchUser = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (token) {
-      const decodedToken = JSON.parse(atob(token.split(".")[1]));
-      setUser({ id: decodedToken.sub, email: decodedToken.email, roles: decodedToken.roles, name: decodedToken.name });
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("fetchUser response:", response.data);
+        setUser(response.data);
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+        localStorage.removeItem("token");
+        setUser(null);
+      }
     }
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   const login = async (email, password) => {
     try {
@@ -23,15 +38,13 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      // Extract the token from the nested 'data' object.
       if (!response.data || !response.data.data || !response.data.data.token) {
         throw new Error("Login successful, but no token received from server.");
       }
       const { token } = response.data.data;
 
       localStorage.setItem("token", token);
-      const decodedToken = JSON.parse(atob(token.split(".")[1]));
-      setUser({ id: decodedToken.sub, email: decodedToken.email, roles: decodedToken.roles, name: decodedToken.name });
+      await fetchUser(); // Fetch user after login
     } catch (error) {
       if (error.response && error.response.status === 401) {
         throw new Error("Invalid email or password. Please try again.");
@@ -54,12 +67,10 @@ export const AuthProvider = ({ children }) => {
         }
       );
 
-      // Extract the token from the nested 'data' object.
       const { token } = response.data.data;
 
       localStorage.setItem("token", token);
-      const decodedToken = JSON.parse(atob(token.split(".")[1]));
-      setUser({ id: decodedToken.sub, email: decodedToken.email, roles: decodedToken.roles, name: decodedToken.name });
+      await fetchUser(); // Fetch user after registration
     } catch (error) {
       console.error("Registration error:", error);
       if (error.response && error.response.data && (error.response.data.error || error.response.data.message)) {
@@ -76,7 +87,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refetchUser: fetchUser }}>
       {children}
     </AuthContext.Provider>
   );
