@@ -29,7 +29,7 @@ const CreateStorePage = () => {
       );
       console.log("Store created:", response.data);
       showToast("Store created successfully!", "success"); // Use showToast for success
-      navigate("/mystores");
+      navigate("/mystores", { state: { refresh: true } });
     } catch (err) {
       const errorMessage =
         err.response?.data?.error || "Error creating store. Please try again.";
