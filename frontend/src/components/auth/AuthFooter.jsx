@@ -2,18 +2,18 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
-const SignupFooter = () => {
+const AuthFooter = ({ page }) => {
   return (
     <>
-      {/* Sign In Link */}
+      {/* Sign In / Sign Up Link */}
       <div className="text-center mt-6 pt-6 border-t border-gray-100">
         <p className="text-gray-600">
-          Already have an account?{" "}
+          {page === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
           <Link
-            to="/signin"
+            to={page === "signin" ? "/signup" : "/signin"}
             className="text-orange-600 hover:text-orange-700 font-semibold hover:underline"
           >
-            Sign in here
+            {page === "signin" ? "Sign up here" : "Sign in here"}
           </Link>
         </p>
       </div>
@@ -32,4 +32,4 @@ const SignupFooter = () => {
   );
 };
 
-export default SignupFooter;
+export default AuthFooter;
