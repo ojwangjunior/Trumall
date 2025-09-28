@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { AuthContext } from "../context/auth-context";
 import { useToast } from "../context/ToastContext";
@@ -13,9 +14,11 @@ const MyStoresPage = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
   const { showToast } = useToast();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchStores = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_API_BASE_URL}/api/me/stores`,
@@ -25,7 +28,7 @@ const MyStoresPage = () => {
             },
           }
         );
-        setStores(response.data.data || []);
+        setStores(response.data || []);
       } catch (error) {
         console.error("Error fetching stores:", error);
         showToast("Failed to fetch your stores.", "error");
@@ -39,7 +42,7 @@ const MyStoresPage = () => {
     } else {
       setLoading(false);
     }
-  }, [user, showToast]);
+  }, [user, showToast, location.state]);
 
   if (loading) {
     return <LoadingState />;
