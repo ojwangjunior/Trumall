@@ -81,6 +81,10 @@ const ProductCard = ({ product }) => {
             </p>
           )}
 
+          {product.store && (
+            <p className="text-sm text-gray-500 mb-2">By {product.store.name}</p>
+          )}
+
           <div className="flex items-center gap-1 mb-2">
             <Rating rating={product.rating || 4.5} />
             <span className="text-sm text-gray-500 ml-1">
