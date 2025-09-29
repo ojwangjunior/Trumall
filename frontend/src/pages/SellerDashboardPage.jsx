@@ -9,6 +9,8 @@ import {
   Truck,
   Edit,
   Trash2,
+  X,
+  AlertCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -18,6 +20,9 @@ const SellerDashboardPage = () => {
   const [products, setProducts] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [toast, setToast] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -115,8 +120,96 @@ const SellerDashboardPage = () => {
     ),
   };
 
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_API_BASE_URL}/api/seller/products/${productId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setProducts(products.filter((product) => product.id !== productId));
+      setShowDeleteModal(false);
+      setProductToDelete(null);
+      showToast("Product deleted successfully!", "success");
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      showToast("Failed to delete product. Please try again.", "error");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in">
+          <div
+            className={`flex items-center gap-3 px-6 py-4 rounded-lg shadow-lg ${
+              toast.type === "success"
+                ? "bg-green-500 text-white"
+                : "bg-red-500 text-white"
+            }`}
+          >
+            {toast.type === "success" ? (
+              <CheckCircle className="w-5 h-5" />
+            ) : (
+              <AlertCircle className="w-5 h-5" />
+            )}
+            <span className="font-medium">{toast.message}</span>
+            <button
+              onClick={() => setToast(null)}
+              className="ml-2 hover:opacity-80"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-red-100 p-3 rounded-full">
+                <AlertCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800">
+                Delete Product
+              </h3>
+            </div>
+            <p className="text-slate-600 mb-6">
+              Are you sure you want to delete this product? This action cannot
+              be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setProductToDelete(null);
+                }}
+                className="px-4 py-2 rounded-lg border-2 border-slate-300 text-slate-700 font-medium hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteProduct(productToDelete)}
+                className="px-4 py-2 rounded-lg bg-red-500 text-white font-medium hover:bg-red-600 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
@@ -169,7 +262,7 @@ const SellerDashboardPage = () => {
                   Total Revenue
                 </p>
                 <p className="text-3xl font-bold text-slate-800">
-                  ${stats.totalRevenue.toFixed(2)}
+                  KES {stats.totalRevenue.toFixed(2)}
                 </p>
               </div>
               <div className="bg-green-100 p-4 rounded-xl">
@@ -213,20 +306,21 @@ const SellerDashboardPage = () => {
           <div className="p-6">
             {activeTab === "orders" && (
               <div>
-                            {loadingOrders ? (
-                              <div className="flex items-center justify-center py-12">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-                              </div>
-                            ) : orders.length === 0 ? (
-                              <div className="text-center py-12">
-                                <ShoppingBag className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                                <p className="text-slate-600 text-lg">No orders yet</p>
-                                <p className="text-slate-400 text-sm mt-2">
-                                  Orders will appear here once customers make purchases
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="space-y-4">                    {orders.map((order) => (
+                {loadingOrders ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                  </div>
+                ) : orders.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingBag className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                    <p className="text-slate-600 text-lg">No orders yet</p>
+                    <p className="text-slate-400 text-sm mt-2">
+                      Orders will appear here once customers make purchases
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {orders.map((order) => (
                       <div
                         key={order.id}
                         className="bg-slate-50 rounded-xl p-6 border border-slate-200 hover:border-orange-300 transition-all"
@@ -344,10 +438,12 @@ const SellerDashboardPage = () => {
                     {products.map((product) => (
                       <div
                         key={product.id}
-                        className="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200"
+                        className="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200 hover:shadow-xl transition-shadow"
                       >
                         <img
-                          src={`${import.meta.env.VITE_API_BASE_URL}${product.images[0].image_url}`}
+                          src={`${import.meta.env.VITE_API_BASE_URL}${
+                            product.images[0].image_url
+                          }`}
                           alt={product.title}
                           className="w-full h-48 object-cover"
                         />
@@ -365,10 +461,18 @@ const SellerDashboardPage = () => {
                             <Link
                               to={`/product/${product.id}/edit`}
                               className="p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                              title="Edit Product"
                             >
                               <Edit className="w-5 h-5" />
                             </Link>
-                            <button className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors">
+                            <button
+                              onClick={() => {
+                                setProductToDelete(product.id);
+                                setShowDeleteModal(true);
+                              }}
+                              className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                              title="Delete Product"
+                            >
                               <Trash2 className="w-5 h-5" />
                             </button>
                           </div>
