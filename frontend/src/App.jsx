@@ -20,6 +20,7 @@ import StoreDetailPage from "./pages/StoreDetailPage";
 import EditStorePage from "./pages/EditStorePage";
 import EditProductPage from "./pages/EditProductPage";
 import SellerProtectedRoute from "./context/SellerProtectedRoute";
+import SellerDashboardPage from "./pages/SellerDashboardPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
             <Route element={<SellerProtectedRoute />}>
               <Route path="/sell" element={<SellPage />} />
               <Route path="/createstore" element={<CreateStorePage />} />
+              <Route path="/seller/dashboard" element={<SellerDashboardPage />} />
             </Route>
           </Routes>
         </main>
