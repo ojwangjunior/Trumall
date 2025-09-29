@@ -17,7 +17,6 @@ const SellPage = () => {
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const { showToast } = useToast(); // Initialize useToast
@@ -65,7 +64,6 @@ const SellPage = () => {
   const handleSell = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSubmissionSuccess(false);
 
     const formData = new FormData();
     formData.append("store_id", storeId);
@@ -93,7 +91,6 @@ const SellPage = () => {
 
       console.log("Selling item:", response.data);
       setIsSubmitting(false);
-      setSubmissionSuccess(true);
       showToast("Product listed successfully!", "success"); // Use showToast for success
       setItemName("");
       setItemPrice("");
