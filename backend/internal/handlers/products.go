@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -326,5 +327,34 @@ func DeleteProductHandler(db *gorm.DB) fiber.Handler {
 		}
 
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "product deleted successfully"})
+	}
+}
+
+// GetSellerProductsHandler retrieves all products for the stores owned by the authenticated seller.
+func GetSellerProductsHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		user, ok := c.Locals("user").(models.User)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthenticated"})
+		}
+
+		var stores []models.Store
+		if err := db.Where("owner_id = ?", user.ID).Find(&stores).Error; err != nil {
+			log.Printf("Error fetching stores for user %s: %v", user.ID, err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch stores"})
+		}
+
+		var storeIDs []string
+		for _, store := range stores {
+			storeIDs = append(storeIDs, store.ID.String())
+		}
+
+		var products []models.Product
+		if err := db.Preload("Store").Preload("Images").Where("store_id IN ?", storeIDs).Find(&products).Error; err != nil {
+			log.Printf("Error fetching products for seller %s: %v", user.ID, err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch products"})
+		}
+
+		return c.JSON(products)
 	}
 }
