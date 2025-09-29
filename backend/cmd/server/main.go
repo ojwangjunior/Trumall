@@ -84,6 +84,8 @@ func main() {
 
 	// Orders
 	app.Get("/api/orders", middleware.RequireAuth(dbConn), handlers.GetOrdersHandler(dbConn))
+	app.Get("/api/seller/orders", middleware.RequireAuth(dbConn), middleware.RequireRole("seller"), handlers.GetSellerOrdersHandler(dbConn))
+	app.Put("/api/seller/orders/:id", middleware.RequireAuth(dbConn), middleware.RequireRole("seller"), handlers.UpdateOrderStatusHandler(dbConn))
 
 	// Payments / Webhooks
 	
