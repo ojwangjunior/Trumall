@@ -92,7 +92,7 @@ const SignupPage = () => {
               handleSignup={handleSignup}
             />
 
-            <AuthFooter />
+            <AuthFooter page="signup" />
           </div>
         </div>
       </div>

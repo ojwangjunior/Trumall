@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 import BuyPageHeader from "../components/buy/BuyPageHeader";
 import BuyPageSearchAndFilter from "../components/buy/BuyPageSearchAndFilter";
@@ -7,43 +8,30 @@ import BuyPageCartDisplay from "../components/buy/BuyPageCartDisplay";
 
 const BuyPage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [cart, setCart] = useState([]);
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/products`);
+        setProducts(response.data);
+        setFilteredProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   const handleSearch = () => {
-    // Handle search logic here
-    console.log("Searching for:", searchKeyword);
-    // Mock search results (ideally from backend)
-    setSearchResults([
-      {
-        id: 1,
-        name: "Laptop",
-        price: 1200,
-        description: "A powerful laptop",
-        image: "https://via.placeholder.com/150",
-      },
-      {
-        id: 2,
-        name: "Keyboard",
-        price: 75,
-        description: "A mechanical keyboard",
-        image: "https://via.placeholder.com/150",
-      },
-      {
-        id: 3,
-        name: "Mouse",
-        price: 25,
-        description: "Wireless mouse",
-        image: "https://via.placeholder.com/150",
-      },
-      {
-        id: 4,
-        name: "Monitor",
-        price: 300,
-        description: "27-inch 4K monitor",
-        image: "https://via.placeholder.com/150",
-      },
-    ]);
+    const lowercasedKeyword = searchKeyword.toLowerCase();
+    const results = products.filter(product =>
+      product.title.toLowerCase().includes(lowercasedKeyword) ||
+      product.description.toLowerCase().includes(lowercasedKeyword)
+    );
+    setFilteredProducts(results);
   };
 
   const addToCart = (item) => {
@@ -60,7 +48,7 @@ const BuyPage = () => {
         handleSearch={handleSearch}
       />
 
-      <BuyPageProductGrid searchResults={searchResults} addToCart={addToCart} />
+      <BuyPageProductGrid searchResults={filteredProducts} addToCart={addToCart} />
 
       <BuyPageCartDisplay cart={cart} />
     </div>

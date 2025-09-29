@@ -64,7 +64,7 @@ const SigninPage = () => {
               handleSignin={handleSignin}
             />
 
-            <AuthFooter />
+            <AuthFooter page="signin" />
           </div>
         </div>
       </div>
