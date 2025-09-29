@@ -116,7 +116,7 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 
 			// Build the public URL path consistently using forward slashes
 			// e.g. /public/images/products/<file>
-			webPath := filepath.ToSlash(filepath.Join(string(filepath.Separator), baseUploadDir, "images", "products", newFileName))
+			webPath := filepath.ToSlash(filepath.Join("/", strings.TrimPrefix(baseUploadDir, "./"), "images", "products", newFileName))
 
 			productImages = append(productImages, models.ProductImage{
 				ID:        uuid.New(),
@@ -356,5 +356,75 @@ func GetSellerProductsHandler(db *gorm.DB) fiber.Handler {
 		}
 
 		return c.JSON(products)
+	}
+}
+
+// DeleteSellerProductHandler allows a seller to delete their own product.
+func DeleteSellerProductHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// Get product ID from URL
+		productID, err := uuid.Parse(c.Params("id"))
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid product ID"})
+		}
+
+		// Find the existing product
+		var product models.Product
+		if err := db.Preload("Store").First(&product, "id = ?", productID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "product not found"})
+			}
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "database error"})
+		}
+
+		// Get user from context
+		user, ok := c.Locals("user").(models.User)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "unauthenticated"})
+		}
+
+		// Verify store ownership
+		if product.Store.OwnerID != user.ID {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "you do not own this product's store"})
+		}
+
+		// Delete product images from storage
+		for _, img := range product.Images {
+			// Determine base upload directory from env (default ./public)
+			baseUploadDir := os.Getenv("UPLOAD_DIR")
+			if baseUploadDir == "" {
+				baseUploadDir = "./public"
+			}
+			// Construct the full file path to delete
+			// Assuming image_url is like /public/images/products/uuid.ext
+			filePathToDelete := filepath.Join(baseUploadDir, strings.TrimPrefix(img.ImageURL, "/public/"))
+			log.Printf("Attempting to delete file: %s", filePathToDelete)
+			if err := os.Remove(filePathToDelete); err != nil {
+				log.Printf("Warning: Failed to delete image file %s: %v", filePathToDelete, err)
+			}
+		}
+
+		// Delete product and associated images from DB in a transaction
+		err = db.Transaction(func(tx *gorm.DB) error {
+			// Delete associated order items first
+			if err := tx.Where("product_id = ?", product.ID).Delete(&models.OrderItem{}).Error; err != nil {
+				return err
+			}
+			// Delete associated product images
+			if err := tx.Where("product_id = ?", product.ID).Delete(&models.ProductImage{}).Error; err != nil {
+				return err
+			}
+			// Then delete the product
+			if err := tx.Delete(&product).Error; err != nil {
+				return err
+			}
+			return nil
+		})
+
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to delete product"})
+		}
+
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "product deleted successfully"})
 	}
 }
