@@ -84,6 +84,7 @@ func main() {
 
 	// Seller Products
 	app.Get("/api/seller/products", middleware.RequireAuth(dbConn), middleware.RequireRole("seller"), handlers.GetSellerProductsHandler(dbConn))
+	app.Delete("/api/seller/products/:id", middleware.RequireAuth(dbConn), middleware.RequireRole("seller"), handlers.DeleteSellerProductHandler(dbConn))
 
 	// Orders
 	app.Get("/api/orders", middleware.RequireAuth(dbConn), handlers.GetOrdersHandler(dbConn))
