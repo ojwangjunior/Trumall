@@ -7,12 +7,17 @@ import {
   Clock,
   CheckCircle,
   Truck,
+  Edit,
+  Trash2,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const SellerDashboardPage = () => {
   const [activeTab, setActiveTab] = useState("orders");
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -29,12 +34,36 @@ const SellerDashboardPage = () => {
       } catch (error) {
         console.error("Error fetching orders:", error);
       } finally {
-        setLoading(false);
+        setLoadingOrders(false);
       }
     };
 
     if (activeTab === "orders") {
       fetchOrders();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_BASE_URL}/api/seller/products`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        setProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    if (activeTab === "products") {
+      fetchProducts();
     }
   }, [activeTab]);
 
@@ -184,21 +213,20 @@ const SellerDashboardPage = () => {
           <div className="p-6">
             {activeTab === "orders" && (
               <div>
-                {loading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-                  </div>
-                ) : orders.length === 0 ? (
-                  <div className="text-center py-12">
-                    <ShoppingBag className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-600 text-lg">No orders yet</p>
-                    <p className="text-slate-400 text-sm mt-2">
-                      Orders will appear here once customers make purchases
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {orders.map((order) => (
+                            {loadingOrders ? (
+                              <div className="flex items-center justify-center py-12">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                              </div>
+                            ) : orders.length === 0 ? (
+                              <div className="text-center py-12">
+                                <ShoppingBag className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                                <p className="text-slate-600 text-lg">No orders yet</p>
+                                <p className="text-slate-400 text-sm mt-2">
+                                  Orders will appear here once customers make purchases
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="space-y-4">                    {orders.map((order) => (
                       <div
                         key={order.id}
                         className="bg-slate-50 rounded-xl p-6 border border-slate-200 hover:border-orange-300 transition-all"
@@ -289,17 +317,66 @@ const SellerDashboardPage = () => {
             )}
 
             {activeTab === "products" && (
-              <div className="text-center py-12">
-                <Package className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h2 className="text-xl font-bold text-slate-700 mb-2">
-                  Your Products
-                </h2>
-                <p className="text-slate-500">
-                  No products yet. Start adding products to your store.
-                </p>
-                <button className="mt-6 px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors">
-                  Add Product
-                </button>
+              <div>
+                {loadingProducts ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                  </div>
+                ) : products.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Package className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold text-slate-700 mb-2">
+                      No products yet
+                    </h2>
+                    <p className="text-slate-500">
+                      Start adding products to your store.
+                    </p>
+                    <Link
+                      to="/sell"
+                      className="mt-6 px-6 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors inline-flex items-center gap-2"
+                    >
+                      <Package className="w-5 h-5" />
+                      Add Product
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {products.map((product) => (
+                      <div
+                        key={product.id}
+                        className="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200"
+                      >
+                        <img
+                          src={`${import.meta.env.VITE_API_BASE_URL}${product.images[0].image_url}`}
+                          alt={product.title}
+                          className="w-full h-48 object-cover"
+                        />
+                        <div className="p-4">
+                          <h3 className="font-bold text-lg text-slate-800 mb-1">
+                            {product.title}
+                          </h3>
+                          <p className="text-slate-600 text-sm mb-3">
+                            {product.store.name}
+                          </p>
+                          <p className="text-xl font-bold text-orange-600">
+                            {product.price_cents / 100} {product.currency}
+                          </p>
+                          <div className="flex justify-end gap-2 mt-4">
+                            <Link
+                              to={`/product/${product.id}/edit`}
+                              className="p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                            >
+                              <Edit className="w-5 h-5" />
+                            </Link>
+                            <button className="p-2 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors">
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
