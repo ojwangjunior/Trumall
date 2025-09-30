@@ -28,4 +28,7 @@ func CreateAddress(c *fiber.Ctx) error {
 	var count int64
 	db.DB.Model(&models.Address{}).Where("user_id = ?", userID).Count(&count)
 	if count == 0 {
+		input.IsDefault = true
+	}
+
 	
