@@ -95,4 +95,6 @@ func GetDefaultAddress(c *fiber.Ctx) error {
 
 	fmt.Println("Looking for default address for user:", uid)
 
+	var address models.Address
+	err := db.DB.Where("user_id = ? AND is_default = ?", uid, true).First(&address).Error
 	
