@@ -105,4 +105,7 @@ func GetDefaultAddress(c *fiber.Ctx) error {
 	return c.JSON(address)
 }
 
-/
+// Delete address
+func DeleteAddress(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(uuid.UUID) // ✅ updated
+	
