@@ -46,4 +46,7 @@ func GetAddresses(c *fiber.Ctx) error {
 
 	var addresses []models.Address
 	if err := db.DB.Where("user_id = ?", userID).Find(&addresses).Error; err != nil {
-	
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not fetch addresses",
+		})
+	}
