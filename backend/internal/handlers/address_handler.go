@@ -124,3 +124,6 @@ func DeleteAddress(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "Address deleted"})
 }
 
+// Set default address
+func SetDefaultAddress(c *fiber.Ctx) error {
+	
