@@ -102,4 +102,7 @@ func GetDefaultAddress(c *fiber.Ctx) error {
 		return c.Status(404).JSON(fiber.Map{"error": "Default address not found"})
 	}
 
-	
+	return c.JSON(address)
+}
+
+/
