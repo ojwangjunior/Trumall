@@ -126,4 +126,7 @@ func DeleteAddress(c *fiber.Ctx) error {
 
 // Set default address
 func SetDefaultAddress(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(uuid.UUID) // ✅ updated
+	idParam := c.Params("id")
+
 	
