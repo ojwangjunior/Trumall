@@ -31,4 +31,10 @@ func CreateAddress(c *fiber.Ctx) error {
 		input.IsDefault = true
 	}
 
+	if err := db.DB.Create(&input).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not save address",
+		})
+	}
+
 	
