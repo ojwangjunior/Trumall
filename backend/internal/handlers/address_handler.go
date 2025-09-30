@@ -120,3 +120,7 @@ func DeleteAddress(c *fiber.Ctx) error {
 			"error": "Could not delete address",
 		})
 	}
+
+	return c.JSON(fiber.Map{"message": "Address deleted"})
+}
+
