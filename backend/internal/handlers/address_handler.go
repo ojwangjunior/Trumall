@@ -130,4 +130,6 @@ func SetDefaultAddress(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 
 	addressID, err := uuid.Parse(idParam)
-	
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid address ID"})
+	}
