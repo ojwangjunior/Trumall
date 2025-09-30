@@ -146,4 +146,5 @@ type CallbackItem struct {
 
 type Address struct {
 	ID         uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	UserID     uuid.UUID      `gorm:"type:uuid;not null" json:"user_id"`
 	
