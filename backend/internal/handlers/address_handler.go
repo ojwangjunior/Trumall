@@ -86,3 +86,6 @@ func UpdateAddress(c *fiber.Ctx) error {
 	return c.JSON(address)
 }
 
+// Get default address
+func GetDefaultAddress(c *fiber.Ctx) error {
+	
