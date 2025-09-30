@@ -44,4 +44,6 @@ func CreateAddress(c *fiber.Ctx) error {
 func GetAddresses(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(uuid.UUID)
 
+	var addresses []models.Address
+	if err := db.DB.Where("user_id = ?", userID).Find(&addresses).Error; err != nil {
 	
