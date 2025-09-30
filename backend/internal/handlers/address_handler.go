@@ -20,3 +20,8 @@ func CreateAddress(c *fiber.Ctx) error {
 			"error": "Invalid request body",
 		})
 	}
+
+	input.ID = uuid.New()
+	input.UserID = userID
+
+	
