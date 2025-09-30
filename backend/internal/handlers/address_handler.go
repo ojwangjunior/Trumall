@@ -15,4 +15,5 @@ func CreateAddress(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(uuid.UUID) // ✅ updated
 
 	var input models.Address
-	
+	if err := c.BodyParser(&input); err != nil {
+		
