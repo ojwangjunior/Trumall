@@ -92,7 +92,7 @@ func main() {
 	app.Put("/api/seller/orders/:id", middleware.RequireAuth(dbConn), middleware.RequireRole("seller"), handlers.UpdateOrderStatusHandler(dbConn))
 
 	// Payments / Webhooks
-	
+
 	app.Get("/api/payments/status", middleware.RequireAuth(dbConn), handlers.GetPaymentStatusHandler(dbConn))
 
 	//cart
@@ -106,6 +106,14 @@ func main() {
 	//mpesa API
 	app.Post("/api/mpesa/callback", mpesa.StkCallbackHandler(dbConn))
 	app.Post("/api/payments/mpesa", payments.CreateMpesaPaymentHandler(dbConn))
+
+	// Addresses
+	app.Post("/api/addresses", middleware.RequireAuth(dbConn), handlers.CreateAddress)
+	app.Get("/api/addresses", middleware.RequireAuth(dbConn), handlers.GetAddresses)
+	app.Get("/api/addresses/default", middleware.RequireAuth(dbConn), handlers.GetDefaultAddress)
+	app.Put("/api/addresses/:id", middleware.RequireAuth(dbConn), handlers.UpdateAddress)
+	app.Delete("/api/addresses/:id", middleware.RequireAuth(dbConn), handlers.DeleteAddress)
+	app.Put("/api/addresses/:id/default", middleware.RequireAuth(dbConn), handlers.SetDefaultAddress)
 
 	// Start server
 	port := os.Getenv("PORT")
