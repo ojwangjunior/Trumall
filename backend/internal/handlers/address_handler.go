@@ -66,4 +66,9 @@ func UpdateAddress(c *fiber.Ctx) error {
 
 	var address models.Address
 	if err := db.DB.Where("id = ? AND user_id = ?", addressID, userID).First(&address).Error; err != nil {
-		
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Address not found",
+		})
+	}
+
+	
