@@ -10,3 +10,6 @@ import (
 	"trumall/internal/models"
 )
 
+// Create new address
+func CreateAddress(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(uuid.UUID) // ✅ updated
