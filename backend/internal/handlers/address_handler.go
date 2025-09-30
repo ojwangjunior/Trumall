@@ -137,4 +137,6 @@ func SetDefaultAddress(c *fiber.Ctx) error {
 	// unset all previous defaults
 	db.DB.Model(&models.Address{}).Where("user_id = ?", userID).Update("is_default", false)
 
+	// set new default
+	if err := db.DB.Model(&models.Address{}).Where("id = ? AND user_id = ?", addressID, userID).Update("is_default", true).Error; err != nil {
 	
