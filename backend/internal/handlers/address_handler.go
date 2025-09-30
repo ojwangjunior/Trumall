@@ -77,4 +77,5 @@ func UpdateAddress(c *fiber.Ctx) error {
 		})
 	}
 
-	
+	if err := db.DB.Save(&address).Error; err != nil {
+		
