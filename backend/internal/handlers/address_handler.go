@@ -24,4 +24,6 @@ func CreateAddress(c *fiber.Ctx) error {
 	input.ID = uuid.New()
 	input.UserID = userID
 
+	// If first address for user, set default automatically
+	var count int64
 	
