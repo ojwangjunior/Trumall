@@ -26,4 +26,6 @@ func CreateAddress(c *fiber.Ctx) error {
 
 	// If first address for user, set default automatically
 	var count int64
+	db.DB.Model(&models.Address{}).Where("user_id = ?", userID).Count(&count)
+	if count == 0 {
 	
