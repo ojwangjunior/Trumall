@@ -93,4 +93,6 @@ func GetDefaultAddress(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "user_id missing or wrong type"})
 	}
 
+	fmt.Println("Looking for default address for user:", uid)
+
 	
