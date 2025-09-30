@@ -88,4 +88,5 @@ func UpdateAddress(c *fiber.Ctx) error {
 
 // Get default address
 func GetDefaultAddress(c *fiber.Ctx) error {
+	uid, ok := c.Locals("user_id").(uuid.UUID)
 	
