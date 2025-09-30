@@ -151,4 +151,5 @@ type Address struct {
 	Street     string         `gorm:"size:255;not null" json:"street"`
 	City       string         `gorm:"size:100;not null" json:"city"`
 	State      string         `gorm:"size:100" json:"state"`
+	Country    string         `gorm:"size:100;default:Kenya" json:"country"`
 	
