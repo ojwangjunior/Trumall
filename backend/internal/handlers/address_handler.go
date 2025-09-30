@@ -140,4 +140,9 @@ func SetDefaultAddress(c *fiber.Ctx) error {
 	// set new default
 	if err := db.DB.Model(&models.Address{}).Where("id = ? AND user_id = ?", addressID, userID).Update("is_default", true).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-		
+			"error": "Could not set default address",
+		})
+	}
+
+	return c.JSON(fiber.Map{"message": "Default address updated"})
+}
