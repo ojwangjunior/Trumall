@@ -133,3 +133,8 @@ func SetDefaultAddress(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid address ID"})
 	}
+
+	// unset all previous defaults
+	db.DB.Model(&models.Address{}).Where("user_id = ?", userID).Update("is_default", false)
+
+	
