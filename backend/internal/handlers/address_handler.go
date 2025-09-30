@@ -65,4 +65,5 @@ func UpdateAddress(c *fiber.Ctx) error {
 	}
 
 	var address models.Address
-	
+	if err := db.DB.Where("id = ? AND user_id = ?", addressID, userID).First(&address).Error; err != nil {
+		
