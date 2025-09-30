@@ -6,4 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 
-	
+	"trumall/internal/db"
+	"trumall/internal/models"
+)
+
