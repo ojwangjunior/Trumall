@@ -156,3 +156,5 @@ type Address struct {
 	Latitude   float64        `json:"latitude"`
 	Longitude  float64        `json:"longitude"`
 	IsDefault  bool           `gorm:"not null;default:false" json:"is_default"`
+	CreatedAt  time.Time      `gorm:"autoCreateTime" json:"created_at"`
+	
