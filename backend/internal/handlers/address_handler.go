@@ -40,3 +40,8 @@ func CreateAddress(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(input)
 }
 
+// Get all addresses
+func GetAddresses(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(uuid.UUID)
+
+	
