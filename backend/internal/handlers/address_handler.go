@@ -116,4 +116,7 @@ func DeleteAddress(c *fiber.Ctx) error {
 	}
 
 	if err := db.DB.Where("id = ? AND user_id = ?", addressID, userID).Delete(&models.Address{}).Error; err != nil {
-		
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not delete address",
+		})
+	}
