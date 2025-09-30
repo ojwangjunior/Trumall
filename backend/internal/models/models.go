@@ -155,4 +155,4 @@ type Address struct {
 	PostalCode string         `gorm:"size:20" json:"postal_code"`
 	Latitude   float64        `json:"latitude"`
 	Longitude  float64        `json:"longitude"`
-	
+	IsDefault  bool           `gorm:"not null;default:false" json:"is_default"`
