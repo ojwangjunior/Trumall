@@ -13,3 +13,6 @@ import (
 // Create new address
 func CreateAddress(c *fiber.Ctx) error {
 	userID := c.Locals("user_id").(uuid.UUID) // ✅ updated
+
+	var input models.Address
+	
