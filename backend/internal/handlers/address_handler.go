@@ -78,4 +78,8 @@ func UpdateAddress(c *fiber.Ctx) error {
 	}
 
 	if err := db.DB.Save(&address).Error; err != nil {
-		
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Could not update address",
+		})
+	}
+
