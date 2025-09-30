@@ -89,4 +89,8 @@ func UpdateAddress(c *fiber.Ctx) error {
 // Get default address
 func GetDefaultAddress(c *fiber.Ctx) error {
 	uid, ok := c.Locals("user_id").(uuid.UUID)
+	if !ok {
+		return c.Status(500).JSON(fiber.Map{"error": "user_id missing or wrong type"})
+	}
+
 	
