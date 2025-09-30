@@ -72,4 +72,9 @@ func UpdateAddress(c *fiber.Ctx) error {
 	}
 
 	if err := c.BodyParser(&address); err != nil {
-		
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	
