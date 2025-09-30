@@ -71,4 +71,5 @@ func UpdateAddress(c *fiber.Ctx) error {
 		})
 	}
 
-	
+	if err := c.BodyParser(&address); err != nil {
+		
