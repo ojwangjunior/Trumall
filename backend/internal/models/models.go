@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 type OrderItem struct {
@@ -16,16 +17,16 @@ type OrderItem struct {
 	Product        Product   `gorm:"foreignKey:ProductID" json:"product"`
 }
 type Order struct {
-	ID         uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
-	BuyerID    uuid.UUID `gorm:"type:uuid;index" json:"buyer_id"`
-	StoreID    uuid.UUID `gorm:"type:uuid;index" json:"store_id"`
-	TotalCents int64     `json:"total_cents"`
-	Currency   string    `gorm:"default:USD" json:"currency"`
-	Status     string    `gorm:"default:pending" json:"status"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID         uuid.UUID   `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	BuyerID    uuid.UUID   `gorm:"type:uuid;index" json:"buyer_id"`
+	StoreID    uuid.UUID   `gorm:"type:uuid;index" json:"store_id"`
+	TotalCents int64       `json:"total_cents"`
+	Currency   string      `gorm:"default:USD" json:"currency"`
+	Status     string      `gorm:"default:pending" json:"status"`
+	CreatedAt  time.Time   `json:"created_at"`
+	UpdatedAt  time.Time   `json:"updated_at"`
 	OrderItems []OrderItem `gorm:"foreignKey:OrderID" json:"order_items"`
-	Buyer      User      `gorm:"foreignKey:BuyerID" json:"buyer"`
+	Buyer      User        `gorm:"foreignKey:BuyerID" json:"buyer"`
 }
 type Payment struct {
 	ID                uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
@@ -91,6 +92,7 @@ type User struct {
 	Roles        pq.StringArray `gorm:"type:text[]" json:"roles"` // ["buyer","seller"]
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
+	Addresses    []Address      `json:"addresses" gorm:"foreignKey:UserID"`
 }
 type CartItem struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
@@ -141,3 +143,7 @@ type CallbackItem struct {
 	Name  string      `json:"Name"`
 	Value interface{} `json:"Value,omitempty"`
 }
+
+type Address struct {
+	ID         uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	
