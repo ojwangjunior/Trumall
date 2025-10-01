@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 type OrderItem struct {
@@ -16,16 +17,16 @@ type OrderItem struct {
 	Product        Product   `gorm:"foreignKey:ProductID" json:"product"`
 }
 type Order struct {
-	ID         uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
-	BuyerID    uuid.UUID `gorm:"type:uuid;index" json:"buyer_id"`
-	StoreID    uuid.UUID `gorm:"type:uuid;index" json:"store_id"`
-	TotalCents int64     `json:"total_cents"`
-	Currency   string    `gorm:"default:USD" json:"currency"`
-	Status     string    `gorm:"default:pending" json:"status"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID         uuid.UUID   `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	BuyerID    uuid.UUID   `gorm:"type:uuid;index" json:"buyer_id"`
+	StoreID    uuid.UUID   `gorm:"type:uuid;index" json:"store_id"`
+	TotalCents int64       `json:"total_cents"`
+	Currency   string      `gorm:"default:USD" json:"currency"`
+	Status     string      `gorm:"default:pending" json:"status"`
+	CreatedAt  time.Time   `json:"created_at"`
+	UpdatedAt  time.Time   `json:"updated_at"`
 	OrderItems []OrderItem `gorm:"foreignKey:OrderID" json:"order_items"`
-	Buyer      User      `gorm:"foreignKey:BuyerID" json:"buyer"`
+	Buyer      User        `gorm:"foreignKey:BuyerID" json:"buyer"`
 }
 type Payment struct {
 	ID                uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
@@ -91,6 +92,7 @@ type User struct {
 	Roles        pq.StringArray `gorm:"type:text[]" json:"roles"` // ["buyer","seller"]
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
+	Addresses    []Address      `json:"addresses" gorm:"foreignKey:UserID"`
 }
 type CartItem struct {
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
@@ -140,4 +142,21 @@ type CallbackMetadata struct {
 type CallbackItem struct {
 	Name  string      `json:"Name"`
 	Value interface{} `json:"Value,omitempty"`
+}
+
+type Address struct {
+	ID         uuid.UUID      `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	UserID     uuid.UUID      `gorm:"type:uuid;not null" json:"user_id"`
+	Label      string         `gorm:"size:50" json:"label"`
+	Street     string         `gorm:"size:255;not null" json:"street"`
+	City       string         `gorm:"size:100;not null" json:"city"`
+	State      string         `gorm:"size:100" json:"state"`
+	Country    string         `gorm:"size:100;default:Kenya" json:"country"`
+	PostalCode string         `gorm:"size:20" json:"postal_code"`
+	Latitude   float64        `json:"latitude"`
+	Longitude  float64        `json:"longitude"`
+	IsDefault  bool           `gorm:"not null;default:false" json:"is_default"`
+	CreatedAt  time.Time      `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt  time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
 }

@@ -12,6 +12,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var DB *gorm.DB
+
 func Connect() (*gorm.DB, error) {
 	// Build the DSN from .env variables
 	dsn := fmt.Sprintf(
@@ -41,9 +43,9 @@ func Connect() (*gorm.DB, error) {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-	    "file://migrations",
-	    "postgres",
-	    driver,
+		"file://migrations",
+		"postgres",
+		driver,
 	)
 	if err != nil {
 		log.Fatalf("failed to create migrate instance: %v", err)
@@ -52,6 +54,7 @@ func Connect() (*gorm.DB, error) {
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		log.Fatalf("failed to run migrations: %v", err)
 	}
-
+	DB = db 
+	
 	return db, nil
 }
