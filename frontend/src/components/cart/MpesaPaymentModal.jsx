@@ -11,7 +11,7 @@
  * To use: Rename this file to MpesaPaymentModal.jsx
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Phone,
   Loader2,
@@ -61,23 +61,23 @@ const MpesaPaymentModal = ({
       setPaymentMethod("");
       setShippingError("");
     }
-  }, [showModal]);
+  }, [showModal, fetchAddresses]);
 
   // Fetch available shipping methods when address is selected
   useEffect(() => {
     if (selectedAddressId && totalAmount > 0) {
       fetchAvailableShippingMethods();
     }
-  }, [selectedAddressId, totalAmount]);
+  }, [selectedAddressId, totalAmount, fetchAvailableShippingMethods]);
 
   // Calculate shipping cost when method changes
   useEffect(() => {
     if (selectedAddressId && selectedShippingMethod) {
       calculateShippingCost();
     }
-  }, [selectedAddressId, selectedShippingMethod]);
+  }, [selectedAddressId, selectedShippingMethod, calculateShippingCost]);
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_API_BASE_URL}/api/addresses`,
@@ -110,9 +110,9 @@ const MpesaPaymentModal = ({
       showToast("Failed to load addresses.", "error");
       setAddresses([]);
     }
-  };
+  }, [axios, setAddresses, setSelectedAddressId, setAvailableShippingMethods, setSelectedShippingMethod, showToast]);
 
-  const fetchAvailableShippingMethods = async () => {
+  const fetchAvailableShippingMethods = useCallback(async () => {
     setIsLoadingShipping(true);
     setShippingError("");
     try {
@@ -146,9 +146,9 @@ const MpesaPaymentModal = ({
     } finally {
       setIsLoadingShipping(false);
     }
-  };
+  }, [axios, selectedAddressId, setAvailableShippingMethods, setSelectedShippingMethod, setIsLoadingShipping, setShippingError, showToast]);
 
-  const calculateShippingCost = async () => {
+  const calculateShippingCost = useCallback(async () => {
     if (!selectedAddressId || !selectedShippingMethod) return;
 
     setIsLoadingShipping(true);
@@ -180,7 +180,7 @@ const MpesaPaymentModal = ({
     } finally {
       setIsLoadingShipping(false);
     }
-  };
+  }, [axios, selectedAddressId, selectedShippingMethod, setIsLoadingShipping, setShippingError, setShippingCost, setEstimatedDelivery, showToast]);
 
   const validatePhone = (phone) => {
     const phoneRegex = /^(?:\+?254|0)?([17]\d{8})$/;
