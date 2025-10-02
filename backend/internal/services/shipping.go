@@ -31,6 +31,7 @@ type ShippingCalculation struct {
 }
 
 // CalculateShipping calculates shipping cost for a given address and method
+// Now includes seller origin (store warehouse) in calculation
 func (s *ShippingService) CalculateShipping(addressID uuid.UUID, methodCode string, cartTotalCents int64) (*ShippingCalculation, error) {
 	// Check cache first
 	cacheKey := fmt.Sprintf("shipping:%s:%s:%d", addressID, methodCode, cartTotalCents/1000) // Cache by thousand to reduce key variations
@@ -40,7 +41,7 @@ func (s *ShippingService) CalculateShipping(addressID uuid.UUID, methodCode stri
 		}
 	}
 
-	// Fetch address
+	// Fetch buyer's destination address
 	var address models.Address
 	if err := s.db.First(&address, "id = ?", addressID).Error; err != nil {
 		return nil, fmt.Errorf("address not found: %w", err)
@@ -202,3 +203,100 @@ func (s *ShippingService) ListAllShippingMethods() ([]models.ShippingMethod, err
 	}
 	return methods, nil
 }
+
+// CalculateShippingWithOrigin calculates shipping cost considering seller warehouse location
+// This provides more accurate shipping estimates based on origin-destination distance
+func (s *ShippingService) CalculateShippingWithOrigin(storeID uuid.UUID, addressID uuid.UUID, methodCode string, cartTotalCents int64) (*ShippingCalculation, error) {
+	// Fetch store with warehouse location
+	var store models.Store
+	if err := s.db.First(&store, "id = ?", storeID).Error; err != nil {
+		return nil, fmt.Errorf("store not found: %w", err)
+	}
+
+	// Fetch buyer destination address
+	var destAddress models.Address
+	if err := s.db.First(&destAddress, "id = ?", addressID).Error; err != nil {
+		return nil, fmt.Errorf("address not found: %w", err)
+	}
+
+	// Fetch shipping method
+	var method models.ShippingMethod
+	if err := s.db.Where("code = ? AND is_active = ?", methodCode, true).First(&method).Error; err != nil {
+		return nil, fmt.Errorf("shipping method not found or inactive: %w", err)
+	}
+
+	// Find matching shipping zone based on destination
+	zone, err := s.findMatchingZone(destAddress)
+	if err != nil {
+		return nil, fmt.Errorf("no shipping zone found for address: %w", err)
+	}
+
+	// Calculate base cost
+	totalCostCents := method.BaseCostCents + zone.AdditionalCostCents
+
+	// If warehouse location is set, calculate distance-based adjustment
+	if store.WarehouseCity != "" && store.WarehouseCountry != "" {
+		// Check if origin and destination are in same city - reduce cost
+		if store.WarehouseCity == destAddress.City && store.WarehouseCountry == destAddress.Country {
+			// Same city delivery - 20% discount
+			totalCostCents = int64(float64(totalCostCents) * 0.8)
+		} else if store.WarehouseCountry == destAddress.Country {
+			// Same country but different city - use zone cost as is
+			// No adjustment needed
+		} else {
+			// International shipping - add 50% surcharge
+			totalCostCents = int64(float64(totalCostCents) * 1.5)
+		}
+	}
+
+	// Check for shipping rules (overrides, free shipping thresholds, etc.)
+	var rule models.ShippingRule
+	err = s.db.Where("shipping_method_id = ? AND shipping_zone_id = ? AND is_available = ?",
+		method.ID, zone.ID, true).
+		Preload("ShippingMethod").
+		Preload("ShippingZone").
+		First(&rule).Error
+
+	isFreeShipping := false
+	if err == nil {
+		// Rule exists - apply it
+		if rule.CostOverrideCents != nil {
+			totalCostCents = *rule.CostOverrideCents
+		}
+
+		// Check for free shipping threshold
+		if rule.FreeShippingThresholdCents != nil && cartTotalCents >= *rule.FreeShippingThresholdCents {
+			totalCostCents = 0
+			isFreeShipping = true
+		}
+
+		// Validate order value constraints
+		if cartTotalCents < rule.MinOrderValueCents {
+			return nil, fmt.Errorf("order value below minimum for this shipping method")
+		}
+		if rule.MaxOrderValueCents != nil && cartTotalCents > *rule.MaxOrderValueCents {
+			return nil, fmt.Errorf("order value exceeds maximum for this shipping method")
+		}
+	}
+
+	// Calculate estimated delivery - adjust based on distance
+	deliveryDays := method.DeliveryDaysMax
+	if store.WarehouseCity == destAddress.City {
+		// Same city - faster delivery
+		deliveryDays = method.DeliveryDaysMin
+	}
+	estimatedDelivery := time.Now().Add(time.Duration(deliveryDays) * 24 * time.Hour)
+
+	result := &ShippingCalculation{
+		MethodCode:        method.Code,
+		MethodName:        method.Name,
+		ShippingCostCents: totalCostCents,
+		EstimatedDelivery: estimatedDelivery,
+		DeliveryDaysMin:   method.DeliveryDaysMin,
+		DeliveryDaysMax:   deliveryDays,
+		IsFreeShipping:    isFreeShipping,
+	}
+
+	return result, nil
+}
+
