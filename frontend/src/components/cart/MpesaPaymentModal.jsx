@@ -51,10 +51,15 @@ const MpesaPaymentModal = ({
   const [isLoadingShipping, setIsLoadingShipping] = useState(false);
   const [shippingError, setShippingError] = useState("");
 
-  // Fetch addresses when modal opens
+  // Fetch addresses every time modal opens to get latest changes
   useEffect(() => {
     if (showModal) {
       fetchAddresses();
+      // Reset states when modal opens
+      setPhoneNumber("");
+      setPhoneError("");
+      setPaymentMethod("");
+      setShippingError("");
     }
   }, [showModal]);
 
@@ -82,16 +87,28 @@ const MpesaPaymentModal = ({
           },
         }
       );
-      setAddresses(response.data);
-      if (response.data.length > 0) {
-        const defaultAddress = response.data.find((addr) => addr.is_default);
+
+      // Handle both array response and object with addresses property
+      const addressList = Array.isArray(response.data)
+        ? response.data
+        : response.data.addresses || [];
+
+      setAddresses(addressList);
+
+      if (addressList.length > 0) {
+        const defaultAddress = addressList.find((addr) => addr.is_default);
         setSelectedAddressId(
-          defaultAddress ? defaultAddress.id : response.data[0].id
+          defaultAddress ? defaultAddress.id : addressList[0].id
         );
+      } else {
+        setSelectedAddressId("");
+        setAvailableShippingMethods([]);
+        setSelectedShippingMethod(null);
       }
     } catch (error) {
       console.error("Error fetching addresses:", error);
       showToast("Failed to load addresses.", "error");
+      setAddresses([]);
     }
   };
 
