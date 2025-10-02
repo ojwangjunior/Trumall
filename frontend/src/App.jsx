@@ -15,6 +15,7 @@ import CreateStorePage from "./pages/CreateStorePage";
 import MyStoresPage from "./pages/MyStoresPage";
 import MyAccountPage from "./pages/MyAccountPage";
 import OrdersPage from "./pages/OrdersPage"; // Import OrdersPage
+import AddressManagementPage from "./pages/AddressManagementPage";
 import ProtectedRoute from "./context/ProtectedRoute";
 import StoreDetailPage from "./pages/StoreDetailPage";
 import EditStorePage from "./pages/EditStorePage";
@@ -42,6 +43,7 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/mystores" element={<MyStoresPage />} />
               <Route path="/account" element={<MyAccountPage />} />
+              <Route path="/account/addresses" element={<AddressManagementPage />} />
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/store/:id" element={<StoreDetailPage />} />
               <Route path="/store/:id/edit" element={<EditStorePage />} />
