@@ -17,16 +17,21 @@ type OrderItem struct {
 	Product        Product   `gorm:"foreignKey:ProductID" json:"product"`
 }
 type Order struct {
-	ID         uuid.UUID   `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
-	BuyerID    uuid.UUID   `gorm:"type:uuid;index" json:"buyer_id"`
-	StoreID    uuid.UUID   `gorm:"type:uuid;index" json:"store_id"`
-	TotalCents int64       `json:"total_cents"`
-	Currency   string      `gorm:"default:USD" json:"currency"`
-	Status     string      `gorm:"default:pending" json:"status"`
-	CreatedAt  time.Time   `json:"created_at"`
-	UpdatedAt  time.Time   `json:"updated_at"`
-	OrderItems []OrderItem `gorm:"foreignKey:OrderID" json:"order_items"`
-	Buyer      User        `gorm:"foreignKey:BuyerID" json:"buyer"`
+	ID                uuid.UUID      `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	BuyerID           uuid.UUID      `gorm:"type:uuid;index" json:"buyer_id"`
+	StoreID           uuid.UUID      `gorm:"type:uuid;index" json:"store_id"`
+	ShippingAddressID uuid.UUID      `gorm:"type:uuid;index" json:"shipping_address_id"` // New field
+	TotalCents        int64          `json:"total_cents"`
+	ShippingCostCents int64          `gorm:"default:0" json:"shipping_cost_cents"` // New field
+	Currency          string         `gorm:"default:USD" json:"currency"`
+	Status            string         `gorm:"default:pending" json:"status"`
+	ShippingMethod    string         `gorm:"size:50" json:"shipping_method"` // New field
+	EstimatedDelivery time.Time      `json:"estimated_delivery"`             // New field
+	CreatedAt         time.Time      `json:"created_at"`
+	UpdatedAt         time.Time      `json:"updated_at"`
+	OrderItems        []OrderItem    `gorm:"foreignKey:OrderID" json:"order_items"`
+	Buyer             User           `gorm:"foreignKey:BuyerID" json:"buyer"`
+	ShippingAddress   Address        `gorm:"foreignKey:ShippingAddressID" json:"shipping_address"` // New field
 }
 type Payment struct {
 	ID                uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
@@ -159,4 +164,47 @@ type Address struct {
 	CreatedAt  time.Time      `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt  time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+type ShippingMethod struct {
+	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	Name            string    `gorm:"size:50;not null;uniqueIndex" json:"name"`
+	Code            string    `gorm:"size:20;not null;uniqueIndex" json:"code"`
+	Description     *string   `json:"description,omitempty"`
+	BaseCostCents   int64     `gorm:"not null;default:0" json:"base_cost_cents"`
+	CostPerKgCents  int64     `gorm:"default:0" json:"cost_per_kg_cents"`
+	DeliveryDaysMin int       `gorm:"not null;default:1" json:"delivery_days_min"`
+	DeliveryDaysMax int       `gorm:"not null;default:3" json:"delivery_days_max"`
+	IsActive        bool      `gorm:"not null;default:true" json:"is_active"`
+	CreatedAt       time.Time `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt       time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+}
+
+type ShippingZone struct {
+	ID                   uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	Name                 string    `gorm:"size:100;not null" json:"name"`
+	Country              string    `gorm:"size:100;not null;default:Kenya" json:"country"`
+	State                *string   `gorm:"size:100" json:"state,omitempty"`
+	City                 *string   `gorm:"size:100" json:"city,omitempty"`
+	PostalCodePattern    *string   `gorm:"size:50" json:"postal_code_pattern,omitempty"`
+	AdditionalCostCents  int64     `gorm:"not null;default:0" json:"additional_cost_cents"`
+	IsActive             bool      `gorm:"not null;default:true" json:"is_active"`
+	Priority             int       `gorm:"not null;default:0" json:"priority"`
+	CreatedAt            time.Time `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt            time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+}
+
+type ShippingRule struct {
+	ID                         uuid.UUID       `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	ShippingMethodID           uuid.UUID       `gorm:"type:uuid;not null" json:"shipping_method_id"`
+	ShippingZoneID             uuid.UUID       `gorm:"type:uuid;not null" json:"shipping_zone_id"`
+	CostOverrideCents          *int64          `json:"cost_override_cents,omitempty"`
+	MinOrderValueCents         int64           `gorm:"default:0" json:"min_order_value_cents"`
+	MaxOrderValueCents         *int64          `json:"max_order_value_cents,omitempty"`
+	FreeShippingThresholdCents *int64          `json:"free_shipping_threshold_cents,omitempty"`
+	IsAvailable                bool            `gorm:"not null;default:true" json:"is_available"`
+	CreatedAt                  time.Time       `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt                  time.Time       `gorm:"autoUpdateTime" json:"updated_at"`
+	ShippingMethod             ShippingMethod  `gorm:"foreignKey:ShippingMethodID" json:"shipping_method"`
+	ShippingZone               ShippingZone    `gorm:"foreignKey:ShippingZoneID" json:"shipping_zone"`
 }
