@@ -9,6 +9,7 @@ const MobileExpandedSearch = ({ onSearch }) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery(''); // Clear search after navigating
       onSearch(searchQuery);
     }
   };
