@@ -110,7 +110,7 @@ const MpesaPaymentModal = ({
       showToast("Failed to load addresses.", "error");
       setAddresses([]);
     }
-  }, [axios, setAddresses, setSelectedAddressId, setAvailableShippingMethods, setSelectedShippingMethod, showToast]);
+  }, [setAddresses, setSelectedAddressId, setAvailableShippingMethods, setSelectedShippingMethod, showToast]);
 
   const fetchAvailableShippingMethods = useCallback(async () => {
     setIsLoadingShipping(true);
@@ -146,7 +146,7 @@ const MpesaPaymentModal = ({
     } finally {
       setIsLoadingShipping(false);
     }
-  }, [axios, selectedAddressId, setAvailableShippingMethods, setSelectedShippingMethod, setIsLoadingShipping, setShippingError, showToast]);
+  }, [selectedAddressId, setAvailableShippingMethods, setSelectedShippingMethod, setIsLoadingShipping, setShippingError]);
 
   const calculateShippingCost = useCallback(async () => {
     if (!selectedAddressId || !selectedShippingMethod) return;
@@ -180,7 +180,7 @@ const MpesaPaymentModal = ({
     } finally {
       setIsLoadingShipping(false);
     }
-  }, [axios, selectedAddressId, selectedShippingMethod, setIsLoadingShipping, setShippingError, setShippingCost, setEstimatedDelivery, showToast]);
+  }, [selectedAddressId, selectedShippingMethod, setIsLoadingShipping, setShippingError, setShippingCost, setEstimatedDelivery, showToast]);
 
   const validatePhone = (phone) => {
     const phoneRegex = /^(?:\+?254|0)?([17]\d{8})$/;
