@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 
 	"trumall/internal/db"
 	"trumall/internal/models"
@@ -35,16 +36,37 @@ func CreateAddress(c *fiber.Ctx) error {
 	input.ID = uuid.New()
 	input.UserID = userID
 
-	// If first address for user, set default automatically
-	var count int64
-	db.DB.Model(&models.Address{}).Where("user_id = ?", userID).Count(&count)
-	if count == 0 {
-		input.IsDefault = true
-	}
+	// Use a transaction to handle default address logic
+	err := db.DB.Transaction(func(tx *gorm.DB) error {
+		// If first address for user, set default automatically
+		var count int64
+		if err := tx.Model(&models.Address{}).Where("user_id = ?", userID).Count(&count).Error; err != nil {
+			return err
+		}
 
-	if err := db.DB.Create(&input).Error; err != nil {
+		if count == 0 {
+			input.IsDefault = true
+		}
+
+		// If this address is being set as default, unset all others first
+		if input.IsDefault {
+			if err := tx.Model(&models.Address{}).Where("user_id = ?", userID).Update("is_default", false).Error; err != nil {
+				return err
+			}
+		}
+
+		// Create the new address
+		if err := tx.Create(&input).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		fmt.Println("Error creating address:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Could not save address",
+			"error": fmt.Sprintf("Could not save address: %v", err),
 		})
 	}
 
