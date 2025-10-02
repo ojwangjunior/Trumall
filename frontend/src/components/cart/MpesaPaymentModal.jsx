@@ -51,32 +51,6 @@ const MpesaPaymentModal = ({
   const [isLoadingShipping, setIsLoadingShipping] = useState(false);
   const [shippingError, setShippingError] = useState("");
 
-  // Fetch addresses every time modal opens to get latest changes
-  useEffect(() => {
-    if (showModal) {
-      fetchAddresses();
-      // Reset states when modal opens
-      setPhoneNumber("");
-      setPhoneError("");
-      setPaymentMethod("");
-      setShippingError("");
-    }
-  }, [showModal, fetchAddresses]);
-
-  // Fetch available shipping methods when address is selected
-  useEffect(() => {
-    if (selectedAddressId && totalAmount > 0) {
-      fetchAvailableShippingMethods();
-    }
-  }, [selectedAddressId, totalAmount, fetchAvailableShippingMethods]);
-
-  // Calculate shipping cost when method changes
-  useEffect(() => {
-    if (selectedAddressId && selectedShippingMethod) {
-      calculateShippingCost();
-    }
-  }, [selectedAddressId, selectedShippingMethod, calculateShippingCost]);
-
   const fetchAddresses = useCallback(async () => {
     try {
       const response = await axios.get(
@@ -181,6 +155,32 @@ const MpesaPaymentModal = ({
       setIsLoadingShipping(false);
     }
   }, [selectedAddressId, selectedShippingMethod, setIsLoadingShipping, setShippingError, setShippingCost, setEstimatedDelivery, showToast]);
+
+  // Fetch addresses every time modal opens to get latest changes
+  useEffect(() => {
+    if (showModal) {
+      fetchAddresses();
+      // Reset states when modal opens
+      setPhoneNumber("");
+      setPhoneError("");
+      setPaymentMethod("");
+      setShippingError("");
+    }
+  }, [showModal, fetchAddresses]);
+
+  // Fetch available shipping methods when address is selected
+  useEffect(() => {
+    if (selectedAddressId && totalAmount > 0) {
+      fetchAvailableShippingMethods();
+    }
+  }, [selectedAddressId, totalAmount, fetchAvailableShippingMethods]);
+
+  // Calculate shipping cost when method changes
+  useEffect(() => {
+    if (selectedAddressId && selectedShippingMethod) {
+      calculateShippingCost();
+    }
+  }, [selectedAddressId, selectedShippingMethod, calculateShippingCost]);
 
   const validatePhone = (phone) => {
     const phoneRegex = /^(?:\+?254|0)?([17]\d{8})$/;
