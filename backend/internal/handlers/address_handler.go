@@ -8,6 +8,7 @@ import (
 
 	"trumall/internal/db"
 	"trumall/internal/models"
+	"trumall/internal/validation"
 )
 
 // Create new address
@@ -20,6 +21,16 @@ func CreateAddress(c *fiber.Ctx) error {
 			"error": "Invalid request body",
 		})
 	}
+
+	// Validate address fields
+	if err := validation.ValidateAddress(input.Street, input.City, input.State, input.Country, input.PostalCode); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	// Normalize country code
+	input.Country = validation.NormalizeCountryCode(input.Country)
 
 	input.ID = uuid.New()
 	input.UserID = userID
@@ -71,11 +82,32 @@ func UpdateAddress(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := c.BodyParser(&address); err != nil {
+	var updateData models.Address
+	if err := c.BodyParser(&updateData); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request body",
 		})
 	}
+
+	// Validate updated address fields
+	if err := validation.ValidateAddress(updateData.Street, updateData.City, updateData.State, updateData.Country, updateData.PostalCode); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	// Normalize country code
+	updateData.Country = validation.NormalizeCountryCode(updateData.Country)
+
+	// Update fields
+	address.Street = updateData.Street
+	address.City = updateData.City
+	address.State = updateData.State
+	address.Country = updateData.Country
+	address.PostalCode = updateData.PostalCode
+	address.Label = updateData.Label
+	address.Latitude = updateData.Latitude
+	address.Longitude = updateData.Longitude
 
 	if err := db.DB.Save(&address).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
