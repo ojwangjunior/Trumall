@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { MapPin, Save, AlertCircle } from 'lucide-react';
+import { KENYA_CITIES, COUNTRIES, getCitiesForCountry } from '../../data/kenyaCities';
 
 const SellerStoreSettings = ({ showToast }) => {
   const [loading, setLoading] = useState(true);
@@ -15,10 +16,19 @@ const SellerStoreSettings = ({ showToast }) => {
     warehouse_country: 'KE',
     warehouse_postal_code: '',
   });
+  const [availableCities, setAvailableCities] = useState(KENYA_CITIES);
 
   useEffect(() => {
     fetchStoreData();
   }, []);
+
+  // Update available cities when country changes in formData
+  useEffect(() => {
+    if (formData.warehouse_country) {
+      const cities = getCitiesForCountry(formData.warehouse_country);
+      setAvailableCities(cities);
+    }
+  }, [formData.warehouse_country]);
 
   const fetchStoreData = async () => {
     try {
@@ -54,10 +64,20 @@ const SellerStoreSettings = ({ showToast }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+
+    // If country is changing, reset city to empty
+    if (name === 'warehouse_country') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+        warehouse_city: '', // Reset city when country changes
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -201,19 +221,45 @@ const SellerStoreSettings = ({ showToast }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Country <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="warehouse_country"
+                  value={formData.warehouse_country}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  {COUNTRIES.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.flag} {country.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   City <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   name="warehouse_city"
                   value={formData.warehouse_city}
                   onChange={handleInputChange}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  placeholder="Nairobi"
-                />
+                >
+                  <option value="">Select a city</option>
+                  {availableCities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   State/Region
@@ -226,27 +272,6 @@ const SellerStoreSettings = ({ showToast }) => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="Nairobi County"
                 />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Country <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="warehouse_country"
-                  value={formData.warehouse_country}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                >
-                  <option value="KE">Kenya</option>
-                  <option value="US">United States</option>
-                  <option value="GB">United Kingdom</option>
-                  <option value="UG">Uganda</option>
-                  <option value="TZ">Tanzania</option>
-                </select>
               </div>
 
               <div>
