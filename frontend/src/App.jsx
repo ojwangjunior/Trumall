@@ -16,6 +16,7 @@ import MyStoresPage from "./pages/MyStoresPage";
 import MyAccountPage from "./pages/MyAccountPage";
 import OrdersPage from "./pages/OrdersPage"; // Import OrdersPage
 import AddressManagementPage from "./pages/AddressManagementPage";
+import SearchPage from "./pages/SearchPage";
 import ProtectedRoute from "./context/ProtectedRoute";
 import StoreDetailPage from "./pages/StoreDetailPage";
 import EditStorePage from "./pages/EditStorePage";
@@ -38,6 +39,7 @@ function App() {
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route element={<ProtectedRoute />}>
