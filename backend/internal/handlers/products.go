@@ -428,3 +428,33 @@ func DeleteSellerProductHandler(db *gorm.DB) fiber.Handler {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "product deleted successfully"})
 	}
 }
+
+// SearchProductsHandler - search products by title or description
+func SearchProductsHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		query := c.Query("q")
+		if query == "" {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "search query required"})
+		}
+
+		var products []models.Product
+		searchPattern := "%" + query + "%"
+
+		if err := db.Where("LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)", searchPattern, searchPattern).
+			Preload("Store").
+			Preload("Images").
+			Find(&products).Error; err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to search products"})
+		}
+
+		// Set default currency if missing
+		for i := range products {
+			if products[i].Currency == "" {
+				products[i].Currency = "USD"
+			}
+		}
+
+		return c.JSON(products)
+	}
+}
+
