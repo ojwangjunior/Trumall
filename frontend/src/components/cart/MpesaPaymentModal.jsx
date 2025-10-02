@@ -1,5 +1,17 @@
-import React, { useState, useEffect } from "react"; // Added useEffect
-import { Link } from "react-router-dom";
+/**
+ * Enhanced MpesaPaymentModal with Shipping Preview
+ *
+ * NEW FEATURES:
+ * 1. Shipping cost preview before checkout
+ * 2. Dynamic shipping methods from database
+ * 3. Real-time cost updates when method changes
+ * 4. Better error handling
+ * 5. Loading states for shipping calculation
+ *
+ * To use: Rename this file to MpesaPaymentModal.jsx
+ */
+
+import React, { useState, useEffect } from "react";
 import {
   Phone,
   Loader2,
@@ -7,10 +19,10 @@ import {
   CreditCard,
   MapPin,
   Truck,
-  Plus,
-} from "lucide-react"; // Added MapPin, Truck, Plus
+  Package,
+} from "lucide-react";
 import { useToast } from "../../context/ToastContext";
-import axios from "axios"; // Added axios
+import axios from "axios";
 
 const MpesaPaymentModal = ({
   showModal,
@@ -25,49 +37,133 @@ const MpesaPaymentModal = ({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [isWaitingForConfirmation, setIsWaitingForConfirmation] =
-    useState(false);
-  const [addresses, setAddresses] = useState([]); // New state for addresses
-  const [selectedAddressId, setSelectedAddressId] = useState(""); // New state for selected address
-  const [shippingMethod, setShippingMethod] = useState("standard"); // New state for shipping method
-  const [shippingCost, setShippingCost] = useState(0); // New state for shipping cost
-  const [estimatedDelivery, setEstimatedDelivery] = useState(""); // New state for estimated delivery
+  const [isWaitingForConfirmation, setIsWaitingForConfirmation] = useState(false);
+
+  // Address states
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState("");
+
+  // Shipping states
+  const [availableShippingMethods, setAvailableShippingMethods] = useState([]);
+  const [selectedShippingMethod, setSelectedShippingMethod] = useState(null);
+  const [shippingCost, setShippingCost] = useState(0);
+  const [estimatedDelivery, setEstimatedDelivery] = useState("");
+  const [isLoadingShipping, setIsLoadingShipping] = useState(false);
+  const [shippingError, setShippingError] = useState("");
 
   // Fetch addresses when modal opens
   useEffect(() => {
     if (showModal) {
-      const fetchAddresses = async () => {
-        try {
-          const response = await axios.get(
-            `${import.meta.env.VITE_API_BASE_URL}/api/addresses`,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }
-          );
-          console.log("Fetched addresses:", response.data);
-          const addressList = Array.isArray(response.data) ? response.data : response.data.addresses || [];
-          setAddresses(addressList);
-          if (addressList.length > 0) {
-            // Select the first address or default if available
-            const defaultAddress = addressList.find(
-              (addr) => addr.is_default
-            );
-            const selectedId = defaultAddress ? defaultAddress.id : addressList[0].id;
-            console.log("Selected address ID:", selectedId);
-            setSelectedAddressId(selectedId);
-          } else {
-            console.warn("No addresses available");
-          }
-        } catch (error) {
-          console.error("Error fetching addresses:", error);
-          showToast("Failed to load addresses.", "error");
-        }
-      };
       fetchAddresses();
     }
-  }, [showModal, showToast]);
+  }, [showModal]);
+
+  // Fetch available shipping methods when address is selected
+  useEffect(() => {
+    if (selectedAddressId && totalAmount > 0) {
+      fetchAvailableShippingMethods();
+    }
+  }, [selectedAddressId, totalAmount]);
+
+  // Calculate shipping cost when method changes
+  useEffect(() => {
+    if (selectedAddressId && selectedShippingMethod) {
+      calculateShippingCost();
+    }
+  }, [selectedAddressId, selectedShippingMethod]);
+
+  const fetchAddresses = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/addresses`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      setAddresses(response.data);
+      if (response.data.length > 0) {
+        const defaultAddress = response.data.find((addr) => addr.is_default);
+        setSelectedAddressId(
+          defaultAddress ? defaultAddress.id : response.data[0].id
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+      showToast("Failed to load addresses.", "error");
+    }
+  };
+
+  const fetchAvailableShippingMethods = async () => {
+    setIsLoadingShipping(true);
+    setShippingError("");
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/shipping/methods`,
+        {
+          params: { address_id: selectedAddressId },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const methods = response.data.shipping_methods || [];
+      setAvailableShippingMethods(methods);
+
+      // Auto-select first method or standard if available
+      if (methods.length > 0) {
+        const standardMethod = methods.find(m => m.method_code === 'standard');
+        setSelectedShippingMethod(standardMethod || methods[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching shipping methods:", error);
+      setShippingError("Failed to load shipping options");
+      // Fallback to basic methods if API fails
+      setAvailableShippingMethods([
+        { method_code: 'standard', method_name: 'Standard Shipping', delivery_days_min: 3, delivery_days_max: 5 },
+        { method_code: 'express', method_name: 'Express Shipping', delivery_days_min: 1, delivery_days_max: 2 }
+      ]);
+      setSelectedShippingMethod({ method_code: 'standard', method_name: 'Standard Shipping' });
+    } finally {
+      setIsLoadingShipping(false);
+    }
+  };
+
+  const calculateShippingCost = async () => {
+    if (!selectedAddressId || !selectedShippingMethod) return;
+
+    setIsLoadingShipping(true);
+    setShippingError("");
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/api/shipping/calculate`,
+        {
+          address_id: selectedAddressId,
+          shipping_method: selectedShippingMethod.method_code,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setShippingCost(response.data.shipping_cost_cents || 0);
+      setEstimatedDelivery(response.data.estimated_delivery || "");
+
+      if (response.data.is_free_shipping) {
+        showToast("Free shipping applied!", "success");
+      }
+    } catch (error) {
+      console.error("Error calculating shipping:", error);
+      setShippingError("Failed to calculate shipping cost");
+      setShippingCost(0);
+    } finally {
+      setIsLoadingShipping(false);
+    }
+  };
 
   const validatePhone = (phone) => {
     const phoneRegex = /^(?:\+?254|0)?([17]\d{8})$/;
@@ -111,34 +207,22 @@ const MpesaPaymentModal = ({
         showToast("Please select a delivery address.", "error");
         return;
       }
+      if (!selectedShippingMethod) {
+        showToast("Please select a shipping method.", "error");
+        return;
+      }
 
       setIsProcessing(true);
       try {
         const formattedPhone = formatPhone(phoneNumber);
 
-        // Calculate final amount in cents
-        const finalAmountCents = (totalAmount + shippingCost / 100) * 100;
-
-        // Check for minimum M-Pesa amount (1 KES = 100 cents)
-        if (finalAmountCents < 100) {
-          showToast("M-Pesa minimum amount is 1 KES", "error");
-          setIsProcessing(false);
-          return;
-        }
-
-        console.log("Checkout request data:", {
-          phone: formattedPhone,
-          address_id: selectedAddressId,
-          shipping_method: shippingMethod,
-        });
-
-        // Step 1: Initiate STK Push and get order_id and checkout_request_id
+        // Initiate checkout
         const response = await axios.post(
           `${import.meta.env.VITE_API_BASE_URL}/api/cart/checkout`,
           {
             phone: formattedPhone,
             address_id: selectedAddressId,
-            shipping_method: shippingMethod,
+            shipping_method: selectedShippingMethod.method_code,
           },
           {
             headers: {
@@ -147,21 +231,27 @@ const MpesaPaymentModal = ({
           }
         );
 
-        const { order_id, checkout_request_id, shipping_cost_cents, estimated_delivery } = response.data; // Assuming backend returns these IDs
+        const {
+          order_id,
+          checkout_request_id,
+          shipping_cost_cents,
+          estimated_delivery,
+        } = response.data;
 
+        // Update shipping info from response
         setShippingCost(shipping_cost_cents);
         setEstimatedDelivery(estimated_delivery);
 
         showToast(
-          "STK Push sent! Check your phone to complete payment. Waiting for confirmation...",
+          "STK Push sent! Check your phone to complete payment.",
           "info"
         );
         setIsWaitingForConfirmation(true);
-        setIsProcessing(false); // STK push sent, no longer "processing" the request itself
+        setIsProcessing(false);
 
-        // Step 2: Start polling for payment status
+        // Poll for payment status
         let pollAttempts = 0;
-        const maxPollAttempts = 20; // Poll for up to 20 * 3 seconds = 60 seconds
+        const maxPollAttempts = 20;
         const pollInterval = setInterval(async () => {
           pollAttempts++;
           if (pollAttempts > maxPollAttempts) {
@@ -176,7 +266,6 @@ const MpesaPaymentModal = ({
           }
 
           try {
-            // Hypothetical backend endpoint to check payment status
             const statusResponse = await axios.get(
               `${import.meta.env.VITE_API_BASE_URL}/api/payments/status`,
               {
@@ -190,11 +279,11 @@ const MpesaPaymentModal = ({
               }
             );
 
-            const paymentStatus = statusResponse.data.status; // Assuming backend returns { status: "paid" | "failed" | "pending" }
+            const paymentStatus = statusResponse.data.status;
 
             if (paymentStatus === "paid") {
               clearInterval(pollInterval);
-              onPaymentSuccess(); // Call onPaymentSuccess only after confirmation
+              onPaymentSuccess();
               showToast("Payment confirmed successfully!", "success");
               setIsWaitingForConfirmation(false);
               onClose();
@@ -204,20 +293,19 @@ const MpesaPaymentModal = ({
               setIsWaitingForConfirmation(false);
               onPaymentError(new Error("Payment failed"));
             }
-            // If status is "pending" or "initiated", continue polling
           } catch (pollError) {
             console.error("Polling error:", pollError);
-            // Continue polling even if there's a temporary error
           }
-        }, 3000); // Poll every 3 seconds
+        }, 3000);
       } catch (err) {
         console.error("Checkout error:", err);
-        console.error("Error response:", err.response?.data);
         onPaymentError(err);
-        const errorMessage = err.response?.data?.error || "Payment failed to start. Please try again.";
-        showToast(errorMessage, "error");
-        setIsWaitingForConfirmation(false); // Reset if error occurs before confirmation
-        setIsProcessing(false); // Reset processing state on error
+        showToast(
+          err.response?.data?.error || "Payment failed to start. Please try again.",
+          "error"
+        );
+        setIsWaitingForConfirmation(false);
+        setIsProcessing(false);
       }
     } else {
       showToast(
@@ -228,18 +316,21 @@ const MpesaPaymentModal = ({
   };
 
   const closeModal = () => {
-    if (!isProcessing) {
+    if (!isProcessing && !isWaitingForConfirmation) {
       onClose();
       setPhoneNumber("");
       setPhoneError("");
+      setPaymentMethod("");
     }
   };
 
   if (!showModal) return null;
 
+  const finalTotal = totalAmount + shippingCost / 100;
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[10000] p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all max-h-[90vh] overflow-y-auto">
         {/* Modal Header */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -250,15 +341,100 @@ const MpesaPaymentModal = ({
               Complete Your Payment
             </h2>
             <p className="text-sm text-gray-500">
-              Choose a payment method to proceed
+              Choose delivery and payment options
             </p>
           </div>
         </div>
 
-        {/* Payment Details */}
+        {/* Address Selection */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            Delivery Address
+          </label>
+          {addresses.length > 0 ? (
+            <select
+              value={selectedAddressId}
+              onChange={(e) => setSelectedAddressId(e.target.value)}
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors"
+              disabled={isProcessing || isWaitingForConfirmation}
+            >
+              {addresses.map((addr) => (
+                <option key={addr.id} value={addr.id}>
+                  {addr.label}: {addr.street}, {addr.city}, {addr.country}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="text-sm text-gray-500 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              No addresses found. Please add one in your profile.
+            </div>
+          )}
+        </div>
+
+        {/* Shipping Method Selection */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+            <Truck className="w-4 h-4" />
+            Shipping Method
+            {isLoadingShipping && (
+              <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+            )}
+          </label>
+
+          {shippingError ? (
+            <div className="text-sm text-red-600 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {shippingError}
+            </div>
+          ) : availableShippingMethods.length > 0 ? (
+            <div className="space-y-2">
+              {availableShippingMethods.map((method) => (
+                <label
+                  key={method.method_code}
+                  className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
+                    selectedShippingMethod?.method_code === method.method_code
+                      ? "bg-green-50 border-green-500"
+                      : "border-gray-300 hover:border-green-300"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      value={method.method_code}
+                      checked={selectedShippingMethod?.method_code === method.method_code}
+                      onChange={() => setSelectedShippingMethod(method)}
+                      className="w-4 h-4 text-green-600 focus:ring-green-500"
+                      disabled={isProcessing || isWaitingForConfirmation || isLoadingShipping}
+                    />
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        {method.method_name}
+                        {method.is_free_shipping && (
+                          <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                            FREE
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {method.delivery_days_min}-{method.delivery_days_max} days
+                      </div>
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          ) : (
+            <div className="text-sm text-gray-500">
+              Loading shipping options...
+            </div>
+          )}
+        </div>
+
+        {/* Payment Summary */}
         <div className="bg-gray-50 rounded-lg p-4 mb-6">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
-            <span>Subtotal:</span>
+            <span>Cart Subtotal:</span>
             <span className="font-semibold text-gray-900">
               {new Intl.NumberFormat("en-US", {
                 style: "currency",
@@ -266,123 +442,64 @@ const MpesaPaymentModal = ({
               }).format(totalAmount)}
             </span>
           </div>
-          {shippingCost > 0 && (
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
-              <span>Shipping ({shippingMethod}):</span>
-              <span className="font-semibold text-gray-900">
-                {new Intl.NumberFormat("en-US", {
+
+          <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <span className="flex items-center gap-1">
+              Shipping
+              {selectedShippingMethod && (
+                <span className="text-xs text-gray-500">
+                  ({selectedShippingMethod.method_name})
+                </span>
+              )}:
+            </span>
+            <span className="font-semibold text-gray-900">
+              {isLoadingShipping ? (
+                <Loader2 className="w-4 h-4 animate-spin inline" />
+              ) : shippingCost === 0 ? (
+                "FREE"
+              ) : (
+                new Intl.NumberFormat("en-US", {
                   style: "currency",
                   currency: currency,
-                }).format(shippingCost / 100)}
-              </span>
-            </div>
-          )}
+                }).format(shippingCost / 100)
+              )}
+            </span>
+          </div>
+
           <div className="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-200 mt-2">
             <span>Total Amount:</span>
             <span>
               {new Intl.NumberFormat("en-US", {
                 style: "currency",
                 currency: currency,
-              }).format(totalAmount + shippingCost / 100)}
+              }).format(finalTotal)}
             </span>
           </div>
+
           {estimatedDelivery && (
-            <div className="flex justify-between text-sm text-gray-600 mt-2">
-              <span>Estimated Delivery:</span>
+            <div className="flex items-center justify-between text-sm text-gray-600 mt-2 pt-2 border-t border-gray-200">
+              <span className="flex items-center gap-1">
+                <Package className="w-4 h-4" />
+                Estimated Delivery:
+              </span>
               <span className="font-semibold text-gray-900">
-                {new Date(estimatedDelivery).toLocaleDateString()}
+                {new Date(estimatedDelivery).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
               </span>
             </div>
           )}
         </div>
 
-        {/* Address Selection */}
-        <div className="mb-6">
-          <label
-            htmlFor="address-select"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Delivery Address
-          </label>
-          {addresses.length > 0 ? (
-            <>
-              <select
-                id="address-select"
-                value={selectedAddressId}
-                onChange={(e) => setSelectedAddressId(e.target.value)}
-                className="w-full pl-3 pr-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-colors"
-                disabled={isProcessing || isWaitingForConfirmation}
-              >
-                {addresses.map((addr) => (
-                  <option key={addr.id} value={addr.id}>
-                    {addr.label}: {addr.street}, {addr.city}, {addr.country}{" "}
-                    {addr.postal_code}
-                  </option>
-                ))}
-              </select>
-              <Link
-                to="/account/addresses"
-                className="mt-2 inline-flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Add New Address
-              </Link>
-            </>
-          ) : (
-            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
-              <p className="text-sm text-orange-900 mb-2">
-                No delivery addresses found. Add your first address to continue.
-              </p>
-              <Link
-                to="/account/addresses"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Add Delivery Address
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Shipping Method Selection */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Shipping Method
-          </label>
-          <div className="space-y-2">
-            <label className="flex items-center space-x-2 p-3 border rounded-lg has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
-              <input
-                type="radio"
-                value="standard"
-                name="shippingMethod"
-                checked={shippingMethod === "standard"}
-                onChange={(e) => setShippingMethod(e.target.value)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                disabled={isProcessing || isWaitingForConfirmation}
-              />
-              <span>Standard Shipping (3-5 days)</span>
-            </label>
-            <label className="flex items-center space-x-2 p-3 border rounded-lg has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500">
-              <input
-                type="radio"
-                value="express"
-                name="shippingMethod"
-                checked={shippingMethod === "express"}
-                onChange={(e) => setShippingMethod(e.target.value)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                disabled={isProcessing || isWaitingForConfirmation}
-              />
-              <span>Express Shipping (1-2 days)</span>
-            </label>
-          </div>
-        </div>
         {/* Payment Method Selection */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Payment Method
           </label>
           <div className="space-y-2">
-            <label className="flex items-center space-x-2 p-3 border rounded-lg has-[:checked]:bg-green-50 has-[:checked]:border-green-500">
+            <label className="flex items-center space-x-2 p-3 border rounded-lg has-[:checked]:bg-green-50 has-[:checked]:border-green-500 cursor-pointer">
               <input
                 type="radio"
                 value="mpesa"
@@ -393,7 +510,7 @@ const MpesaPaymentModal = ({
               />
               <span>M-Pesa</span>
             </label>
-            <label className="flex items-center space-x-2 p-3 border rounded-lg has-[:checked]:bg-green-50 has-[:checked]:border-green-500">
+            <label className="flex items-center space-x-2 p-3 border rounded-lg has-[:checked]:bg-green-50 has-[:checked]:border-green-500 cursor-pointer opacity-50">
               <input
                 type="radio"
                 value="card"
@@ -401,19 +518,9 @@ const MpesaPaymentModal = ({
                 checked={paymentMethod === "card"}
                 onChange={(e) => setPaymentMethod(e.target.value)}
                 className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+                disabled
               />
-              <span>Credit/Debit Card</span>
-            </label>
-            <label className="flex items-center space-x-2 p-3 border rounded-lg has-[:checked]:bg-green-50 has-[:checked]:border-green-500">
-              <input
-                type="radio"
-                value="cod"
-                name="paymentMethod"
-                checked={paymentMethod === "cod"}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
-              />
-              <span>Cash on Delivery</span>
+              <span>Credit/Debit Card (Coming Soon)</span>
             </label>
           </div>
         </div>
@@ -468,7 +575,10 @@ const MpesaPaymentModal = ({
             disabled={
               isProcessing ||
               isWaitingForConfirmation ||
+              isLoadingShipping ||
               !paymentMethod ||
+              !selectedAddressId ||
+              !selectedShippingMethod ||
               (paymentMethod === "mpesa" && (!phoneNumber || !!phoneError))
             }
             className={`
@@ -476,6 +586,8 @@ const MpesaPaymentModal = ({
               ${
                 isProcessing ||
                 isWaitingForConfirmation ||
+                isLoadingShipping ||
+                !selectedShippingMethod ||
                 (paymentMethod === "mpesa" && (!phoneNumber || !!phoneError))
                   ? "bg-gray-400 text-white cursor-not-allowed"
                   : "bg-green-600 text-white hover:bg-green-700"
@@ -495,7 +607,10 @@ const MpesaPaymentModal = ({
             ) : (
               <>
                 <CreditCard className="w-4 h-4" />
-                Pay Now
+                Pay {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: currency,
+                }).format(finalTotal)}
               </>
             )}
           </button>
