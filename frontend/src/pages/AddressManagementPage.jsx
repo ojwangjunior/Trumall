@@ -34,7 +34,8 @@ const AddressManagementPage = () => {
       }
 
       const data = await response.json();
-      setAddresses(data.addresses || []);
+      // Backend returns array directly, not wrapped in object
+      setAddresses(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Error fetching addresses:', err);
       setError('Failed to load addresses. Please try again.');
