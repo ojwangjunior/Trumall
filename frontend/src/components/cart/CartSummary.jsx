@@ -55,12 +55,12 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
 
           <div className="flex justify-between text-sm text-gray-600">
             <span>Delivery</span>
-            <span className="text-green-600 font-medium">Free</span>
+            <span className="text-gray-500 italic">Calculated at checkout</span>
           </div>
 
           <div className="border-t pt-3">
             <div className="flex justify-between items-center">
-              <span className="text-lg font-bold text-gray-900">Total</span>
+              <span className="text-lg font-bold text-gray-900">Subtotal</span>
               <span className="text-2xl font-bold text-gray-900">
                 {new Intl.NumberFormat("en-US", {
                   style: "currency",
@@ -68,6 +68,9 @@ const CartSummary = ({ calculateTotal, cartItems }) => {
                 }).format(totalAmount)}
               </span>
             </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Final total including shipping will be shown at checkout
+            </p>
           </div>
         </div>
 
