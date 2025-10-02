@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
-import { Search, Loader2, ShoppingCart } from 'lucide-react';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { Search, Loader2, ShoppingCart, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
+  const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const handleBack = () => {
+    // Use -1 to go back to previous page, preserving browser history
+    navigate(-1);
+  };
 
   useEffect(() => {
     const searchProducts = async () => {
@@ -42,6 +48,18 @@ const SearchPage = () => {
     searchProducts();
   }, [query]);
 
+  // Keyboard shortcut: ESC to go back
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        handleBack();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -56,6 +74,37 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
+        {/* Back Button & Breadcrumb */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleBack}
+              className="inline-flex items-center gap-2 text-gray-600 hover:text-orange-600 transition-colors group"
+              title="Press ESC to go back"
+            >
+              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              <span className="font-medium">Back</span>
+            </button>
+
+            {/* Breadcrumb */}
+            <nav className="flex items-center text-sm text-gray-500">
+              <Link to="/" className="hover:text-orange-600 transition-colors">
+                Home
+              </Link>
+              <span className="mx-2">/</span>
+              <span className="text-gray-900 font-medium">Search</span>
+            </nav>
+          </div>
+
+          {/* Keyboard hint - desktop only */}
+          <div className="hidden md:flex items-center gap-2 text-xs text-gray-400">
+            <kbd className="px-2 py-1 bg-gray-100 border border-gray-300 rounded text-gray-600 font-mono">
+              ESC
+            </kbd>
+            <span>to go back</span>
+          </div>
+        </div>
+
         {/* Search Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
