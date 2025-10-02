@@ -82,12 +82,20 @@ type Review struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 type Store struct {
-	ID          uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
-	OwnerID     uuid.UUID `gorm:"type:uuid;index" json:"owner_id"`
-	Name        string    `gorm:"not null" json:"name"`
-	Description *string   `json:"description,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
-	Products    []Product `gorm:"foreignKey:StoreID" json:"products"`
+	ID                   uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	OwnerID              uuid.UUID `gorm:"type:uuid;index" json:"owner_id"`
+	Name                 string    `gorm:"not null" json:"name"`
+	Description          *string   `json:"description,omitempty"`
+	// Warehouse/Origin Location for Shipping
+	WarehouseStreet      string  `gorm:"size:255" json:"warehouse_street,omitempty"`
+	WarehouseCity        string  `gorm:"size:100" json:"warehouse_city,omitempty"`
+	WarehouseState       string  `gorm:"size:100" json:"warehouse_state,omitempty"`
+	WarehouseCountry     string  `gorm:"size:100;default:KE" json:"warehouse_country,omitempty"`
+	WarehousePostalCode  string  `gorm:"size:20" json:"warehouse_postal_code,omitempty"`
+	WarehouseLatitude    float64 `json:"warehouse_latitude,omitempty"`
+	WarehouseLongitude   float64 `json:"warehouse_longitude,omitempty"`
+	CreatedAt            time.Time `json:"created_at"`
+	Products             []Product `gorm:"foreignKey:StoreID" json:"products"`
 }
 type User struct {
 	ID           uuid.UUID      `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
