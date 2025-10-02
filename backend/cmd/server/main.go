@@ -115,6 +115,27 @@ func main() {
 	app.Delete("/api/addresses/:id", middleware.RequireAuth(dbConn), handlers.DeleteAddress)
 	app.Put("/api/addresses/:id/default", middleware.RequireAuth(dbConn), handlers.SetDefaultAddress)
 
+	// Shipping
+	app.Post("/api/shipping/calculate", middleware.RequireAuth(dbConn), handlers.CalculateShippingHandler(dbConn))
+	app.Get("/api/shipping/methods", middleware.RequireAuth(dbConn), handlers.GetAvailableShippingMethodsHandler(dbConn))
+	app.Get("/api/shipping/methods/all", handlers.ListShippingMethodsHandler(dbConn))
+
+	// Admin: Shipping Management
+	app.Post("/api/admin/shipping/methods", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.CreateShippingMethodHandler(dbConn))
+	app.Get("/api/admin/shipping/methods", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.AdminListShippingMethodsHandler(dbConn))
+	app.Put("/api/admin/shipping/methods/:id", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.UpdateShippingMethodHandler(dbConn))
+	app.Delete("/api/admin/shipping/methods/:id", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.DeleteShippingMethodHandler(dbConn))
+
+	app.Post("/api/admin/shipping/zones", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.CreateShippingZoneHandler(dbConn))
+	app.Get("/api/admin/shipping/zones", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.ListShippingZonesHandler(dbConn))
+	app.Put("/api/admin/shipping/zones/:id", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.UpdateShippingZoneHandler(dbConn))
+	app.Delete("/api/admin/shipping/zones/:id", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.DeleteShippingZoneHandler(dbConn))
+
+	app.Post("/api/admin/shipping/rules", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.CreateShippingRuleHandler(dbConn))
+	app.Get("/api/admin/shipping/rules", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.ListShippingRulesHandler(dbConn))
+	app.Put("/api/admin/shipping/rules/:id", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.UpdateShippingRuleHandler(dbConn))
+	app.Delete("/api/admin/shipping/rules/:id", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.DeleteShippingRuleHandler(dbConn))
+
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
