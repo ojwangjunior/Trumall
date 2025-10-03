@@ -24,6 +24,7 @@ import EditProductPage from "./pages/EditProductPage";
 import SellerProtectedRoute from "./context/SellerProtectedRoute";
 import SellerDashboardPage from "./pages/SellerDashboardPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+import WishlistPage from "./pages/WishlistPage";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route element={<ProtectedRoute />}>
+              <Route path="/wishlist" element={<WishlistPage />} />
               <Route path="/mystores" element={<MyStoresPage />} />
               <Route path="/account" element={<MyAccountPage />} />
               <Route path="/account/addresses" element={<AddressManagementPage />} />
