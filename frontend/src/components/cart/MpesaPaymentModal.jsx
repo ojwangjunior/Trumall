@@ -37,7 +37,8 @@ const MpesaPaymentModal = ({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [isWaitingForConfirmation, setIsWaitingForConfirmation] = useState(false);
+  const [isWaitingForConfirmation, setIsWaitingForConfirmation] =
+    useState(false);
 
   // Address states
   const [addresses, setAddresses] = useState([]);
@@ -84,7 +85,13 @@ const MpesaPaymentModal = ({
       showToast("Failed to load addresses.", "error");
       setAddresses([]);
     }
-  }, [setAddresses, setSelectedAddressId, setAvailableShippingMethods, setSelectedShippingMethod, showToast]);
+  }, [
+    setAddresses,
+    setSelectedAddressId,
+    setAvailableShippingMethods,
+    setSelectedShippingMethod,
+    showToast,
+  ]);
 
   const fetchAvailableShippingMethods = useCallback(async () => {
     setIsLoadingShipping(true);
@@ -105,7 +112,9 @@ const MpesaPaymentModal = ({
 
       // Auto-select first method or standard if available
       if (methods.length > 0) {
-        const standardMethod = methods.find(m => m.method_code === 'standard');
+        const standardMethod = methods.find(
+          (m) => m.method_code === "standard"
+        );
         setSelectedShippingMethod(standardMethod || methods[0]);
       }
     } catch (error) {
@@ -113,14 +122,33 @@ const MpesaPaymentModal = ({
       setShippingError("Failed to load shipping options");
       // Fallback to basic methods if API fails
       setAvailableShippingMethods([
-        { method_code: 'standard', method_name: 'Standard Shipping', delivery_days_min: 3, delivery_days_max: 5 },
-        { method_code: 'express', method_name: 'Express Shipping', delivery_days_min: 1, delivery_days_max: 2 }
+        {
+          method_code: "standard",
+          method_name: "Standard Shipping",
+          delivery_days_min: 3,
+          delivery_days_max: 5,
+        },
+        {
+          method_code: "express",
+          method_name: "Express Shipping",
+          delivery_days_min: 1,
+          delivery_days_max: 2,
+        },
       ]);
-      setSelectedShippingMethod({ method_code: 'standard', method_name: 'Standard Shipping' });
+      setSelectedShippingMethod({
+        method_code: "standard",
+        method_name: "Standard Shipping",
+      });
     } finally {
       setIsLoadingShipping(false);
     }
-  }, [selectedAddressId, setAvailableShippingMethods, setSelectedShippingMethod, setIsLoadingShipping, setShippingError]);
+  }, [
+    selectedAddressId,
+    setAvailableShippingMethods,
+    setSelectedShippingMethod,
+    setIsLoadingShipping,
+    setShippingError,
+  ]);
 
   const calculateShippingCost = useCallback(async () => {
     if (!selectedAddressId || !selectedShippingMethod) return;
@@ -154,7 +182,15 @@ const MpesaPaymentModal = ({
     } finally {
       setIsLoadingShipping(false);
     }
-  }, [selectedAddressId, selectedShippingMethod, setIsLoadingShipping, setShippingError, setShippingCost, setEstimatedDelivery, showToast]);
+  }, [
+    selectedAddressId,
+    selectedShippingMethod,
+    setIsLoadingShipping,
+    setShippingError,
+    setShippingCost,
+    setEstimatedDelivery,
+    showToast,
+  ]);
 
   // Fetch addresses every time modal opens to get latest changes
   useEffect(() => {
@@ -318,7 +354,8 @@ const MpesaPaymentModal = ({
         console.error("Checkout error:", err);
         onPaymentError(err);
         showToast(
-          err.response?.data?.error || "Payment failed to start. Please try again.",
+          err.response?.data?.error ||
+            "Payment failed to start. Please try again.",
           "error"
         );
         setIsWaitingForConfirmation(false);
@@ -419,10 +456,17 @@ const MpesaPaymentModal = ({
                     <input
                       type="radio"
                       value={method.method_code}
-                      checked={selectedShippingMethod?.method_code === method.method_code}
+                      checked={
+                        selectedShippingMethod?.method_code ===
+                        method.method_code
+                      }
                       onChange={() => setSelectedShippingMethod(method)}
                       className="w-4 h-4 text-green-600 focus:ring-green-500"
-                      disabled={isProcessing || isWaitingForConfirmation || isLoadingShipping}
+                      disabled={
+                        isProcessing ||
+                        isWaitingForConfirmation ||
+                        isLoadingShipping
+                      }
                     />
                     <div>
                       <div className="font-medium text-gray-900">
@@ -434,8 +478,23 @@ const MpesaPaymentModal = ({
                         )}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {method.delivery_days_min}-{method.delivery_days_max} days
+                        {method.delivery_days_min === method.delivery_days_max
+                          ? `${method.delivery_days_min} days`
+                          : `${method.delivery_days_min}-${method.delivery_days_max} days`}
                       </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-semibold text-gray-900">
+                      {method.shipping_cost_cents === 0 ||
+                      method.is_free_shipping ? (
+                        <span className="text-green-600">FREE</span>
+                      ) : (
+                        new Intl.NumberFormat("en-US", {
+                          style: "currency",
+                          currency: currency,
+                        }).format(method.shipping_cost_cents / 100)
+                      )}
                     </div>
                   </div>
                 </label>
@@ -467,7 +526,8 @@ const MpesaPaymentModal = ({
                 <span className="text-xs text-gray-500">
                   ({selectedShippingMethod.method_name})
                 </span>
-              )}:
+              )}
+              :
             </span>
             <span className="font-semibold text-gray-900">
               {isLoadingShipping ? (
@@ -624,7 +684,8 @@ const MpesaPaymentModal = ({
             ) : (
               <>
                 <CreditCard className="w-4 h-4" />
-                Pay {new Intl.NumberFormat("en-US", {
+                Pay{" "}
+                {new Intl.NumberFormat("en-US", {
                   style: "currency",
                   currency: currency,
                 }).format(finalTotal)}
