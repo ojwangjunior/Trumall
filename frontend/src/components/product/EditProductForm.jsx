@@ -15,6 +15,16 @@ const EditProductForm = ({
   setKeyFeatures,
   specifications,
   setSpecifications,
+  brand,
+  setBrand,
+  whatsInBox,
+  setWhatsInBox,
+  warrantyInfo,
+  setWarrantyInfo,
+  originalPrice,
+  setOriginalPrice,
+  discount,
+  setDiscount,
   handleFileChange,
   imagePreviews,
   isSubmitting,
@@ -54,6 +64,23 @@ const EditProductForm = ({
     setSpecifications(updated);
   };
 
+  // Handle adding an item to What's in the Box
+  const addBoxItem = () => {
+    setWhatsInBox([...whatsInBox, ""]);
+  };
+
+  // Handle removing an item from What's in the Box
+  const removeBoxItem = (index) => {
+    setWhatsInBox(whatsInBox.filter((_, i) => i !== index));
+  };
+
+  // Handle updating an item in What's in the Box
+  const updateBoxItem = (index, value) => {
+    const updated = [...whatsInBox];
+    updated[index] = value;
+    setWhatsInBox(updated);
+  };
+
   return (
     <form onSubmit={handleUpdate} className="space-y-6">
       <div className="mb-5">
@@ -76,43 +103,102 @@ const EditProductForm = ({
 
       <div className="mb-5">
         <label
-          htmlFor="itemPrice"
+          htmlFor="brand"
           className="block text-gray-700 text-sm font-bold mb-2"
         >
-          Item Price (KES)
+          Brand (Optional)
         </label>
         <input
-          type="number"
-          id="itemPrice"
+          type="text"
+          id="brand"
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
-          placeholder="e.g., 99.99"
-          value={itemPrice}
-          onChange={(e) => setItemPrice(e.target.value)}
-          required
-          min="0"
-          step="0.01"
+          placeholder="e.g., Samsung, Nike, Apple"
+          value={brand}
+          onChange={(e) => setBrand(e.target.value)}
         />
       </div>
 
-      <div className="mb-5">
-        <label
-          htmlFor="stock"
-          className="block text-gray-700 text-sm font-bold mb-2"
-        >
-          Stock
-        </label>
-        <input
-          type="number"
-          id="stock"
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
-          placeholder="e.g., 10"
-          value={stock}
-          onChange={(e) =>
-            setStock(e.target.value === "" ? 0 : parseInt(e.target.value))
-          }
-          required
-          min="0"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+        <div>
+          <label
+            htmlFor="itemPrice"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
+            Current Price (KES)
+          </label>
+          <input
+            type="number"
+            id="itemPrice"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., 99.99"
+            value={itemPrice}
+            onChange={(e) => setItemPrice(e.target.value)}
+            required
+            min="0"
+            step="0.01"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="originalPrice"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
+            Original Price (Optional)
+          </label>
+          <input
+            type="number"
+            id="originalPrice"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., 149.99"
+            value={originalPrice}
+            onChange={(e) => setOriginalPrice(e.target.value)}
+            min="0"
+            step="0.01"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+        <div>
+          <label
+            htmlFor="discount"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
+            Discount % (Optional)
+          </label>
+          <input
+            type="number"
+            id="discount"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., 25"
+            value={discount}
+            onChange={(e) => setDiscount(e.target.value)}
+            min="0"
+            max="100"
+          />
+        </div>
+
+        <div>
+          <label
+            htmlFor="stock"
+            className="block text-gray-700 text-sm font-bold mb-2"
+          >
+            Stock
+          </label>
+          <input
+            type="number"
+            id="stock"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., 10"
+            value={stock}
+            onChange={(e) =>
+              setStock(e.target.value === "" ? 0 : parseInt(e.target.value))
+            }
+            required
+            min="0"
+          />
+        </div>
       </div>
 
       <div className="mb-5">
@@ -235,6 +321,72 @@ const EditProductForm = ({
             </p>
           )}
         </div>
+      </div>
+
+      {/* What's in the Box Section */}
+      <div className="mb-5 bg-purple-50 p-4 rounded-lg border border-purple-200">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <label className="block text-gray-700 text-sm font-bold">
+              What's in the Box
+            </label>
+            <p className="text-xs text-gray-600 mt-1">
+              List items included with the product (e.g., "1x Main Unit", "1x USB Cable", "User Manual")
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addBoxItem}
+            className="flex items-center gap-1 px-3 py-2 bg-purple-500 text-white text-sm rounded-lg hover:bg-purple-600 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          {whatsInBox.map((item, index) => (
+            <div key={index} className="flex gap-2">
+              <input
+                type="text"
+                value={item}
+                onChange={(e) => updateBoxItem(index, e.target.value)}
+                placeholder={`Item ${index + 1} (e.g., "1x Main Unit")`}
+                className="flex-1 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+              <button
+                type="button"
+                onClick={() => removeBoxItem(index)}
+                className="p-2 text-red-500 hover:bg-red-100 rounded transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          ))}
+
+          {whatsInBox.length === 0 && (
+            <p className="text-sm text-gray-500 italic">
+              No items added yet. Click "Add" to list what's included.
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Warranty Information */}
+      <div className="mb-5">
+        <label
+          htmlFor="warrantyInfo"
+          className="block text-gray-700 text-sm font-bold mb-2"
+        >
+          Warranty Information (Optional)
+        </label>
+        <textarea
+          id="warrantyInfo"
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-2 focus:ring-blue-500 h-24 resize-none"
+          placeholder="e.g., 1-year manufacturer warranty, 30-day return policy"
+          value={warrantyInfo}
+          onChange={(e) => setWarrantyInfo(e.target.value)}
+        />
       </div>
 
       <ImageUploadPreview

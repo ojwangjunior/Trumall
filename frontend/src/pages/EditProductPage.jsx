@@ -16,6 +16,11 @@ const EditProductPage = () => {
   const [storeId, setStoreId] = useState("");
   const [keyFeatures, setKeyFeatures] = useState([]);
   const [specifications, setSpecifications] = useState([]);
+  const [brand, setBrand] = useState("");
+  const [whatsInBox, setWhatsInBox] = useState([]);
+  const [warrantyInfo, setWarrantyInfo] = useState("");
+  const [originalPrice, setOriginalPrice] = useState("");
+  const [discount, setDiscount] = useState("");
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,6 +57,13 @@ const EditProductPage = () => {
           const specsArray = Object.entries(specsObj).map(([key, value]) => ({ key, value }));
           setSpecifications(specsArray);
         }
+
+        // Load additional fields
+        setBrand(product.brand || "");
+        setWhatsInBox(product.whats_in_box || []);
+        setWarrantyInfo(product.warranty_info || "");
+        setOriginalPrice(product.original_price_cents ? (product.original_price_cents / 100).toString() : "");
+        setDiscount(product.discount ? product.discount.toString() : "");
       } catch (error) {
         console.error("Error fetching product:", error);
         showToast("Failed to fetch product data.", "error");
@@ -94,6 +106,32 @@ const EditProductPage = () => {
         return acc;
       }, {});
       formData.append("specifications", JSON.stringify(specsObj));
+    }
+
+    // Add brand
+    if (brand.trim() !== "") {
+      formData.append("brand", brand);
+    }
+
+    // Add what's in the box (filter out empty values)
+    const validBoxItems = whatsInBox.filter(item => item.trim() !== "");
+    if (validBoxItems.length > 0) {
+      formData.append("whats_in_box", JSON.stringify(validBoxItems));
+    }
+
+    // Add warranty info
+    if (warrantyInfo.trim() !== "") {
+      formData.append("warranty_info", warrantyInfo);
+    }
+
+    // Add original price
+    if (originalPrice && parseFloat(originalPrice) > 0) {
+      formData.append("original_price_cents", Math.round(parseFloat(originalPrice) * 100));
+    }
+
+    // Add discount
+    if (discount && parseInt(discount) > 0) {
+      formData.append("discount", parseInt(discount));
     }
 
     images.forEach((image) => {
@@ -148,6 +186,16 @@ const EditProductPage = () => {
           setKeyFeatures={setKeyFeatures}
           specifications={specifications}
           setSpecifications={setSpecifications}
+          brand={brand}
+          setBrand={setBrand}
+          whatsInBox={whatsInBox}
+          setWhatsInBox={setWhatsInBox}
+          warrantyInfo={warrantyInfo}
+          setWarrantyInfo={setWarrantyInfo}
+          originalPrice={originalPrice}
+          setOriginalPrice={setOriginalPrice}
+          discount={discount}
+          setDiscount={setDiscount}
           handleFileChange={handleFileChange}
           imagePreviews={imagePreviews}
           isSubmitting={isSubmitting}
