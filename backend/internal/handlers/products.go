@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -80,6 +81,54 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		}
 		if p.Currency == "" {
 			p.Currency = "USD"
+		}
+
+		// Handle key_features (JSON array of strings)
+		if keyFeaturesStrs, ok := form.Value["key_features"]; ok && len(keyFeaturesStrs) > 0 {
+			var keyFeatures []string
+			if err := json.Unmarshal([]byte(keyFeaturesStrs[0]), &keyFeatures); err == nil {
+				p.KeyFeatures = keyFeatures
+			}
+		}
+
+		// Handle specifications (JSON object)
+		if specsStrs, ok := form.Value["specifications"]; ok && len(specsStrs) > 0 {
+			specsJSON := specsStrs[0]
+			p.Specifications = &specsJSON
+		}
+
+		// Handle brand
+		if brands, ok := form.Value["brand"]; ok && len(brands) > 0 {
+			brand := brands[0]
+			p.Brand = &brand
+		}
+
+		// Handle whats_in_box (JSON array of strings)
+		if whatsInBoxStrs, ok := form.Value["whats_in_box"]; ok && len(whatsInBoxStrs) > 0 {
+			var whatsInBox []string
+			if err := json.Unmarshal([]byte(whatsInBoxStrs[0]), &whatsInBox); err == nil {
+				p.WhatsInBox = whatsInBox
+			}
+		}
+
+		// Handle warranty_info
+		if warranties, ok := form.Value["warranty_info"]; ok && len(warranties) > 0 {
+			warranty := warranties[0]
+			p.WarrantyInfo = &warranty
+		}
+
+		// Handle original_price_cents
+		if originalPriceStrs, ok := form.Value["original_price_cents"]; ok && len(originalPriceStrs) > 0 {
+			if originalPrice, err := strconv.ParseInt(originalPriceStrs[0], 10, 64); err == nil {
+				p.OriginalPriceCents = &originalPrice
+			}
+		}
+
+		// Handle discount percentage
+		if discountStrs, ok := form.Value["discount"]; ok && len(discountStrs) > 0 {
+			if discount, err := strconv.Atoi(discountStrs[0]); err == nil {
+				p.Discount = &discount
+			}
 		}
 
 		// Handle image uploads
@@ -274,6 +323,54 @@ func UpdateProductHandler(db *gorm.DB) fiber.Handler {
 			product.Currency = currencies[0]
 		}
 
+		// Handle key_features (JSON array of strings)
+		if keyFeaturesStrs, ok := form.Value["key_features"]; ok && len(keyFeaturesStrs) > 0 {
+			var keyFeatures []string
+			if err := json.Unmarshal([]byte(keyFeaturesStrs[0]), &keyFeatures); err == nil {
+				product.KeyFeatures = keyFeatures
+			}
+		}
+
+		// Handle specifications (JSON object)
+		if specsStrs, ok := form.Value["specifications"]; ok && len(specsStrs) > 0 {
+			specsJSON := specsStrs[0]
+			product.Specifications = &specsJSON
+		}
+
+		// Handle brand
+		if brands, ok := form.Value["brand"]; ok && len(brands) > 0 {
+			brand := brands[0]
+			product.Brand = &brand
+		}
+
+		// Handle whats_in_box (JSON array of strings)
+		if whatsInBoxStrs, ok := form.Value["whats_in_box"]; ok && len(whatsInBoxStrs) > 0 {
+			var whatsInBox []string
+			if err := json.Unmarshal([]byte(whatsInBoxStrs[0]), &whatsInBox); err == nil {
+				product.WhatsInBox = whatsInBox
+			}
+		}
+
+		// Handle warranty_info
+		if warranties, ok := form.Value["warranty_info"]; ok && len(warranties) > 0 {
+			warranty := warranties[0]
+			product.WarrantyInfo = &warranty
+		}
+
+		// Handle original_price_cents
+		if originalPriceStrs, ok := form.Value["original_price_cents"]; ok && len(originalPriceStrs) > 0 {
+			if originalPrice, err := strconv.ParseInt(originalPriceStrs[0], 10, 64); err == nil {
+				product.OriginalPriceCents = &originalPrice
+			}
+		}
+
+		// Handle discount percentage
+		if discountStrs, ok := form.Value["discount"]; ok && len(discountStrs) > 0 {
+			if discount, err := strconv.Atoi(discountStrs[0]); err == nil {
+				product.Discount = &discount
+			}
+		}
+
 		if err := db.Save(&product).Error; err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to update product"})
 		}
@@ -428,3 +525,33 @@ func DeleteSellerProductHandler(db *gorm.DB) fiber.Handler {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"message": "product deleted successfully"})
 	}
 }
+
+// SearchProductsHandler - search products by title or description
+func SearchProductsHandler(db *gorm.DB) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		query := c.Query("q")
+		if query == "" {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": "search query required"})
+		}
+
+		var products []models.Product
+		searchPattern := "%" + query + "%"
+
+		if err := db.Where("LOWER(title) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)", searchPattern, searchPattern).
+			Preload("Store").
+			Preload("Images").
+			Find(&products).Error; err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to search products"})
+		}
+
+		// Set default currency if missing
+		for i := range products {
+			if products[i].Currency == "" {
+				products[i].Currency = "USD"
+			}
+		}
+
+		return c.JSON(products)
+	}
+}
+

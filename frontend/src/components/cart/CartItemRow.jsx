@@ -1,4 +1,5 @@
 import React from "react";
+import { Plus, Minus, Trash2 } from "lucide-react";
 
 const CartItemRow = ({
   item,
@@ -6,6 +7,14 @@ const CartItemRow = ({
   decreaseQuantity,
   removeFromCart,
 }) => {
+  const handleQuantityChange = (e) => {
+    const value = parseInt(e.target.value);
+    if (!isNaN(value) && value > 0) {
+      // You can add a custom updateQuantity function if needed
+      // For now, we'll keep using increase/decrease
+    }
+  };
+
   return (
     <tr key={item.ID}>
       <td className="px-6 py-4 whitespace-nowrap">
@@ -37,19 +46,24 @@ const CartItemRow = ({
         }).format(item.price / 100)}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        <div className="flex items-center space-x-2">
+        <div className="inline-flex items-center bg-gray-50 border border-gray-300 rounded-lg overflow-hidden">
           <button
             onClick={() => decreaseQuantity(item.Product.id)}
-            className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            disabled={item.quantity <= 1}
+            className="px-3 py-2 text-gray-700 hover:bg-gray-200 active:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-50"
+            aria-label="Decrease quantity"
           >
-            -
+            <Minus className="w-4 h-4" />
           </button>
-          <span>{item.quantity}</span>
+          <span className="px-4 py-2 min-w-[3rem] text-center font-medium text-gray-900 bg-white border-x border-gray-300">
+            {item.quantity}
+          </span>
           <button
             onClick={() => increaseQuantity(item.Product.id)}
-            className="px-2 py-1 border border-gray-300 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="px-3 py-2 text-gray-700 hover:bg-gray-200 active:bg-gray-300 transition-colors"
+            aria-label="Increase quantity"
           >
-            +
+            <Plus className="w-4 h-4" />
           </button>
         </div>
       </td>
@@ -62,9 +76,11 @@ const CartItemRow = ({
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <button
           onClick={() => removeFromCart(item.ID)}
-          className="text-red-600 hover:text-red-900"
+          className="inline-flex items-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+          aria-label="Remove item from cart"
         >
-          Remove
+          <Trash2 className="w-4 h-4" />
+          <span>Remove</span>
         </button>
       </td>
     </tr>

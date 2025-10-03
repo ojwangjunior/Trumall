@@ -14,7 +14,13 @@ const EditProductPage = () => {
   const [itemDescription, setItemDescription] = useState("");
   const [stock, setStock] = useState(1);
   const [storeId, setStoreId] = useState("");
-  // const [stores, setStores] = useState([]);
+  const [keyFeatures, setKeyFeatures] = useState([]);
+  const [specifications, setSpecifications] = useState([]);
+  const [brand, setBrand] = useState("");
+  const [whatsInBox, setWhatsInBox] = useState([]);
+  const [warrantyInfo, setWarrantyInfo] = useState("");
+  const [originalPrice, setOriginalPrice] = useState("");
+  const [discount, setDiscount] = useState("");
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,9 +45,28 @@ const EditProductPage = () => {
         setItemDescription(product.description);
         setStock(product.stock);
         setStoreId(product.store_id);
+
+        // Load key features
+        setKeyFeatures(product.key_features || []);
+
+        // Load specifications (convert from JSON object to array format)
+        if (product.specifications) {
+          const specsObj = typeof product.specifications === 'string'
+            ? JSON.parse(product.specifications)
+            : product.specifications;
+          const specsArray = Object.entries(specsObj).map(([key, value]) => ({ key, value }));
+          setSpecifications(specsArray);
+        }
+
+        // Load additional fields
+        setBrand(product.brand || "");
+        setWhatsInBox(product.whats_in_box || []);
+        setWarrantyInfo(product.warranty_info || "");
+        setOriginalPrice(product.original_price_cents ? (product.original_price_cents / 100).toString() : "");
+        setDiscount(product.discount ? product.discount.toString() : "");
       } catch (error) {
         console.error("Error fetching product:", error);
-        showToast("Failed to fetch product data.", "error"); // Use showToast
+        showToast("Failed to fetch product data.", "error");
       }
     };
 
@@ -58,7 +83,6 @@ const EditProductPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmissionSuccess(false);
-    // setError(null); // No longer needed, showToast handles dismissal
 
     const formData = new FormData();
     formData.append("store_id", storeId);
@@ -67,6 +91,48 @@ const EditProductPage = () => {
     formData.append("price_cents", Math.round(parseFloat(itemPrice) * 100));
     formData.append("stock", parseInt(stock));
     formData.append("currency", "KES");
+
+    // Add key features (filter out empty values)
+    const validKeyFeatures = keyFeatures.filter(f => f.trim() !== "");
+    if (validKeyFeatures.length > 0) {
+      formData.append("key_features", JSON.stringify(validKeyFeatures));
+    }
+
+    // Add specifications (convert array format to JSON object, filter out empty values)
+    const validSpecs = specifications.filter(s => s.key.trim() !== "" && s.value.trim() !== "");
+    if (validSpecs.length > 0) {
+      const specsObj = validSpecs.reduce((acc, spec) => {
+        acc[spec.key] = spec.value;
+        return acc;
+      }, {});
+      formData.append("specifications", JSON.stringify(specsObj));
+    }
+
+    // Add brand
+    if (brand.trim() !== "") {
+      formData.append("brand", brand);
+    }
+
+    // Add what's in the box (filter out empty values)
+    const validBoxItems = whatsInBox.filter(item => item.trim() !== "");
+    if (validBoxItems.length > 0) {
+      formData.append("whats_in_box", JSON.stringify(validBoxItems));
+    }
+
+    // Add warranty info
+    if (warrantyInfo.trim() !== "") {
+      formData.append("warranty_info", warrantyInfo);
+    }
+
+    // Add original price
+    if (originalPrice && parseFloat(originalPrice) > 0) {
+      formData.append("original_price_cents", Math.round(parseFloat(originalPrice) * 100));
+    }
+
+    // Add discount
+    if (discount && parseInt(discount) > 0) {
+      formData.append("discount", parseInt(discount));
+    }
 
     images.forEach((image) => {
       formData.append("images", image);
@@ -116,8 +182,20 @@ const EditProductPage = () => {
           setItemDescription={setItemDescription}
           stock={stock}
           setStock={setStock}
-          storeId={storeId}
-          // setStoreId={setStoreId} // storeId is not being set in this form
+          keyFeatures={keyFeatures}
+          setKeyFeatures={setKeyFeatures}
+          specifications={specifications}
+          setSpecifications={setSpecifications}
+          brand={brand}
+          setBrand={setBrand}
+          whatsInBox={whatsInBox}
+          setWhatsInBox={setWhatsInBox}
+          warrantyInfo={warrantyInfo}
+          setWarrantyInfo={setWarrantyInfo}
+          originalPrice={originalPrice}
+          setOriginalPrice={setOriginalPrice}
+          discount={discount}
+          setDiscount={setDiscount}
           handleFileChange={handleFileChange}
           imagePreviews={imagePreviews}
           isSubmitting={isSubmitting}

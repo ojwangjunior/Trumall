@@ -1,12 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 const MobileExpandedSearch = ({ onSearch }) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+  const debounceTimerRef = useRef(null);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    onSearch(searchQuery);
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery(''); // Clear search after navigating
+      onSearch(searchQuery);
+    }
   };
+
+  // Debounced search - triggers after user stops typing for 800ms
+  useEffect(() => {
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Don't search if query is empty or too short
+    if (searchQuery.trim().length < 2) {
+      return;
+    }
+
+    // Set new timer
+    debounceTimerRef.current = setTimeout(() => {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      onSearch(searchQuery);
+    }, 800); // 800ms delay after user stops typing
+
+    // Cleanup timer on unmount or when searchQuery changes
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchQuery, navigate, onSearch]);
 
   return (
     <div className="lg:hidden border-t border-gray-200 p-4 bg-white">

@@ -15,6 +15,8 @@ import CreateStorePage from "./pages/CreateStorePage";
 import MyStoresPage from "./pages/MyStoresPage";
 import MyAccountPage from "./pages/MyAccountPage";
 import OrdersPage from "./pages/OrdersPage"; // Import OrdersPage
+import AddressManagementPage from "./pages/AddressManagementPage";
+import SearchPage from "./pages/SearchPage";
 import ProtectedRoute from "./context/ProtectedRoute";
 import StoreDetailPage from "./pages/StoreDetailPage";
 import EditStorePage from "./pages/EditStorePage";
@@ -22,6 +24,7 @@ import EditProductPage from "./pages/EditProductPage";
 import SellerProtectedRoute from "./context/SellerProtectedRoute";
 import SellerDashboardPage from "./pages/SellerDashboardPage";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+import WishlistPage from "./pages/WishlistPage";
 
 function App() {
   return (
@@ -37,11 +40,14 @@ function App() {
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route element={<ProtectedRoute />}>
+              <Route path="/wishlist" element={<WishlistPage />} />
               <Route path="/mystores" element={<MyStoresPage />} />
               <Route path="/account" element={<MyAccountPage />} />
+              <Route path="/account/addresses" element={<AddressManagementPage />} />
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/store/:id" element={<StoreDetailPage />} />
               <Route path="/store/:id/edit" element={<EditStorePage />} />

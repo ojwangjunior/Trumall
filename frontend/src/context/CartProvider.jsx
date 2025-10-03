@@ -20,7 +20,13 @@ export const CartProvider = ({ children }) => {
           },
         }
       );
-      setCartItems(response.data);
+      // Sort cart items by ID to maintain consistent order
+      const sortedItems = (response.data || []).sort((a, b) => {
+        if (a.ID < b.ID) return -1;
+        if (a.ID > b.ID) return 1;
+        return 0;
+      });
+      setCartItems(sortedItems);
     } catch (error) {
       if (
         error.response &&
@@ -98,7 +104,13 @@ export const CartProvider = ({ children }) => {
           },
         }
       );
-      setCartItems(response.data);
+      // Sort cart items by ID to maintain consistent order
+      const sortedItems = (response.data || []).sort((a, b) => {
+        if (a.ID < b.ID) return -1;
+        if (a.ID > b.ID) return 1;
+        return 0;
+      });
+      setCartItems(sortedItems);
     } catch (error) {
       console.error("Error increasing quantity:", error);
       showToast("Failed to increase quantity.", "error");
@@ -116,7 +128,13 @@ export const CartProvider = ({ children }) => {
           },
         }
       );
-      setCartItems(response.data);
+      // Sort cart items by ID to maintain consistent order
+      const sortedItems = (response.data || []).sort((a, b) => {
+        if (a.ID < b.ID) return -1;
+        if (a.ID > b.ID) return 1;
+        return 0;
+      });
+      setCartItems(sortedItems);
     } catch (error) {
       console.error("Error decreasing quantity:", error);
       showToast("Failed to decrease quantity.", "error");

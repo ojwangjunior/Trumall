@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../context/auth-context";
+import { getPrimaryRole, formatRole } from "../../../utils/roleHelpers";
 
 const getFirstName = (fullName) => {
   if (!fullName) return "";
@@ -102,8 +103,8 @@ const AccountDropdown = () => {
               <div className="px-4 pb-2 border-b border-gray-100">
                 <p className="text-sm font-medium text-gray-900">{user.name}</p>
                 <p className="text-xs text-gray-500">{user.email}</p>
-                <p className="text-xs text-orange-500 capitalize">
-                  {user.role}
+                <p className="text-xs text-orange-500">
+                  {formatRole(getPrimaryRole(user.roles))}
                 </p>
               </div>
             )}

@@ -72,6 +72,14 @@ func UpdateStoreHandler(db *gorm.DB) fiber.Handler {
 
 		store.Name = input.Name
 		store.Description = input.Description
+		// Update warehouse location fields
+		store.WarehouseStreet = input.WarehouseStreet
+		store.WarehouseCity = input.WarehouseCity
+		store.WarehouseState = input.WarehouseState
+		store.WarehouseCountry = input.WarehouseCountry
+		store.WarehousePostalCode = input.WarehousePostalCode
+		store.WarehouseLatitude = input.WarehouseLatitude
+		store.WarehouseLongitude = input.WarehouseLongitude
 
 		if err := db.Save(&store).Error; err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to update store"})

@@ -1,5 +1,6 @@
 import React from "react";
-import { Settings, Edit3, LogOut, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Settings, Edit3, LogOut, ChevronRight, MapPin } from "lucide-react";
 
 const AccountQuickActions = ({ handleLogout }) => {
   return (
@@ -10,6 +11,19 @@ const AccountQuickActions = ({ handleLogout }) => {
       </h3>
 
       <div className="space-y-3">
+        <Link
+          to="/account/addresses"
+          className="w-full flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors group"
+        >
+          <div className="flex items-center space-x-3">
+            <MapPin className="w-4 h-4 text-slate-500" />
+            <span className="text-sm font-medium text-slate-900">
+              Manage Addresses
+            </span>
+          </div>
+          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600" />
+        </Link>
+
         <button className="w-full flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors group">
           <div className="flex items-center space-x-3">
             <Edit3 className="w-4 h-4 text-slate-500" />

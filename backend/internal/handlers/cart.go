@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"log"
 
+	// Add this import
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"trumall/internal/models"
+	"trumall/internal/services"
 	"trumall/mpesa" // Add this import
 )
 
@@ -170,11 +172,19 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 		user := c.Locals("user").(models.User)
 
 		type CheckoutRequest struct {
-			Phone string `json:"phone"`
+			Phone           string    `json:"phone"`
+			AddressID       uuid.UUID `json:"address_id"`
+			ShippingMethod  string    `json:"shipping_method"`
 		}
 		var checkoutReq CheckoutRequest
 		if err := c.BodyParser(&checkoutReq); err != nil {
 			return c.Status(400).JSON(fiber.Map{"error": "invalid request body"})
+		}
+
+		// Fetch the selected address
+		var shippingAddress models.Address
+		if err := db.Where("id = ? AND user_id = ?", checkoutReq.AddressID, user.ID).First(&shippingAddress).Error; err != nil {
+			return c.Status(400).JSON(fiber.Map{"error": "invalid shipping address"})
 		}
 
 		var cart []models.CartItem
@@ -192,11 +202,21 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 			return c.Status(400).JSON(fiber.Map{"error": "invalid store for product"})
 		}
 
-		// ✅ Calculate total
-		var totalCents int64
+		// ✅ Calculate cart total (before shipping)
+		var cartTotalCents int64
 		for _, item := range cart {
-			totalCents += int64(item.Quantity) * int64(item.Product.PriceCents)
+			cartTotalCents += int64(item.Quantity) * int64(item.Product.PriceCents)
 		}
+
+		// ✅ Calculate shipping using shipping service
+		shippingService := services.NewShippingService(db)
+		shippingCalc, err := shippingService.CalculateShipping(checkoutReq.AddressID, checkoutReq.ShippingMethod, cartTotalCents)
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{"error": fmt.Sprintf("shipping calculation failed: %v", err)})
+		}
+
+		// ✅ Calculate total including shipping
+		totalCents := cartTotalCents + shippingCalc.ShippingCostCents
 
 		// Start a transaction
 		tx := db.Begin()
@@ -210,13 +230,17 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 			}
 		}()
 
-		// ✅ Create order with storeID
+		// ✅ Create order with storeID and shipping details
 		order := models.Order{
-			BuyerID:    user.ID,
-			StoreID:    storeID,
-			TotalCents: totalCents,
-			Currency:   "KES",
-			Status:     "pending", // Status is pending until payment is confirmed
+			BuyerID:           user.ID,
+			StoreID:           storeID,
+			ShippingAddressID: shippingAddress.ID,
+			TotalCents:        totalCents,
+			ShippingCostCents: shippingCalc.ShippingCostCents,
+			Currency:          "KES",
+			Status:            "pending", // Status is pending until payment is confirmed
+			ShippingMethod:    checkoutReq.ShippingMethod,
+			EstimatedDelivery: shippingCalc.EstimatedDelivery,
 		}
 		if err := tx.Create(&order).Error; err != nil {
 			tx.Rollback()
@@ -288,6 +312,8 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 		return c.JSON(fiber.Map{
 			"order_id":            order.ID,
 			"checkout_request_id": checkoutRequestID,
+			"shipping_cost_cents": order.ShippingCostCents,
+			"estimated_delivery":  order.EstimatedDelivery,
 		})
 	}
 }
