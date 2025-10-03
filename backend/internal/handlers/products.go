@@ -97,6 +97,40 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 			p.Specifications = &specsJSON
 		}
 
+		// Handle brand
+		if brands, ok := form.Value["brand"]; ok && len(brands) > 0 {
+			brand := brands[0]
+			p.Brand = &brand
+		}
+
+		// Handle whats_in_box (JSON array of strings)
+		if whatsInBoxStrs, ok := form.Value["whats_in_box"]; ok && len(whatsInBoxStrs) > 0 {
+			var whatsInBox []string
+			if err := json.Unmarshal([]byte(whatsInBoxStrs[0]), &whatsInBox); err == nil {
+				p.WhatsInBox = whatsInBox
+			}
+		}
+
+		// Handle warranty_info
+		if warranties, ok := form.Value["warranty_info"]; ok && len(warranties) > 0 {
+			warranty := warranties[0]
+			p.WarrantyInfo = &warranty
+		}
+
+		// Handle original_price_cents
+		if originalPriceStrs, ok := form.Value["original_price_cents"]; ok && len(originalPriceStrs) > 0 {
+			if originalPrice, err := strconv.ParseInt(originalPriceStrs[0], 10, 64); err == nil {
+				p.OriginalPriceCents = &originalPrice
+			}
+		}
+
+		// Handle discount percentage
+		if discountStrs, ok := form.Value["discount"]; ok && len(discountStrs) > 0 {
+			if discount, err := strconv.Atoi(discountStrs[0]); err == nil {
+				p.Discount = &discount
+			}
+		}
+
 		// Handle image uploads
 		files := form.File["images"]
 		var productImages []models.ProductImage
@@ -301,6 +335,40 @@ func UpdateProductHandler(db *gorm.DB) fiber.Handler {
 		if specsStrs, ok := form.Value["specifications"]; ok && len(specsStrs) > 0 {
 			specsJSON := specsStrs[0]
 			product.Specifications = &specsJSON
+		}
+
+		// Handle brand
+		if brands, ok := form.Value["brand"]; ok && len(brands) > 0 {
+			brand := brands[0]
+			product.Brand = &brand
+		}
+
+		// Handle whats_in_box (JSON array of strings)
+		if whatsInBoxStrs, ok := form.Value["whats_in_box"]; ok && len(whatsInBoxStrs) > 0 {
+			var whatsInBox []string
+			if err := json.Unmarshal([]byte(whatsInBoxStrs[0]), &whatsInBox); err == nil {
+				product.WhatsInBox = whatsInBox
+			}
+		}
+
+		// Handle warranty_info
+		if warranties, ok := form.Value["warranty_info"]; ok && len(warranties) > 0 {
+			warranty := warranties[0]
+			product.WarrantyInfo = &warranty
+		}
+
+		// Handle original_price_cents
+		if originalPriceStrs, ok := form.Value["original_price_cents"]; ok && len(originalPriceStrs) > 0 {
+			if originalPrice, err := strconv.ParseInt(originalPriceStrs[0], 10, 64); err == nil {
+				product.OriginalPriceCents = &originalPrice
+			}
+		}
+
+		// Handle discount percentage
+		if discountStrs, ok := form.Value["discount"]; ok && len(discountStrs) > 0 {
+			if discount, err := strconv.Atoi(discountStrs[0]); err == nil {
+				product.Discount = &discount
+			}
 		}
 
 		if err := db.Save(&product).Error; err != nil {

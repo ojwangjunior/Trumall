@@ -60,11 +60,18 @@ type Product struct {
 	AuthenticityHash *string        `json:"authenticity_hash,omitempty"`
 
 	// UX Enhancement Fields
-	KeyFeatures      pq.StringArray `gorm:"type:text[]" json:"key_features,omitempty"`
-	Specifications   *string        `gorm:"type:jsonb" json:"specifications,omitempty"` // JSON object like {"Brand": "Samsung", "Size": "15.6 inch"}
-	AverageRating    float64        `gorm:"default:0" json:"average_rating"`
-	ReviewCount      int            `gorm:"default:0" json:"review_count"`
-	RatingBreakdown  *string        `gorm:"type:jsonb" json:"rating_breakdown,omitempty"` // JSON like {"5": 60, "4": 25, "3": 10, "2": 3, "1": 2}
+	KeyFeatures        pq.StringArray `gorm:"type:text[]" json:"key_features,omitempty"`
+	Specifications     *string        `gorm:"type:jsonb" json:"specifications,omitempty"` // JSON object like {"Brand": "Samsung", "Size": "15.6 inch"}
+	AverageRating      float64        `gorm:"default:0" json:"average_rating"`
+	ReviewCount        int            `gorm:"default:0" json:"review_count"`
+	RatingBreakdown    *string        `gorm:"type:jsonb" json:"rating_breakdown,omitempty"` // JSON like {"5": 60, "4": 25, "3": 10, "2": 3, "1": 2}
+
+	// Additional Detail Fields
+	Brand              *string        `json:"brand,omitempty"`
+	WhatsInBox         pq.StringArray `gorm:"type:text[]" json:"whats_in_box,omitempty"`
+	WarrantyInfo       *string        `json:"warranty_info,omitempty"`
+	OriginalPriceCents *int64         `json:"original_price_cents,omitempty"`
+	Discount           *int           `json:"discount,omitempty"`
 
 	CreatedAt        time.Time      `json:"created_at"`
 	UpdatedAt        time.Time      `json:"updated_at"`
@@ -228,4 +235,13 @@ type ShippingRule struct {
 	UpdatedAt                  time.Time       `gorm:"autoUpdateTime" json:"updated_at"`
 	ShippingMethod             ShippingMethod  `gorm:"foreignKey:ShippingMethodID" json:"shipping_method"`
 	ShippingZone               ShippingZone    `gorm:"foreignKey:ShippingZoneID" json:"shipping_zone"`
+}
+
+type Favorite struct {
+	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey" json:"id"`
+	UserID    uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
+	ProductID uuid.UUID `gorm:"type:uuid;not null;index" json:"product_id"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"created_at"`
+	Product   Product   `gorm:"foreignKey:ProductID" json:"product,omitempty"`
+	User      User      `gorm:"foreignKey:UserID" json:"user,omitempty"`
 }
