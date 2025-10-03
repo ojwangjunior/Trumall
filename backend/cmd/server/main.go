@@ -137,6 +137,12 @@ func main() {
 	app.Put("/api/admin/shipping/rules/:id", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.UpdateShippingRuleHandler(dbConn))
 	app.Delete("/api/admin/shipping/rules/:id", middleware.RequireAuth(dbConn), middleware.RequireRole("admin"), handlers.DeleteShippingRuleHandler(dbConn))
 
+	// Favorites/Wishlist
+	app.Post("/api/favorites", middleware.RequireAuth(dbConn), handlers.AddToFavoritesHandler(dbConn))
+	app.Delete("/api/favorites/:productId", middleware.RequireAuth(dbConn), handlers.RemoveFromFavoritesHandler(dbConn))
+	app.Get("/api/favorites", middleware.RequireAuth(dbConn), handlers.GetUserFavoritesHandler(dbConn))
+	app.Get("/api/favorites/check/:productId", middleware.RequireAuth(dbConn), handlers.CheckFavoriteStatusHandler(dbConn))
+
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
