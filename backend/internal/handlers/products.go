@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -80,6 +81,20 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		}
 		if p.Currency == "" {
 			p.Currency = "USD"
+		}
+
+		// Handle key_features (JSON array of strings)
+		if keyFeaturesStrs, ok := form.Value["key_features"]; ok && len(keyFeaturesStrs) > 0 {
+			var keyFeatures []string
+			if err := json.Unmarshal([]byte(keyFeaturesStrs[0]), &keyFeatures); err == nil {
+				p.KeyFeatures = keyFeatures
+			}
+		}
+
+		// Handle specifications (JSON object)
+		if specsStrs, ok := form.Value["specifications"]; ok && len(specsStrs) > 0 {
+			specsJSON := specsStrs[0]
+			p.Specifications = &specsJSON
 		}
 
 		// Handle image uploads
@@ -272,6 +287,20 @@ func UpdateProductHandler(db *gorm.DB) fiber.Handler {
 		}
 		if currencies, ok := form.Value["currency"]; ok && len(currencies) > 0 {
 			product.Currency = currencies[0]
+		}
+
+		// Handle key_features (JSON array of strings)
+		if keyFeaturesStrs, ok := form.Value["key_features"]; ok && len(keyFeaturesStrs) > 0 {
+			var keyFeatures []string
+			if err := json.Unmarshal([]byte(keyFeaturesStrs[0]), &keyFeatures); err == nil {
+				product.KeyFeatures = keyFeatures
+			}
+		}
+
+		// Handle specifications (JSON object)
+		if specsStrs, ok := form.Value["specifications"]; ok && len(specsStrs) > 0 {
+			specsJSON := specsStrs[0]
+			product.Specifications = &specsJSON
 		}
 
 		if err := db.Save(&product).Error; err != nil {
