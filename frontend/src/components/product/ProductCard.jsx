@@ -70,30 +70,22 @@ const ProductCard = ({ product }) => {
         </div>
 
         <div className="p-4 flex-1 flex flex-col">
-          <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 flex-1">
+          {/* Title - Truncated to 2 lines */}
+          <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[3rem]">
             {product.title}
           </h3>
 
-          {/* Display full description, it will be truncated by CSS line-clamp-3 if too long */}
-          {product.description && (
-            <p className="text-gray-600 text-sm mb-2 line-clamp-3">
-              {product.description}
-            </p>
-          )}
-
-          {product.store && (
-            <p className="text-sm text-gray-500 mb-2">By {product.store.name}</p>
-          )}
-
-          <div className="flex items-center gap-1 mb-2">
-            <Rating rating={product.rating || 4.5} />
+          {/* Rating & Reviews */}
+          <div className="flex items-center gap-1 mb-3">
+            <Rating rating={product.average_rating || product.rating || 0} />
             <span className="text-sm text-gray-500 ml-1">
-              ({product.reviewCount || "0"})
+              ({product.review_count || product.reviewCount || 0})
             </span>
           </div>
 
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl font-bold text-gray-900">
+          {/* Price */}
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-2xl font-bold text-gray-900">
               {formatPrice(product.price_cents, product.currency)}
             </span>
             {product.original_price_cents && (
@@ -106,9 +98,16 @@ const ProductCard = ({ product }) => {
             )}
           </div>
 
-          <div className="text-sm text-gray-600 mb-4">
-            Stock: {product.stock}
-          </div>
+          {/* Critical Stock Status - Only show if out of stock or low stock */}
+          {product.stock === 0 ? (
+            <div className="text-sm text-red-600 font-semibold mb-2">
+              Out of stock
+            </div>
+          ) : product.stock <= 5 ? (
+            <div className="text-sm text-orange-600 font-semibold mb-2">
+              Only {product.stock} left
+            </div>
+          ) : null}
         </div>
       </Link>
 

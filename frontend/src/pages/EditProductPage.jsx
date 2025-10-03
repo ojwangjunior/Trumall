@@ -14,7 +14,8 @@ const EditProductPage = () => {
   const [itemDescription, setItemDescription] = useState("");
   const [stock, setStock] = useState(1);
   const [storeId, setStoreId] = useState("");
-  // const [stores, setStores] = useState([]);
+  const [keyFeatures, setKeyFeatures] = useState([]);
+  const [specifications, setSpecifications] = useState([]);
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,9 +40,21 @@ const EditProductPage = () => {
         setItemDescription(product.description);
         setStock(product.stock);
         setStoreId(product.store_id);
+
+        // Load key features
+        setKeyFeatures(product.key_features || []);
+
+        // Load specifications (convert from JSON object to array format)
+        if (product.specifications) {
+          const specsObj = typeof product.specifications === 'string'
+            ? JSON.parse(product.specifications)
+            : product.specifications;
+          const specsArray = Object.entries(specsObj).map(([key, value]) => ({ key, value }));
+          setSpecifications(specsArray);
+        }
       } catch (error) {
         console.error("Error fetching product:", error);
-        showToast("Failed to fetch product data.", "error"); // Use showToast
+        showToast("Failed to fetch product data.", "error");
       }
     };
 
@@ -58,7 +71,6 @@ const EditProductPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmissionSuccess(false);
-    // setError(null); // No longer needed, showToast handles dismissal
 
     const formData = new FormData();
     formData.append("store_id", storeId);
@@ -67,6 +79,22 @@ const EditProductPage = () => {
     formData.append("price_cents", Math.round(parseFloat(itemPrice) * 100));
     formData.append("stock", parseInt(stock));
     formData.append("currency", "KES");
+
+    // Add key features (filter out empty values)
+    const validKeyFeatures = keyFeatures.filter(f => f.trim() !== "");
+    if (validKeyFeatures.length > 0) {
+      formData.append("key_features", JSON.stringify(validKeyFeatures));
+    }
+
+    // Add specifications (convert array format to JSON object, filter out empty values)
+    const validSpecs = specifications.filter(s => s.key.trim() !== "" && s.value.trim() !== "");
+    if (validSpecs.length > 0) {
+      const specsObj = validSpecs.reduce((acc, spec) => {
+        acc[spec.key] = spec.value;
+        return acc;
+      }, {});
+      formData.append("specifications", JSON.stringify(specsObj));
+    }
 
     images.forEach((image) => {
       formData.append("images", image);
@@ -116,8 +144,10 @@ const EditProductPage = () => {
           setItemDescription={setItemDescription}
           stock={stock}
           setStock={setStock}
-          storeId={storeId}
-          // setStoreId={setStoreId} // storeId is not being set in this form
+          keyFeatures={keyFeatures}
+          setKeyFeatures={setKeyFeatures}
+          specifications={specifications}
+          setSpecifications={setSpecifications}
           handleFileChange={handleFileChange}
           imagePreviews={imagePreviews}
           isSubmitting={isSubmitting}
