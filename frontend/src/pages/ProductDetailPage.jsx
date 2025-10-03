@@ -117,12 +117,12 @@ const ProductDetailPage = () => {
           id={id}
         />
       </div>
+      
+      {/* About This Item Section */}
+      <AboutThisItem product={product} />
 
       {/* Key Features Section */}
       <KeyFeatures product={product} />
-
-      {/* About This Item Section */}
-      <AboutThisItem product={product} />
 
       {/* Specifications Section */}
       <ProductSpecifications product={product} />
