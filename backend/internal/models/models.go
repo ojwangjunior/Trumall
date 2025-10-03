@@ -58,9 +58,18 @@ type Product struct {
 	SKU              *string        `json:"sku,omitempty"`
 	Stock            int            `gorm:"default:0" json:"stock"`
 	AuthenticityHash *string        `json:"authenticity_hash,omitempty"`
+
+	// UX Enhancement Fields
+	KeyFeatures      pq.StringArray `gorm:"type:text[]" json:"key_features,omitempty"`
+	Specifications   *string        `gorm:"type:jsonb" json:"specifications,omitempty"` // JSON object like {"Brand": "Samsung", "Size": "15.6 inch"}
+	AverageRating    float64        `gorm:"default:0" json:"average_rating"`
+	ReviewCount      int            `gorm:"default:0" json:"review_count"`
+	RatingBreakdown  *string        `gorm:"type:jsonb" json:"rating_breakdown,omitempty"` // JSON like {"5": 60, "4": 25, "3": 10, "2": 3, "1": 2}
+
 	CreatedAt        time.Time      `json:"created_at"`
 	UpdatedAt        time.Time      `json:"updated_at"`
 	Images           []ProductImage `gorm:"foreignKey:ProductID" json:"images"`
+	Reviews          []Review       `gorm:"foreignKey:ProductID" json:"reviews,omitempty"`
 	// Back-reference: Many products belong to one store
 	Store Store `gorm:"foreignKey:StoreID" json:"store"`
 }
@@ -74,12 +83,16 @@ type ProductImage struct {
 }
 
 type Review struct {
-	ID        uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
-	ProductID uuid.UUID `gorm:"type:uuid;index" json:"product_id"`
-	UserID    uuid.UUID `gorm:"type:uuid;index" json:"user_id"`
-	Rating    int       `json:"rating"`
-	Comment   *string   `json:"comment,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
+	ID               uuid.UUID      `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
+	ProductID        uuid.UUID      `gorm:"type:uuid;index" json:"product_id"`
+	UserID           uuid.UUID      `gorm:"type:uuid;index" json:"user_id"`
+	Rating           int            `gorm:"not null" json:"rating"` // 1-5
+	Comment          *string        `json:"comment,omitempty"`
+	Images           pq.StringArray `gorm:"type:text[]" json:"images,omitempty"` // Array of image URLs
+	VerifiedPurchase bool           `gorm:"default:false" json:"verified_purchase"`
+	UserName         string         `json:"user_name"` // Cached user name for display
+	CreatedAt        time.Time      `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt        time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
 }
 type Store struct {
 	ID                   uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"id"`
