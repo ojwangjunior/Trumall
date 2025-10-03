@@ -13,6 +13,9 @@ import ProductNotFoundState from "../components/product/ProductNotFoundState";
 import AboutThisItem from "../components/product/AboutThisItem";
 import ProductSpecifications from "../components/product/ProductSpecifications";
 import ProductReviews from "../components/product/ProductReviews";
+import KeyFeatures from "../components/product/KeyFeatures";
+import WhatsInTheBox from "../components/product/WhatsInTheBox";
+import WarrantyInfo from "../components/product/WarrantyInfo";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -115,11 +118,20 @@ const ProductDetailPage = () => {
         />
       </div>
 
+      {/* Key Features Section */}
+      <KeyFeatures product={product} />
+
       {/* About This Item Section */}
       <AboutThisItem product={product} />
 
       {/* Specifications Section */}
       <ProductSpecifications product={product} />
+
+      {/* What's in the Box Section */}
+      <WhatsInTheBox product={product} />
+
+      {/* Warranty Information */}
+      <WarrantyInfo product={product} />
 
       {/* Reviews Section */}
       <ProductReviews product={product} />

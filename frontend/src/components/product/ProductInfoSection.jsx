@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Rating from "../../components/common/Rating";
-import { Package, Truck, RefreshCw, Shield } from "lucide-react";
+import { Package, Truck, Shield } from "lucide-react";
 
 const ProductInfoSection = ({
   product,
@@ -18,11 +18,18 @@ const ProductInfoSection = ({
     <div className="space-y-6">
       {/* Title & Rating */}
       <div>
+        {/* Brand */}
+        {product.brand && (
+          <p className="text-sm text-gray-500 mb-1">
+            Brand: <span className="font-semibold text-orange-600">{product.brand}</span>
+          </p>
+        )}
+
         <h1 className="text-3xl font-bold mb-3">{product.title}</h1>
         <div className="flex items-center gap-4 mb-2">
-          <Rating rating={product.average_rating || product.rating || 4.5} />
+          <Rating rating={product.average_rating || 0} />
           <span className="text-gray-600">
-            ({product.review_count || product.reviewCount || "0"} reviews)
+            ({product.review_count || 0} {product.review_count === 1 ? 'review' : 'reviews'})
           </span>
         </div>
         {product.store && (
@@ -137,16 +144,8 @@ const ProductInfoSection = ({
         <div className="flex items-start gap-3">
           <Truck className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="font-medium text-gray-900">Free shipping on orders over KES 5,000</p>
-            <p className="text-sm text-gray-600 mt-1">Estimated delivery: 3-5 business days</p>
-          </div>
-        </div>
-
-        <div className="flex items-start gap-3">
-          <RefreshCw className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-          <div>
-            <p className="font-medium text-gray-900">30-day return policy</p>
-            <p className="text-sm text-gray-600 mt-1">Easy returns, no questions asked</p>
+            <p className="font-medium text-gray-900">Shipping calculated at checkout</p>
+            <p className="text-sm text-gray-600 mt-1">Based on your location and selected shipping method</p>
           </div>
         </div>
 
@@ -165,6 +164,19 @@ const ProductInfoSection = ({
             <p className="text-sm text-gray-600 mt-1">All items carefully packaged for safe delivery</p>
           </div>
         </div>
+
+        {product.store && (
+          <div className="pt-3 border-t border-gray-200">
+            <p className="text-sm text-gray-600">
+              Ships from: <span className="font-medium text-gray-900">{product.store.name}</span>
+            </p>
+            {product.store.warehouse_city && (
+              <p className="text-xs text-gray-500 mt-1">
+                {product.store.warehouse_city}, {product.store.warehouse_country || 'Kenya'}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

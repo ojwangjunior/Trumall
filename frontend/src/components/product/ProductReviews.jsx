@@ -2,8 +2,8 @@ import React from 'react';
 import Rating from '../common/Rating';
 
 const ProductReviews = ({ product }) => {
-  const averageRating = product.average_rating || product.rating || 4.5;
-  const reviewCount = product.review_count || product.reviewCount || 0;
+  const averageRating = product.average_rating || 0;
+  const reviewCount = product.review_count || 0;
   const reviews = product.reviews || [];
 
   // Parse rating breakdown if it's a string
@@ -13,13 +13,13 @@ const ProductReviews = ({ product }) => {
       ? JSON.parse(product.rating_breakdown)
       : product.rating_breakdown;
   } else {
-    // Default breakdown for demo
+    // Empty breakdown if no reviews
     ratingBreakdown = {
-      5: 60,
-      4: 25,
-      3: 10,
-      2: 3,
-      1: 2
+      5: 0,
+      4: 0,
+      3: 0,
+      2: 0,
+      1: 0
     };
   }
 
