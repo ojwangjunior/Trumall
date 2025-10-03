@@ -57,7 +57,7 @@ const ProductDetailPage = () => {
     };
 
     fetchProduct();
-  }, [id]);
+  }, [id, showToast]);
 
   const isOwner =
     user && product && product.store && user.id === product.store.owner_id;
