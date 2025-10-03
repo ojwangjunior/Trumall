@@ -10,6 +10,9 @@ import ProductImageGallery from "../components/product/ProductImageGallery";
 import ProductInfoSection from "../components/product/ProductInfoSection";
 import ProductLoadingState from "../components/product/ProductLoadingState";
 import ProductNotFoundState from "../components/product/ProductNotFoundState";
+import AboutThisItem from "../components/product/AboutThisItem";
+import ProductSpecifications from "../components/product/ProductSpecifications";
+import ProductReviews from "../components/product/ProductReviews";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -93,7 +96,8 @@ const ProductDetailPage = () => {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Product Images & Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <ProductImageGallery
           product={product}
           mainImage={mainImage}
@@ -110,6 +114,15 @@ const ProductDetailPage = () => {
           id={id}
         />
       </div>
+
+      {/* About This Item Section */}
+      <AboutThisItem product={product} />
+
+      {/* Specifications Section */}
+      <ProductSpecifications product={product} />
+
+      {/* Reviews Section */}
+      <ProductReviews product={product} />
     </div>
   );
 };
