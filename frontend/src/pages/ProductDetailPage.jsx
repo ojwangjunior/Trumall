@@ -10,6 +10,12 @@ import ProductImageGallery from "../components/product/ProductImageGallery";
 import ProductInfoSection from "../components/product/ProductInfoSection";
 import ProductLoadingState from "../components/product/ProductLoadingState";
 import ProductNotFoundState from "../components/product/ProductNotFoundState";
+import AboutThisItem from "../components/product/AboutThisItem";
+import ProductSpecifications from "../components/product/ProductSpecifications";
+import ProductReviews from "../components/product/ProductReviews";
+import KeyFeatures from "../components/product/KeyFeatures";
+import WhatsInTheBox from "../components/product/WhatsInTheBox";
+import WarrantyInfo from "../components/product/WarrantyInfo";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -51,7 +57,7 @@ const ProductDetailPage = () => {
     };
 
     fetchProduct();
-  }, [id]);
+  }, [id, showToast]);
 
   const isOwner =
     user && product && product.store && user.id === product.store.owner_id;
@@ -93,7 +99,8 @@ const ProductDetailPage = () => {
 
   return (
     <div className="bg-white p-8 rounded-lg shadow-md">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Product Images & Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <ProductImageGallery
           product={product}
           mainImage={mainImage}
@@ -110,6 +117,24 @@ const ProductDetailPage = () => {
           id={id}
         />
       </div>
+      
+      {/* About This Item Section */}
+      <AboutThisItem product={product} />
+
+      {/* Key Features Section */}
+      <KeyFeatures product={product} />
+
+      {/* Specifications Section */}
+      <ProductSpecifications product={product} />
+
+      {/* What's in the Box Section */}
+      <WhatsInTheBox product={product} />
+
+      {/* Warranty Information */}
+      <WarrantyInfo product={product} />
+
+      {/* Reviews Section */}
+      <ProductReviews product={product} />
     </div>
   );
 };

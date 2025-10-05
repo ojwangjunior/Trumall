@@ -14,6 +14,8 @@ const SellPage = () => {
   const [stock, setStock] = useState(1);
   const [storeId, setStoreId] = useState("");
   const [stores, setStores] = useState([]);
+  const [keyFeatures, setKeyFeatures] = useState([]);
+  const [specifications, setSpecifications] = useState([]);
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -73,6 +75,22 @@ const SellPage = () => {
     formData.append("stock", parseInt(stock));
     formData.append("currency", "KES");
 
+    // Add key features (filter out empty values)
+    const validKeyFeatures = keyFeatures.filter(f => f.trim() !== "");
+    if (validKeyFeatures.length > 0) {
+      formData.append("key_features", JSON.stringify(validKeyFeatures));
+    }
+
+    // Add specifications (convert array format to JSON object, filter out empty values)
+    const validSpecs = specifications.filter(s => s.key.trim() !== "" && s.value.trim() !== "");
+    if (validSpecs.length > 0) {
+      const specsObj = validSpecs.reduce((acc, spec) => {
+        acc[spec.key] = spec.value;
+        return acc;
+      }, {});
+      formData.append("specifications", JSON.stringify(specsObj));
+    }
+
     images.forEach((image) => {
       formData.append("images", image);
     });
@@ -96,6 +114,8 @@ const SellPage = () => {
       setItemPrice("");
       setItemDescription("");
       setStock(1);
+      setKeyFeatures([]);
+      setSpecifications([]);
       setImages([]);
       setImagePreviews([]);
     } catch (error) {
@@ -122,6 +142,10 @@ const SellPage = () => {
           storeId={storeId}
           setStoreId={setStoreId}
           stores={stores}
+          keyFeatures={keyFeatures}
+          setKeyFeatures={setKeyFeatures}
+          specifications={specifications}
+          setSpecifications={setSpecifications}
           handleFileChange={handleFileChange}
           imagePreviews={imagePreviews}
           isSubmitting={isSubmitting}

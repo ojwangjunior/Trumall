@@ -9,6 +9,7 @@ import SellerDashboardStats from "../components/seller/SellerDashboardStats";
 import SellerDashboardTabs from "../components/seller/SellerDashboardTabs";
 import SellerOrderList from "../components/seller/SellerOrderList";
 import SellerProductList from "../components/seller/SellerProductList";
+import SellerStoreSettings from "../components/seller/SellerStoreSettings";
 import DeleteConfirmationModal from "../components/common/DeleteConfirmationModal";
 import ToastNotification from "../components/common/ToastNotification";
 import Tooltip from "../components/common/Tooltip";
@@ -207,6 +208,9 @@ const SellerDashboardPage = () => {
                 setProductToDelete={setProductToDelete}
                 setShowDeleteModal={setShowDeleteModal}
               />
+            )}
+            {activeTab === "settings" && (
+              <SellerStoreSettings showToast={showToast} />
             )}
           </div>
         </div>

@@ -4,6 +4,7 @@ package mpesa
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -29,7 +30,8 @@ func GetAccessToken() (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("mpesa token request returned %d", resp.StatusCode)
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("mpesa token request returned %d: %s", resp.StatusCode, string(bodyBytes))
 	}
 	var o oauthResp
 	if err := json.NewDecoder(resp.Body).Decode(&o); err != nil {

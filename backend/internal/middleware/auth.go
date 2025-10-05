@@ -58,7 +58,7 @@ func RequireAuth(db *gorm.DB) fiber.Handler {
 		}
 
 		var user models.User
-		if err := db.First(&user, "id = ?", uid).Error; err != nil {
+		if err := db.Preload("Addresses").First(&user, "id = ?", uid).Error; err != nil {
 			return c.Status(401).JSON(fiber.Map{"error": "user not found"})
 		}
 

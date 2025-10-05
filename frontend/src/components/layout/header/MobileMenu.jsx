@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/auth-context';
+import { getPrimaryRole, formatRole } from '../../../utils/roleHelpers';
 
 const MobileMenu = ({ closeMenu }) => {
   const { user, logout } = useContext(AuthContext);
@@ -20,7 +21,7 @@ const MobileMenu = ({ closeMenu }) => {
           <div className="py-3 border-b border-gray-100">
             <p className="text-sm font-medium text-gray-900">{user.name}</p>
             <p className="text-xs text-gray-500">{user.email}</p>
-            <p className="text-xs text-orange-500 capitalize">{user.role}</p>
+            <p className="text-xs text-orange-500">{formatRole(getPrimaryRole(user.roles))}</p>
           </div>
         ) : (
           <div className="py-3 border-b border-gray-100 space-y-2">
