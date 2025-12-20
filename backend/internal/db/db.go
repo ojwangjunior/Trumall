@@ -43,7 +43,8 @@ func Connect() (*gorm.DB, error) {
 	}
 
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
+		// "file://migrations",
+		"file://../../migrations",
 		"postgres",
 		driver,
 	)
