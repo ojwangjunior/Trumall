@@ -150,4 +150,17 @@ impl TrustMallContract {
             timestamp,
         };
 
-       
+        // Increment counter
+        let mut count: u32 = env.storage().instance().get(&PRODUCT_COUNT).unwrap_or(0);
+        count += 1;
+        env.storage().instance().set(&PRODUCT_COUNT, &count);
+
+        // Store product data
+        let key = (symbol_short!("PRODUCT"), count);
+        env.storage().persistent().set(&key, &product);
+        env.storage().persistent().extend_ttl(&key, 100, 518400);
+
+        product_id
+    }
+
+    
