@@ -141,4 +141,11 @@ func (s *SorobanService) RecordProduct(productID, storeID, title string, priceCe
 	return txHash, nil
 }
 
-/
+// RecordStore records a store creation on the blockchain
+func (s *SorobanService) RecordStore(storeID, ownerID, name string) (string, error) {
+	if s.ContractID == "" || s.RPCURL == "" || s.SecretKey == "" {
+		log.Println("Soroban not configured, skipping blockchain recording")
+		return "", nil
+	}
+
+	
