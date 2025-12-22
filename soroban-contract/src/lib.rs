@@ -163,4 +163,13 @@ impl TrustMallContract {
         product_id
     }
 
-    
+    /// Record store creation
+    pub fn record_store(
+        env: Env,
+        store_id: String,
+        owner_id: String,
+        name: String,
+    ) -> String {
+        let timestamp = env.ledger().timestamp();
+
+       
