@@ -192,4 +192,9 @@ impl TrustMallContract {
         store_id
     }
 
+    /// Get total number of recorded payments
+    pub fn get_payment_count(env: Env) -> u32 {
+        env.storage().instance().get(&PAYMENT_COUNT).unwrap_or(0)
+    }
+
    
