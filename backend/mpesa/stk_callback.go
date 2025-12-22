@@ -129,7 +129,10 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 			// Record payment on blockchain (async)
 			go func() {
 				sorobanSvc := services.NewSorobanService()
-				
+				txHash, err := sorobanSvc.RecordPayment(
+					order.ID.String(),
+					int64(amount*100),
+					
 		} else {
 			log.Println("STK failed:", sc.ResultCode, sc.ResultDesc)
 			// Start a transaction for failed payment
