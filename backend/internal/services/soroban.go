@@ -175,7 +175,13 @@ func (s *SorobanService) GetPaymentCount() (string, error) {
 		return "0", nil
 	}
 
-	
+	cmd := exec.Command("soroban", "contract", "invoke",
+		"--id", s.ContractID,
+		"--rpc-url", s.RPCURL,
+		"--network-passphrase", s.NetworkPassphrase,
+		"--",
+		"get_payment_count",
+	)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
