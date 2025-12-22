@@ -114,4 +114,11 @@ impl TrustMallContract {
         env.storage().instance().set(&ORDER_COUNT, &count);
 
         // Store order data
-      
+        let key = (symbol_short!("ORDER"), count);
+        env.storage().persistent().set(&key, &order);
+        env.storage().persistent().extend_ttl(&key, 100, 518400);
+
+        order_id
+    }
+
+   
