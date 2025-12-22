@@ -92,4 +92,9 @@ func (s *SorobanService) UpdateOrderStatus(orderID, newStatus string) (string, e
 		return "", nil
 	}
 
-	
+	cmd := exec.Command("soroban", "contract", "invoke",
+		"--id", s.ContractID,
+		"--source", s.SecretKey,
+		"--rpc-url", s.RPCURL,
+		"--network-passphrase", s.NetworkPassphrase,
+		
