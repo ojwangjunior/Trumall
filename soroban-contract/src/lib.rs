@@ -121,4 +121,15 @@ impl TrustMallContract {
         order_id
     }
 
-   
+    /// Update order status
+    pub fn update_order_status(env: Env, order_id: String, new_status: String) -> bool {
+        // In production, you'd want to search for the order and update it
+        // For now, we'll record the status change as a new entry
+        let timestamp = env.ledger().timestamp();
+        let key = (symbol_short!("ORD_UPD"), order_id.clone(), timestamp);
+        env.storage().persistent().set(&key, &new_status);
+        env.storage().persistent().extend_ttl(&key, 100, 518400);
+        true
+    }
+
+    
