@@ -31,4 +31,10 @@ func (s *SorobanService) RecordPayment(orderID string, amountCents int64, curren
 		return "", nil
 	}
 
-	
+	cmd := exec.Command("soroban", "contract", "invoke",
+		"--id", s.ContractID,
+		"--source", s.SecretKey,
+		"--rpc-url", s.RPCURL,
+		"--network-passphrase", s.NetworkPassphrase,
+		"--",
+		
