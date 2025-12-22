@@ -78,4 +78,14 @@ impl TrustMallContract {
         count += 1;
         env.storage().instance().set(&PAYMENT_COUNT, &count);
 
-      
+        // Store payment data
+        let key = (symbol_short!("PAYMENT"), count);
+        env.storage().persistent().set(&key, &payment);
+
+        // Extend TTL for 30 days (in ledgers, ~5 seconds per ledger = 518400 ledgers)
+        env.storage().persistent().extend_ttl(&key, 100, 518400);
+
+        order_id
+    }
+
+   
