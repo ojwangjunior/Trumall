@@ -34,4 +34,12 @@ pub struct Product {
     pub timestamp: u64,
 }
 
-#
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Store {
+    pub store_id: String,
+    pub owner_id: String,
+    pub name: String,
+    pub timestamp: u64,
+}
+
