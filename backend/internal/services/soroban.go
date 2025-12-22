@@ -16,3 +16,6 @@ type SorobanService struct {
 }
 
 func NewSorobanService() *SorobanService {
+	return &SorobanService{
+		ContractID:        os.Getenv("SOROBAN_CONTRACT_ID"),
+		
