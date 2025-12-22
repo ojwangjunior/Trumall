@@ -195,7 +195,10 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 		// Record product on blockchain (async)
 		go func() {
 			sorobanSvc := services.NewSorobanService()
-			
+			txHash, err := sorobanSvc.RecordProduct(
+				p.ID.String(),
+				p.StoreID.String(),
+				
 
 		// Preload associated data for the response
 		db.Preload("Store").Preload("Images").First(&p, "id = ?", p.ID)
