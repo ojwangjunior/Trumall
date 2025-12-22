@@ -43,3 +43,9 @@ pub struct Store {
     pub timestamp: u64,
 }
 
+const PAYMENT_COUNT: Symbol = symbol_short!("PAY_CNT");
+const ORDER_COUNT: Symbol = symbol_short!("ORD_CNT");
+const PRODUCT_COUNT: Symbol = symbol_short!("PRD_CNT");
+const STORE_COUNT: Symbol = symbol_short!("STR_CNT");
+
+#
