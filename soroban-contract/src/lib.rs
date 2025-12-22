@@ -172,4 +172,24 @@ impl TrustMallContract {
     ) -> String {
         let timestamp = env.ledger().timestamp();
 
-       
+        let store = Store {
+            store_id: store_id.clone(),
+            owner_id,
+            name,
+            timestamp,
+        };
+
+        // Increment counter
+        let mut count: u32 = env.storage().instance().get(&STORE_COUNT).unwrap_or(0);
+        count += 1;
+        env.storage().instance().set(&STORE_COUNT, &count);
+
+        // Store data
+        let key = (symbol_short!("STORE"), count);
+        env.storage().persistent().set(&key, &store);
+        env.storage().persistent().extend_ttl(&key, 100, 518400);
+
+        store_id
+    }
+
+   
