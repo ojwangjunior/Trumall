@@ -212,4 +212,16 @@ impl TrustMallContract {
         env.storage().instance().get(&STORE_COUNT).unwrap_or(0)
     }
 
-  
+    /// Get payment by index
+    pub fn get_payment(env: Env, index: u32) -> Option<Payment> {
+        let key = (symbol_short!("PAYMENT"), index);
+        env.storage().persistent().get(&key)
+    }
+
+    /// Get order by index
+    pub fn get_order(env: Env, index: u32) -> Option<Order> {
+        let key = (symbol_short!("ORDER"), index);
+        env.storage().persistent().get(&key)
+    }
+
+   
