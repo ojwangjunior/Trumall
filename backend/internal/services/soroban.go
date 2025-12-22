@@ -177,6 +177,11 @@ func (s *SorobanService) GetPaymentCount() (string, error) {
 
 	
 
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("soroban get_payment_count failed: %v - %s", err, string(output))
+	}
+
 	return strings.TrimSpace(string(output)), nil
 }
 
