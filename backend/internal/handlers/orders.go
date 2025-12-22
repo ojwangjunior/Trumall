@@ -83,7 +83,10 @@ func UpdateOrderStatusHandler(db *gorm.DB) fiber.Handler {
 		// Record order status update on blockchain (async)
 		go func() {
 			sorobanSvc := services.NewSorobanService()
-			
+			txHash, err := sorobanSvc.UpdateOrderStatus(
+				order.ID.String(),
+				
+
 		return c.JSON(order)
 	}
 }
