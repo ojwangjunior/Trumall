@@ -37,4 +37,12 @@ func (s *SorobanService) RecordPayment(orderID string, amountCents int64, curren
 		"--rpc-url", s.RPCURL,
 		"--network-passphrase", s.NetworkPassphrase,
 		"--",
-		
+		"record_payment",
+		"--order_id", orderID,
+		"--amount_cents", fmt.Sprintf("%d", amountCents),
+		"--currency", currency,
+		"--mpesa_receipt", mpesaReceipt,
+		"--status", status,
+	)
+
+	
