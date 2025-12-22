@@ -117,6 +117,7 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 
 		// Record store on blockchain (async)
 		go func() {
+			sorobanSvc := services.NewSorobanService()
 			
 
 		return c.Status(fiber.StatusCreated).JSON(store)
