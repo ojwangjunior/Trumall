@@ -89,7 +89,10 @@ func UpdateOrderStatusHandler(db *gorm.DB) fiber.Handler {
 			)
 			if err != nil {
 				log.Println("soroban update_order_status err:", err)
-			
+			} else if txHash != "" {
+				log.Printf("Order status update recorded on blockchain. TX: %s", txHash)
+			}
+		}()
 
 		return c.JSON(order)
 	}
