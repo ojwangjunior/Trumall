@@ -165,4 +165,8 @@ func (s *SorobanService) RecordStore(storeID, ownerID, name string) (string, err
 		return "", fmt.Errorf("soroban record_store failed: %v - %s", err, string(output))
 	}
 
-	
+	txHash := strings.TrimSpace(string(output))
+	return txHash, nil
+}
+
+/
