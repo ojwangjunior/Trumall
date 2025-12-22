@@ -55,3 +55,11 @@ func (s *SorobanService) RecordPayment(orderID string, amountCents int64, curren
 	return txHash, nil
 }
 
+// RecordOrder records an order on the blockchain
+func (s *SorobanService) RecordOrder(orderID, buyerID, storeID string, totalCents int64, status string) (string, error) {
+	if s.ContractID == "" || s.RPCURL == "" || s.SecretKey == "" {
+		log.Println("Soroban not configured, skipping blockchain recording")
+		return "", nil
+	}
+
+	
