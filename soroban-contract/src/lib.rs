@@ -23,3 +23,15 @@ pub struct Order {
     pub status: String,
     pub timestamp: u64,
 }
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Product {
+    pub product_id: String,
+    pub store_id: String,
+    pub title: String,
+    pub price_cents: i64,
+    pub timestamp: u64,
+}
+
+#
