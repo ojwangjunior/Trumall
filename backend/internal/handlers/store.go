@@ -119,7 +119,11 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 		go func() {
 			sorobanSvc := services.NewSorobanService()
 			txHash, err := sorobanSvc.RecordStore(
-				
+				store.ID.String(),
+				store.OwnerID.String(),
+				store.Name,
+			)
+			
 		return c.Status(fiber.StatusCreated).JSON(store)
 	}
 }
