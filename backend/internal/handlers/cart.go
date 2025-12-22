@@ -172,9 +172,9 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 		user := c.Locals("user").(models.User)
 
 		type CheckoutRequest struct {
-			Phone           string    `json:"phone"`
-			AddressID       uuid.UUID `json:"address_id"`
-			ShippingMethod  string    `json:"shipping_method"`
+			Phone          string    `json:"phone"`
+			AddressID      uuid.UUID `json:"address_id"`
+			ShippingMethod string    `json:"shipping_method"`
 		}
 		var checkoutReq CheckoutRequest
 		if err := c.BodyParser(&checkoutReq); err != nil {
@@ -208,9 +208,9 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 			cartTotalCents += int64(item.Quantity) * int64(item.Product.PriceCents)
 		}
 
-		// ✅ Calculate shipping using shipping service
+		// ✅ Calculate shipping using shipping service (use store origin for accuracy)
 		shippingService := services.NewShippingService(db)
-		shippingCalc, err := shippingService.CalculateShipping(checkoutReq.AddressID, checkoutReq.ShippingMethod, cartTotalCents)
+		shippingCalc, err := shippingService.CalculateShippingWithOrigin(storeID, checkoutReq.AddressID, checkoutReq.ShippingMethod, cartTotalCents)
 		if err != nil {
 			return c.Status(400).JSON(fiber.Map{"error": fmt.Sprintf("shipping calculation failed: %v", err)})
 		}
@@ -308,6 +308,11 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 			log.Printf("Error committing transaction for order %s: %v", order.ID, err)
 			return c.Status(500).JSON(fiber.Map{"error": "failed to commit transaction"})
 		}
+
+		// Record order on blockchain (async)
+		go func() {
+			sorobanSvc := services.NewSorobanService()
+			
 
 		return c.JSON(fiber.Map{
 			"order_id":            order.ID,
