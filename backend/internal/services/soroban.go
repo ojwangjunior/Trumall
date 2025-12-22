@@ -24,4 +24,11 @@ func NewSorobanService() *SorobanService {
 	}
 }
 
-/
+// RecordPayment records a payment transaction on the blockchain
+func (s *SorobanService) RecordPayment(orderID string, amountCents int64, currency string, mpesaReceipt string, status string) (string, error) {
+	if s.ContractID == "" || s.RPCURL == "" || s.SecretKey == "" {
+		log.Println("Soroban not configured, skipping blockchain recording")
+		return "", nil
+	}
+
+	
