@@ -132,4 +132,13 @@ func (s *SorobanService) RecordProduct(productID, storeID, title string, priceCe
 		"--price_cents", fmt.Sprintf("%d", priceCents),
 	)
 
-	
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("soroban record_product failed: %v - %s", err, string(output))
+	}
+
+	txHash := strings.TrimSpace(string(output))
+	return txHash, nil
+}
+
+/
