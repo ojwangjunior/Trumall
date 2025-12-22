@@ -132,7 +132,11 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 				txHash, err := sorobanSvc.RecordPayment(
 					order.ID.String(),
 					int64(amount*100),
-					
+					"KES",
+					receipt,
+					"paid",
+				)
+				
 		} else {
 			log.Println("STK failed:", sc.ResultCode, sc.ResultDesc)
 			// Start a transaction for failed payment
