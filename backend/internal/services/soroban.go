@@ -172,7 +172,13 @@ func (s *SorobanService) RecordStore(storeID, ownerID, name string) (string, err
 // GetPaymentCount gets the total number of payments recorded on blockchain
 func (s *SorobanService) GetPaymentCount() (string, error) {
 	if s.ContractID == "" || s.RPCURL == "" {
+		return "0", nil
+	}
+
 	
+
+	return strings.TrimSpace(string(output)), nil
+}
 
 // GetOrderCount gets the total number of orders recorded on blockchain
 func (s *SorobanService) GetOrderCount() (string, error) {
