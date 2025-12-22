@@ -201,7 +201,12 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 				p.Title,
 				p.PriceCents,
 			)
-			
+			if err != nil {
+				log.Println("soroban record_product err:", err)
+			} else if txHash != "" {
+				log.Printf("Product recorded on blockchain. TX: %s", txHash)
+			}
+		}()
 
 		// Preload associated data for the response
 		db.Preload("Store").Preload("Images").First(&p, "id = ?", p.ID)
