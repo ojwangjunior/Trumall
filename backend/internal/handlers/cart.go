@@ -314,6 +314,8 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 			sorobanSvc := services.NewSorobanService()
 			txHash, err := sorobanSvc.RecordOrder(
 				order.ID.String(),
+				order.BuyerID.String(),
+				order.StoreID.String(),
 				
 
 		return c.JSON(fiber.Map{
