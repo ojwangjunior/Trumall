@@ -17,17 +17,19 @@ import (
 
 func main() {
 	// Load env vars
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Printf("Error loading ../../.env file: %v", err)
-		log.Println("Trying current directory...")
-		err = godotenv.Load(".env")
-		if err != nil {
-			log.Printf("Error loading .env from current dir: %v", err)
-			log.Println("Using system environment variables")
+	// Try loading from different possible locations
+	envPaths := []string{".env", "../../.env", "../../../.env"}
+	var loaded bool
+	for _, path := range envPaths {
+		if err := godotenv.Load(path); err == nil {
+			log.Printf("Successfully loaded .env file from: %s\n", path)
+			loaded = true
+			break
 		}
-	} else {
-		log.Println("Successfully loaded .env file")
+	}
+
+	if !loaded {
+		log.Println("Warning: No .env file found in expected locations. Using system environment variables.")
 	}
 
 	// Connect DB
