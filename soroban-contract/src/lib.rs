@@ -224,4 +224,10 @@ impl TrustMallContract {
         env.storage().persistent().get(&key)
     }
 
+    /// Get product by index
+    pub fn get_product(env: Env, index: u32) -> Option<Product> {
+        let key = (symbol_short!("PRODUCT"), index);
+        env.storage().persistent().get(&key)
+    }
+
    
