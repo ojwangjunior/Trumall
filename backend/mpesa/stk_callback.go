@@ -139,7 +139,13 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 				if err != nil {
 					log.Println("soroban record_payment err:", err)
 				} else if txHash != "" {
-					
+					log.Printf("Payment recorded on blockchain. TX: %s", txHash)
+					// Update payment with soroban_tx_id
+					dbConn.Model(&models.Payment{}).
+						Where("id = ?", payment.ID).
+						Update("soroban_tx_id", txHash)
+				}
+			}()
 		} else {
 			log.Println("STK failed:", sc.ResultCode, sc.ResultDesc)
 			// Start a transaction for failed payment
