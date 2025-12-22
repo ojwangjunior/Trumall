@@ -258,4 +258,19 @@ mod test {
         assert_eq!(client.get_payment_count(), 1);
     }
 
-    
+    #[test]
+    fn test_record_order() {
+        let env = Env::default();
+        let contract_id = env.register_contract(None, TrustMallContract);
+        let client = TrustMallContractClient::new(&env, &contract_id);
+
+        let order_id = String::from_str(&env, "order_123");
+        let buyer_id = String::from_str(&env, "buyer_456");
+        let store_id = String::from_str(&env, "store_789");
+        let status = String::from_str(&env, "pending");
+
+        let result = client.record_order(&order_id, &buyer_id, &store_id, &50000, &status);
+        assert_eq!(result, order_id);
+        assert_eq!(client.get_order_count(), 1);
+    }
+}
