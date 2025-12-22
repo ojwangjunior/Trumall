@@ -45,4 +45,9 @@ func (s *SorobanService) RecordPayment(orderID string, amountCents int64, curren
 		"--status", status,
 	)
 
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("soroban record_payment failed: %v - %s", err, string(output))
+	}
+
 	
