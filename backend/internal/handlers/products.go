@@ -15,6 +15,7 @@ import (
 	"gorm.io/gorm"
 
 	"trumall/internal/models"
+	"trumall/internal/services"
 )
 
 // CreateProductHandler requires auth and checks that the authenticated user is the store owner.
@@ -190,6 +191,10 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 			}
 			return c.Status(500).JSON(fiber.Map{"error": "failed to create product"})
 		}
+
+		// Record product on blockchain (async)
+		go func() {
+			)
 
 		// Preload associated data for the response
 		db.Preload("Store").Preload("Images").First(&p, "id = ?", p.ID)
