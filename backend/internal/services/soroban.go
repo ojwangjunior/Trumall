@@ -103,4 +103,12 @@ func (s *SorobanService) UpdateOrderStatus(orderID, newStatus string) (string, e
 		"--new_status", newStatus,
 	)
 
-	
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("soroban update_order_status failed: %v - %s", err, string(output))
+	}
+
+	txHash := strings.TrimSpace(string(output))
+	return txHash, nil
+}
+
