@@ -160,4 +160,9 @@ func (s *SorobanService) RecordStore(storeID, ownerID, name string) (string, err
 		"--name", name,
 	)
 
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("soroban record_store failed: %v - %s", err, string(output))
+	}
+
 	
