@@ -50,4 +50,8 @@ func (s *SorobanService) RecordPayment(orderID string, amountCents int64, curren
 		return "", fmt.Errorf("soroban record_payment failed: %v - %s", err, string(output))
 	}
 
-	
+	// Parse transaction hash from output
+	txHash := strings.TrimSpace(string(output))
+	return txHash, nil
+}
+
