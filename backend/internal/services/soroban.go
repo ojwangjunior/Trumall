@@ -76,4 +76,13 @@ func (s *SorobanService) RecordOrder(orderID, buyerID, storeID string, totalCent
 		"--status", status,
 	)
 
-	
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("soroban record_order failed: %v - %s", err, string(output))
+	}
+
+	txHash := strings.TrimSpace(string(output))
+	return txHash, nil
+}
+
+/
