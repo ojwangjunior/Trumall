@@ -197,4 +197,14 @@ impl TrustMallContract {
         env.storage().instance().get(&PAYMENT_COUNT).unwrap_or(0)
     }
 
-   
+    /// Get total number of recorded orders
+    pub fn get_order_count(env: Env) -> u32 {
+        env.storage().instance().get(&ORDER_COUNT).unwrap_or(0)
+    }
+
+    /// Get total number of recorded products
+    pub fn get_product_count(env: Env) -> u32 {
+        env.storage().instance().get(&PRODUCT_COUNT).unwrap_or(0)
+    }
+
+  
