@@ -8,3 +8,6 @@ import (
 	"strings"
 )
 
+type SorobanService struct {
+	ContractID        string
+	
