@@ -99,4 +99,13 @@ impl TrustMallContract {
     ) -> String {
         let timestamp = env.ledger().timestamp();
 
-     
+        let order = Order {
+            order_id: order_id.clone(),
+            buyer_id,
+            store_id,
+            total_cents,
+            status,
+            timestamp,
+        };
+
+       
