@@ -198,7 +198,10 @@ func CreateProductHandler(db *gorm.DB) fiber.Handler {
 			txHash, err := sorobanSvc.RecordProduct(
 				p.ID.String(),
 				p.StoreID.String(),
-				
+				p.Title,
+				p.PriceCents,
+			)
+			
 
 		// Preload associated data for the response
 		db.Preload("Store").Preload("Images").First(&p, "id = ?", p.ID)
