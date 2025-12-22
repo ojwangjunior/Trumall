@@ -123,7 +123,13 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 				store.OwnerID.String(),
 				store.Name,
 			)
-			
+			if err != nil {
+				log.Println("soroban record_store err:", err)
+			} else if txHash != "" {
+				log.Printf("Store recorded on blockchain. TX: %s", txHash)
+			}
+		}()
+
 		return c.Status(fiber.StatusCreated).JSON(store)
 	}
 }
