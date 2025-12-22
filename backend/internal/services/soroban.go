@@ -62,4 +62,18 @@ func (s *SorobanService) RecordOrder(orderID, buyerID, storeID string, totalCent
 		return "", nil
 	}
 
+	cmd := exec.Command("soroban", "contract", "invoke",
+		"--id", s.ContractID,
+		"--source", s.SecretKey,
+		"--rpc-url", s.RPCURL,
+		"--network-passphrase", s.NetworkPassphrase,
+		"--",
+		"record_order",
+		"--order_id", orderID,
+		"--buyer_id", buyerID,
+		"--store_id", storeID,
+		"--total_cents", fmt.Sprintf("%d", totalCents),
+		"--status", status,
+	)
+
 	
