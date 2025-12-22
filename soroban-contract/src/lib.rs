@@ -132,4 +132,14 @@ impl TrustMallContract {
         true
     }
 
-    
+    /// Record a product listing for authenticity verification
+    pub fn record_product(
+        env: Env,
+        product_id: String,
+        store_id: String,
+        title: String,
+        price_cents: i64,
+    ) -> String {
+        let timestamp = env.ledger().timestamp();
+
+       
