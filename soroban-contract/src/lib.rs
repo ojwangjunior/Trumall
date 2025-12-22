@@ -13,3 +13,13 @@ pub struct Payment {
     pub status: String,
 }
 
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Order {
+    pub order_id: String,
+    pub buyer_id: String,
+    pub store_id: String,
+    pub total_cents: i64,
+    pub status: String,
+    pub timestamp: u64,
+}
