@@ -97,4 +97,10 @@ func (s *SorobanService) UpdateOrderStatus(orderID, newStatus string) (string, e
 		"--source", s.SecretKey,
 		"--rpc-url", s.RPCURL,
 		"--network-passphrase", s.NetworkPassphrase,
-		
+		"--",
+		"update_order_status",
+		"--order_id", orderID,
+		"--new_status", newStatus,
+	)
+
+	
