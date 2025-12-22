@@ -73,4 +73,9 @@ impl TrustMallContract {
             status,
         };
 
-     
+        // Increment counter
+        let mut count: u32 = env.storage().instance().get(&PAYMENT_COUNT).unwrap_or(0);
+        count += 1;
+        env.storage().instance().set(&PAYMENT_COUNT, &count);
+
+      
