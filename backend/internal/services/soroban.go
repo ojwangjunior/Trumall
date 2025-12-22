@@ -85,4 +85,11 @@ func (s *SorobanService) RecordOrder(orderID, buyerID, storeID string, totalCent
 	return txHash, nil
 }
 
-/
+// UpdateOrderStatus updates an order status on the blockchain
+func (s *SorobanService) UpdateOrderStatus(orderID, newStatus string) (string, error) {
+	if s.ContractID == "" || s.RPCURL == "" || s.SecretKey == "" {
+		log.Println("Soroban not configured, skipping blockchain recording")
+		return "", nil
+	}
+
+	
