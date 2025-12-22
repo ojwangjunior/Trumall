@@ -242,4 +242,20 @@ mod test {
     use super::*;
     use soroban_sdk::Env;
 
+    #[test]
+    fn test_record_payment() {
+        let env = Env::default();
+        let contract_id = env.register_contract(None, TrustMallContract);
+        let client = TrustMallContractClient::new(&env, &contract_id);
+
+        let order_id = String::from_str(&env, "order_123");
+        let currency = String::from_str(&env, "KES");
+        let receipt = String::from_str(&env, "receipt_456");
+        let status = String::from_str(&env, "paid");
+
+        let result = client.record_payment(&order_id, &10000, &currency, &receipt, &status);
+        assert_eq!(result, order_id);
+        assert_eq!(client.get_payment_count(), 1);
+    }
+
     
