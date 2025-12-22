@@ -237,3 +237,9 @@ impl TrustMallContract {
     }
 }
 
+#[cfg(test)]
+mod test {
+    use super::*;
+    use soroban_sdk::Env;
+
+    
