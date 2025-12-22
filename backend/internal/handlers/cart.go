@@ -312,7 +312,9 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 		// Record order on blockchain (async)
 		go func() {
 			sorobanSvc := services.NewSorobanService()
-			
+			txHash, err := sorobanSvc.RecordOrder(
+				order.ID.String(),
+				
 
 		return c.JSON(fiber.Map{
 			"order_id":            order.ID,
