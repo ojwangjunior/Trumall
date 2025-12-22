@@ -10,4 +10,6 @@ import (
 
 type SorobanService struct {
 	ContractID        string
+	RPCURL            string
+	SecretKey         string
 	
