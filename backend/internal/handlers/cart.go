@@ -316,7 +316,10 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 				order.ID.String(),
 				order.BuyerID.String(),
 				order.StoreID.String(),
-				
+				order.TotalCents,
+				order.Status,
+			)
+			
 
 		return c.JSON(fiber.Map{
 			"order_id":            order.ID,
