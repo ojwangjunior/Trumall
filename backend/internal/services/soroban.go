@@ -112,3 +112,11 @@ func (s *SorobanService) UpdateOrderStatus(orderID, newStatus string) (string, e
 	return txHash, nil
 }
 
+// RecordProduct records a product listing on the blockchain for authenticity
+func (s *SorobanService) RecordProduct(productID, storeID, title string, priceCents int64) (string, error) {
+	if s.ContractID == "" || s.RPCURL == "" || s.SecretKey == "" {
+		log.Println("Soroban not configured, skipping blockchain recording")
+		return "", nil
+	}
+
+	
