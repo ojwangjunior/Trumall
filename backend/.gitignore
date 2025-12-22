@@ -1,2 +1,19 @@
+# Go build output
+bin
 target
+
+# Environment
 .env
+
+# Vendor and coverage
+vendor/
+coverage.out
+
+# IDEs/editors
+.vscode/
+.idea/
+*.swp
+*.log
+
+# OS
+.DS_Store
