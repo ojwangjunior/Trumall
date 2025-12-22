@@ -148,4 +148,16 @@ func (s *SorobanService) RecordStore(storeID, ownerID, name string) (string, err
 		return "", nil
 	}
 
+	cmd := exec.Command("soroban", "contract", "invoke",
+		"--id", s.ContractID,
+		"--source", s.SecretKey,
+		"--rpc-url", s.RPCURL,
+		"--network-passphrase", s.NetworkPassphrase,
+		"--",
+		"record_store",
+		"--store_id", storeID,
+		"--owner_id", ownerID,
+		"--name", name,
+	)
+
 	
