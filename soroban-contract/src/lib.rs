@@ -207,4 +207,9 @@ impl TrustMallContract {
         env.storage().instance().get(&PRODUCT_COUNT).unwrap_or(0)
     }
 
+    /// Get total number of recorded stores
+    pub fn get_store_count(env: Env) -> u32 {
+        env.storage().instance().get(&STORE_COUNT).unwrap_or(0)
+    }
+
   
