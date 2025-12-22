@@ -85,7 +85,11 @@ func UpdateOrderStatusHandler(db *gorm.DB) fiber.Handler {
 			sorobanSvc := services.NewSorobanService()
 			txHash, err := sorobanSvc.UpdateOrderStatus(
 				order.ID.String(),
-				
+				body.Status,
+			)
+			if err != nil {
+				log.Println("soroban update_order_status err:", err)
+			
 
 		return c.JSON(order)
 	}
