@@ -319,7 +319,12 @@ func CheckoutHandler(db *gorm.DB) fiber.Handler {
 				order.TotalCents,
 				order.Status,
 			)
-			
+			if err != nil {
+				log.Println("soroban record_order err:", err)
+			} else if txHash != "" {
+				log.Printf("Order recorded on blockchain. TX: %s", txHash)
+			}
+		}()
 
 		return c.JSON(fiber.Map{
 			"order_id":            order.ID,
