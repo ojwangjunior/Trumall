@@ -169,4 +169,29 @@ func (s *SorobanService) RecordStore(storeID, ownerID, name string) (string, err
 	return txHash, nil
 }
 
-/
+// GetPaymentCount gets the total number of payments recorded on blockchain
+func (s *SorobanService) GetPaymentCount() (string, error) {
+	if s.ContractID == "" || s.RPCURL == "" {
+	
+
+// GetOrderCount gets the total number of orders recorded on blockchain
+func (s *SorobanService) GetOrderCount() (string, error) {
+	if s.ContractID == "" || s.RPCURL == "" {
+		return "0", nil
+	}
+
+	cmd := exec.Command("soroban", "contract", "invoke",
+		"--id", s.ContractID,
+		"--rpc-url", s.RPCURL,
+		"--network-passphrase", s.NetworkPassphrase,
+		"--",
+		"get_order_count",
+	)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("soroban get_order_count failed: %v - %s", err, string(output))
+	}
+
+	return strings.TrimSpace(string(output)), nil
+}
