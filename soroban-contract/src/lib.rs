@@ -88,4 +88,15 @@ impl TrustMallContract {
         order_id
     }
 
-   
+    /// Record an order on the blockchain
+    pub fn record_order(
+        env: Env,
+        order_id: String,
+        buyer_id: String,
+        store_id: String,
+        total_cents: i64,
+        status: String,
+    ) -> String {
+        let timestamp = env.ledger().timestamp();
+
+     
