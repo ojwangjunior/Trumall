@@ -51,3 +51,26 @@ const STORE_COUNT: Symbol = symbol_short!("STR_CNT");
 #[contract]
 pub struct TrustMallContract;
 
+#[contractimpl]
+impl TrustMallContract {
+    /// Record a payment transaction on the blockchain
+    pub fn record_payment(
+        env: Env,
+        order_id: String,
+        amount_cents: i64,
+        currency: String,
+        mpesa_receipt: String,
+        status: String,
+    ) -> String {
+        let timestamp = env.ledger().timestamp();
+
+        let payment = Payment {
+            order_id: order_id.clone(),
+            amount_cents,
+            currency,
+            mpesa_receipt,
+            timestamp,
+            status,
+        };
+
+     
