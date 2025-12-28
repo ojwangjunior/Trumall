@@ -1,11 +1,14 @@
 package handlers
 
 import (
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"trumall/internal/models"
+	"trumall/internal/services"
 )
 
 func GetMyStoresHandler(db *gorm.DB) fiber.Handler {
@@ -111,6 +114,21 @@ func CreateStoreHandler(db *gorm.DB) fiber.Handler {
 		if err := db.Create(&store).Error; err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to create store"})
 		}
+
+		// Record store on blockchain (async)
+		go func() {
+			sorobanSvc := services.NewSorobanService()
+			txHash, err := sorobanSvc.RecordStore(
+				store.ID.String(),
+				store.OwnerID.String(),
+				store.Name,
+			)
+			if err != nil {
+				log.Println("soroban record_store err:", err)
+			} else if txHash != "" {
+				log.Printf("Store recorded on blockchain. TX: %s", txHash)
+			}
+		}()
 
 		return c.Status(fiber.StatusCreated).JSON(store)
 	}

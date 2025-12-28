@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"trumall/internal/models"
+	"trumall/internal/services"
 )
 
 // GetOrdersHandler retrieves all orders for the authenticated user.
@@ -78,6 +79,20 @@ func UpdateOrderStatusHandler(db *gorm.DB) fiber.Handler {
 		if err := db.Save(&order).Error; err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to update order status"})
 		}
+
+		// Record order status update on blockchain (async)
+		go func() {
+			sorobanSvc := services.NewSorobanService()
+			txHash, err := sorobanSvc.UpdateOrderStatus(
+				order.ID.String(),
+				body.Status,
+			)
+			if err != nil {
+				log.Println("soroban update_order_status err:", err)
+			} else if txHash != "" {
+				log.Printf("Order status update recorded on blockchain. TX: %s", txHash)
+			}
+		}()
 
 		return c.JSON(order)
 	}

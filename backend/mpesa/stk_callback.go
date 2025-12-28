@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 
 	"trumall/internal/models"
+	"trumall/internal/services"
 )
 
 func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
@@ -125,10 +126,24 @@ func StkCallbackHandler(dbConn *gorm.DB) fiber.Handler {
 				return c.Status(fiber.StatusInternalServerError).SendString("internal server error")
 			}
 
-			// Trigger Soroban credit (async)
+			// Record payment on blockchain (async)
 			go func() {
-				if err := InvokeSorobanCredit("", amount, receipt); err != nil {
-					log.Println("soroban invoke err:", err)
+				sorobanSvc := services.NewSorobanService()
+				txHash, err := sorobanSvc.RecordPayment(
+					order.ID.String(),
+					int64(amount*100),
+					"KES",
+					receipt,
+					"paid",
+				)
+				if err != nil {
+					log.Println("soroban record_payment err:", err)
+				} else if txHash != "" {
+					log.Printf("Payment recorded on blockchain. TX: %s", txHash)
+					// Update payment with soroban_tx_id
+					dbConn.Model(&models.Payment{}).
+						Where("id = ?", payment.ID).
+						Update("soroban_tx_id", txHash)
 				}
 			}()
 		} else {
